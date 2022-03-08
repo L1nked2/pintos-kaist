@@ -604,16 +604,13 @@ allocate_tid (void) {
 void thread_sleep(int64_t ticks) {
 	// block interrupts
 	enum intr_level old_level = intr_disable ();
-	//check thread is idle or not
-	if(thread_current() != idle_thread) {
-		// save ticks to be waked up
-		thread_current()->wakeup_tick = ticks;
-		// add to sleep list
-		// TODO: update function to priority queue
-		list_push_back (&sleep_list, &thread_current()->elem);
-		// block thread
-		thread_block();
-	}
+	// save ticks to be waked up
+	thread_current()->wakeup_tick = ticks;
+	// add to sleep list
+	// TODO: update function to priority queue
+	list_push_back (&sleep_list, &thread_current()->elem);
+	// block thread
+	thread_block();
 	intr_set_level (old_level);
 	return;
 }
