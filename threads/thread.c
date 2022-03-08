@@ -608,7 +608,9 @@ void thread_sleep(int64_t ticks) {
 	thread_current()->wakeup_tick = ticks;
 	// add to sleep list
 	// TODO: update function to priority queue
-	list_push_back (&sleep_list, &thread_current()->elem);
+	if(thread_current() != idle_thread){
+		list_push_back (&sleep_list, &thread_current()->elem);
+	}
 	// block thread
 	thread_block();
 	intr_set_level (old_level);
