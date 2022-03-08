@@ -601,7 +601,7 @@ allocate_tid (void) {
 
 /* codes for alarm-clock */
 /* make current thread blocked and insert to sleep queue */
-void thread_sleep(int64_t ticks) {
+void thread_sleep_until(int64_t ticks) {
 	// block interrupts
 	enum intr_level old_level = intr_disable ();
 	// save ticks to be waked up
@@ -619,14 +619,14 @@ void thread_sleep(int64_t ticks) {
 
 /* check sleep_list and move threads to ready_list
 if thread's wakeup_tick is less than current_tick */
-void refresh_sleep_list () {
+void refresh_sleep_list (void) {
 	struct list_elem *e;
 	int64_t current_tick = timer_ticks();
 	for(e=list_begin(&sleep_list); e!=list_end(&sleep_list);) {
 		struct thread *current_thread = list_entry(e, struct thread, elem);
 		if (current_thread->wakeup_tick < current_tick) {
-			list_remove(&current_thread->elem);
 			thread_unblock(current_thread);
+			e = list_remove(&current_thread->elem);
 		}
 		else {
 			e = list_next(e);
