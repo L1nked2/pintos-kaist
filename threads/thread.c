@@ -606,13 +606,13 @@ void thread_sleep_until(int64_t ticks) {
 	enum intr_level old_level = intr_disable ();
 	// save ticks to be waked up
 	thread_current()->wakeup_tick = ticks;
-	// add to sleep list
+	// add to sleep list, but idle thread must on
+	// ready_list always, so check if idle()
 	// TODO: update function to priority queue
 	if(thread_current() != idle_thread){
 		list_push_back (&sleep_list, &thread_current()->elem);
-	}
-	// block thread
-	thread_block();
+		thread_block();
+	}	
 	intr_set_level (old_level);
 	return;
 }
