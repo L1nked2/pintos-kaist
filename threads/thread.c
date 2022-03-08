@@ -28,6 +28,10 @@
    that are ready to run but not actually running. */
 static struct list ready_list;
 
+/* List of processes in THREAD_BLOCKED state. */
+static struct list sleep_list;
+static int64_t next_tick_to_awake;
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -108,6 +112,7 @@ thread_init (void) {
 	/* Init the globla thread context */
 	lock_init (&tid_lock);
 	list_init (&ready_list);
+	list_init (&sleep_list);
 	list_init (&destruction_req);
 
 	/* Set up a thread structure for the running thread. */
@@ -148,6 +153,11 @@ thread_tick (void) {
 #endif
 	else
 		kernel_ticks++;
+
+	// check sleep_list and move threads to ready_list
+	// which need to be waked up
+	refresh_sleep_list();
+
 
 	/* Enforce preemption. */
 	if (++thread_ticks >= TIME_SLICE)
@@ -587,4 +597,39 @@ allocate_tid (void) {
 	lock_release (&tid_lock);
 
 	return tid;
+}
+
+/* codes for alarm-clock */
+/* make current thread blocked and insert to sleep queue */
+void thread_sleep(int64_t ticks) {
+	// block interrupts
+	enum intr_level old_level = intr_disable ();
+	//check thread is idle or not
+	if(thread_current() != idle_thread) {
+		// save ticks to be waked up
+		thread_current()->wakeup_tick = ticks;
+		// add to sleep list
+		// TODO: update function to priority queue
+		list_push_back (&sleep_list, &thread_current()->elem);
+		// block thread
+		thread_block();
+	}
+	intr_set_level (old_level);
+	return;
+}
+
+/* check sleep_list and move threads to ready_list
+if thread's wakeup_tick is less than current_tick */
+void refresh_sleep_list () {
+	struct list_elem *e;
+	int64_t current_tick = timer_ticks();
+	for(e=list_begin(&sleep_list); e!=list_end(&sleep_list);) {
+		struct thread *current_thread = list_entry(e, struct thread, elem);
+		e = list_next(e);
+		if (current_thread->wakeup_tick < current_tick) {
+			list_remove(&current_thread->elem);
+			thread_unblock(current_thread);
+		}
+	}
+	return;
 }
