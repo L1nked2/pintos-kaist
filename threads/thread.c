@@ -624,7 +624,7 @@ void refresh_sleep_list (void) {
 	int64_t current_tick = timer_ticks();
 	for(e = list_begin(&sleep_list); e != list_end(&sleep_list);) {
 		struct thread *current_thread = list_entry(e, struct thread, elem);
-		if (current_thread->wakeup_tick < current_tick) {
+		if (current_thread->wakeup_tick <= current_tick) {
 			e = list_remove(&current_thread->elem);
 			thread_unblock(current_thread);
 		}
