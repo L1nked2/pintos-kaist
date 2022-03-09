@@ -332,7 +332,7 @@ void
 thread_set_priority (int new_priority) {
 	thread_current()->priority = new_priority;
 	// if the priority of thread is changed, yield thread by comparing both priorities.
-	if (!lsit_empty(&ready_list) && compare_thread_priority(list_front(&ready_list), &thread_current()->elem, NULL)) {
+	if (!list_empty(&ready_list) && compare_thread_priority(list_front(&ready_list), &thread_current()->elem, NULL)) {
 		thread_yield();
 	}
 }
