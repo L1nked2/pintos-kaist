@@ -149,9 +149,9 @@ int thread_get_load_avg (void);
 void do_iret (struct intr_frame *tf);
 
 /* funtions for priority scheduling */
-bool compare_thread_wakeup(const struct list_elem* a,
-	const struct list_elem* b, void* aux UNUSED);
-bool compare_thread_priority(const struct list_elem* a,
-	const struct list_elem* b, void* aux UNUSED);
+bool compare_thread_wakeup(struct list_elem* a,
+	struct list_elem* b, void* aux UNUSED);
+bool compare_thread_priority(struct list_elem* a,
+	struct list_elem* b, void* aux UNUSED);
 
 #endif /* threads/thread.h */
