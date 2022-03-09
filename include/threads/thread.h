@@ -136,9 +136,6 @@ void thread_yield (void);
 
 /* functions for thread sleep */
 void thread_sleep_until(int64_t ticks);
-void thread_awake(int64_t ticks);// is neccessary?
-void update_next_tick_to_awake(int64_t ticks);
-int64_t get_next_tick_to_awake(void);
 void refresh_sleep_list(void);
 
 int thread_get_priority (void);
@@ -150,5 +147,9 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
 void do_iret (struct intr_frame *tf);
+
+/* funtions for priority scheduling */
+bool compare_thread_priority(const struct list_elem* a,
+	const struct list_elem* b, void*aux UNUSED)
 
 #endif /* threads/thread.h */

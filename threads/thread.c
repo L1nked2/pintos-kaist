@@ -30,6 +30,9 @@ static struct list ready_list;
 
 /* List of processes in THREAD_BLOCKED state. */
 static struct list sleep_list;
+
+/* Let scheduler to skip checking sleep_list 
+   for minimum sleeping ticks of blocked threads*/
 static int64_t next_tick_to_awake;
 
 /* Idle thread. */
@@ -634,3 +637,29 @@ void refresh_sleep_list (void) {
 	}
 	return;
 }
+bool compare_thread_wakeup(const struct list_elem* a,
+	const struct list_elem* b, void* aux UNUSED) {
+{
+	struct thread *t_a, *t_b;
+	t_a = list_entry(a, struct thread, elem);
+	t_b = list_entry(b, struct thread, elem);
+	ASSERT(is_thread(t_a));
+	ASSERT(is_thread(t_b));
+	return (t_a->wakeup_tick < t_b->wakeup_tick);
+}
+
+/* codes for priority scheduling */
+bool compare_thread_priority(const struct list_elem* a,
+	const struct list_elem* b, void* aux UNUSED) {
+{
+	struct thread *t_a, *t_b;
+	t_a = list_entry(a, struct thread, elem);
+	t_b = list_entry(b, struct thread, elem);
+	ASSERT(is_thread(t_a));
+	ASSERT(is_thread(t_b));
+	return (t_a->priority > t_b->priority);
+}
+
+
+
+void list
