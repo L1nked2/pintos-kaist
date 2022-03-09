@@ -330,7 +330,11 @@ thread_yield (void) {
 /* Sets the current thread's priority to NEW_PRIORITY. */
 void
 thread_set_priority (int new_priority) {
-	thread_current ()->priority = new_priority;
+	thread_current()->priority = new_priority;
+	// if the priority of thread is changed, yield thread by comparing both priorities.
+	if (compare_thread_priority(&t->elem, &thread_current()->elem, NULL)) {
+		thread_yield();
+	}
 }
 
 /* Returns the current thread's priority. */
