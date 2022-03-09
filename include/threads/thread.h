@@ -150,6 +150,6 @@ void do_iret (struct intr_frame *tf);
 
 /* funtions for priority scheduling */
 bool compare_thread_priority(const struct list_elem* a,
-	const struct list_elem* b, void*aux UNUSED)
+	const struct list_elem* b, void*aux UNUSED);
 
 #endif /* threads/thread.h */

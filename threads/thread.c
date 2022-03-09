@@ -619,7 +619,8 @@ void thread_sleep_until(int64_t ticks) {
 	// ready_list always, so check if idle()
 	// TODO: update function to priority queue
 	if(thread_current() != idle_thread){
-		list_push_back (&sleep_list, &thread_current()->elem);
+		//list_push_back (&sleep_list, &thread_current()->elem);
+		list_insert_ordered(&sleep_list, &thread_current()->elem, compare_thread_wakeup, NULL);
 		thread_block();
 	}	
 	intr_set_level (old_level);
@@ -664,4 +665,3 @@ bool compare_thread_priority(const struct list_elem* a,
 	ASSERT(is_thread(t_b));
 	return (t_a->priority > t_b->priority);
 }
-
