@@ -120,10 +120,7 @@ sema_up (struct semaphore *sema) {
 	sema->value++;
 	// if the priority of the unblocked thread is higher 
 	// than the priority of running thread, then yield.
-	if (!list_empty(&ready_list) &&
-	compare_thread_priority(list_front(&ready_list), &thread_current()->elem, NULL)) {
-		thread_yield();
-	}
+	schedule_preemptively();
 	intr_set_level (old_level);
 }
 

@@ -219,10 +219,7 @@ thread_create (const char *name, int priority,
 
 	/* Add to run queue. */
 	thread_unblock (t);
-
-	if (compare_thread_priority(&t->elem, &thread_current()->elem, NULL)) {
-		thread_yield();
-	}
+	schedule_preemptively();
 
 	return tid;
 }
@@ -331,10 +328,7 @@ thread_yield (void) {
 void
 thread_set_priority (int new_priority) {
 	thread_current()->priority = new_priority;
-	// if the priority of thread is changed, yield thread by comparing both priorities.
-	if (!list_empty(&ready_list) && compare_thread_priority(list_front(&ready_list), &thread_current()->elem, NULL)) {
-		thread_yield();
-	}
+	schedule_preemptively();
 }
 
 /* Returns the current thread's priority. */
@@ -648,6 +642,8 @@ void refresh_sleep_list (void) {
 	}
 	return;
 }
+
+/* codes for priority scheduling */
 bool compare_thread_wakeup(struct list_elem* a,
 	struct list_elem* b, void* aux UNUSED)
 {
@@ -669,4 +665,13 @@ bool compare_thread_priority(struct list_elem* a,
 	ASSERT(is_thread(t_a));
 	ASSERT(is_thread(t_b));
 	return (t_a->priority > t_b->priority);
+}
+
+/* if the priority of thread is changed, yield thread by comparing both priorities. */
+void schedule_preemptively(void)
+{
+	if (!list_empty(&ready_list) &&
+	compare_thread_priority(list_front(&ready_list), &thread_current()->elem, NULL))
+		thread_yield();
+	return;
 }

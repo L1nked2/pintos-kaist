@@ -153,5 +153,5 @@ bool compare_thread_wakeup(struct list_elem* a,
 	struct list_elem* b, void* aux UNUSED);
 bool compare_thread_priority(struct list_elem* a,
 	struct list_elem* b, void* aux UNUSED);
-
+void schedule_preemptively(void);
 #endif /* threads/thread.h */
