@@ -66,7 +66,9 @@ sema_down (struct semaphore *sema) {
 
 	old_level = intr_disable ();
 	while (sema->value == 0) {
-		list_push_back (&sema->waiters, &thread_current ()->elem);
+		//list_push_back (&sema->waiters, &thread_current ()->elem);
+		// insert the element to be sorted in descending order.
+		list_insert_ordered(&sema->waiters, &thread_current()->elem, compare_thread_priority, NULL);
 		thread_block ();
 	}
 	sema->value--;
@@ -109,10 +111,19 @@ sema_up (struct semaphore *sema) {
 	ASSERT (sema != NULL);
 
 	old_level = intr_disable ();
-	if (!list_empty (&sema->waiters))
+	if (!list_empty (&sema->waiters)) {
+		// waiters list should be sorted because the priorities in the list might be changed.
+		list_sort(&sema->waiters, compare_thread_priority, NULL); 
 		thread_unblock (list_entry (list_pop_front (&sema->waiters),
 					struct thread, elem));
+	}
 	sema->value++;
+	// if the priority of the unblocked thread is higher 
+	// than the priority of running thread, then yield.
+	if (!list_empty(&ready_list) &&
+	compare_thread_priority(list_front(&ready_list), &thread_current()->elem, NULL)) {
+		thread_yield();
+	}
 	intr_set_level (old_level);
 }
 
