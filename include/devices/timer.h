@@ -1,7 +1,9 @@
 #ifndef DEVICES_TIMER_H
 #define DEVICES_TIMER_H
 
+#include <debug.h>
 #include <round.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 /* Number of timer interrupts per second. */
@@ -20,4 +22,9 @@ void timer_nsleep (int64_t nanoseconds);
 
 void timer_print_stats (void);
 
+/* functions for thread sleep */
+void thread_sleep_until(int64_t ticks);
+void refresh_sleep_list(void);
+bool compare_thread_wakeup(struct list_elem* a,
+	struct list_elem* b, void* aux UNUSED);
 #endif /* devices/timer.h */

@@ -29,6 +29,9 @@ static bool too_many_loops (unsigned loops);
 static void busy_wait (int64_t loops);
 static void real_time_sleep (int64_t num, int32_t denom);
 
+/* List of sleeping threads */
+static struct list sleep_list;
+
 /* Sets up the 8254 Programmable Interval Timer (PIT) to
    interrupt PIT_FREQ times per second, and registers the
    corresponding interrupt. */
@@ -43,6 +46,8 @@ timer_init (void) {
 	outb (0x40, count >> 8);
 
 	intr_register_ext (0x20, timer_interrupt, "8254 Timer");
+
+	list_init (&sleep_list);//if doesn't works, turn off interrupts
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -128,6 +133,9 @@ static void
 timer_interrupt (struct intr_frame *args UNUSED) {
 	ticks++;
 	thread_tick ();
+	// check sleep_list and 
+	// move threads which need to be waked up to ready_list
+	refresh_sleep_list();
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
@@ -185,4 +193,50 @@ real_time_sleep (int64_t num, int32_t denom) {
 		ASSERT (denom % 1000 == 0);
 		busy_wait (loops_per_tick * num / 1000 * TIMER_FREQ / (denom / 1000));
 	}
+}
+
+/* codes for alarm clock */
+/* make current thread blocked and insert to sleep queue */
+void thread_sleep_until(int64_t ticks) {
+	// block interrupts
+	enum intr_level old_level = intr_disable ();
+	// save ticks to be waked up
+	thread_current()->wakeup_tick = ticks;
+	// add to sleep list, but idle thread must on
+	// ready_list always, so check if idle()
+	if(thread_current() != idle_thread){
+		// insert thread into sleep list
+		list_insert_ordered(&sleep_list, &thread_current()->elem, compare_thread_wakeup, NULL);
+		thread_block();
+	}	
+	intr_set_level (old_level);
+	return;
+}
+
+/* check sleep_list and move threads to ready_list
+if thread's wakeup_tick is less than current_tick */
+void refresh_sleep_list (void) {
+	struct list_elem *e;
+	int64_t current_tick = timer_ticks();
+	for(e = list_begin(&sleep_list); e != list_end(&sleep_list);) {
+		struct thread *current_thread = list_entry(e, struct thread, elem);
+		if (current_thread->wakeup_tick <= current_tick) {
+			e = list_remove(&current_thread->elem);
+			thread_unblock(current_thread);
+		}
+		else {
+			e = list_next(e);
+		}
+	}
+	return;
+}
+bool compare_thread_wakeup(struct list_elem* a,
+	struct list_elem* b, void* aux UNUSED)
+{
+	struct thread *t_a, *t_b;
+	t_a = list_entry(a, struct thread, elem);
+	t_b = list_entry(b, struct thread, elem);
+	ASSERT(is_thread(t_a));
+	ASSERT(is_thread(t_b));
+	return (t_a->wakeup_tick < t_b->wakeup_tick);
 }

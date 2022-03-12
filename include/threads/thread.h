@@ -115,6 +115,9 @@ struct thread {
    Controlled by kernel command-line option "-o mlfqs". */
 extern bool thread_mlfqs;
 
+/* Idle thread. */
+static struct thread *idle_thread;
+
 void thread_init (void);
 void thread_start (void);
 
@@ -134,10 +137,6 @@ const char *thread_name (void);
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
 
-/* functions for thread sleep */
-void thread_sleep_until(int64_t ticks);
-void refresh_sleep_list(void);
-
 int thread_get_priority (void);
 void thread_set_priority (int);
 
@@ -149,8 +148,6 @@ int thread_get_load_avg (void);
 void do_iret (struct intr_frame *tf);
 
 /* funtions for priority scheduling */
-bool compare_thread_wakeup(struct list_elem* a,
-	struct list_elem* b, void* aux UNUSED);
 bool compare_thread_priority(struct list_elem* a,
 	struct list_elem* b, void* aux UNUSED);
 void schedule_preemptively(void);
