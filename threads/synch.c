@@ -345,7 +345,17 @@ bool compare_sema_priority(struct list_elem* a,
 	se_b = list_entry(b, struct semaphore_elem, elem);
 	waiters_a = &((se_a->semaphore).waiters);
 	waiters_b = &((se_b->semaphore).waiters);
-	priority_a = list_entry(list_begin(waiters_a), struct thread, elem)->priority;
-	priority_b = list_entry(list_begin(waiters_b), struct thread, elem)->priority;
+	if(list_empty(waiters_a)) {
+		priority_a = PRI_MIN;
+	}
+	else {
+		priority_a = list_entry(list_begin(waiters_a), struct thread, elem)->priority;
+	}
+	if(list_empty(waiters_b)) {
+		priority_b = PRI_MIN;
+	}
+	else {
+		priority_b = list_entry(list_begin(waiters_b), struct thread, elem)->priority;
+	}
 	return (priority_a > priority_b);
 }
