@@ -15,11 +15,6 @@
 #include "userprog/process.h"
 #endif
 
-/* Random value for struct thread's `magic' member.
-   Used to detect stack overflow.  See the big comment at the top
-   of thread.h for details. */
-#define THREAD_MAGIC 0xcd6abf4b
-
 /* Random value for basic thread
    Do not modify this value. */
 #define THREAD_BASIC 0xd42df210
@@ -27,10 +22,6 @@
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
-
-/* Let scheduler to skip checking sleep_list 
-   for minimum sleeping ticks of blocked threads*/
-static int64_t next_tick_to_awake;
 
 /* Initial thread, the thread running init.c:main(). */
 static struct thread *initial_thread;
