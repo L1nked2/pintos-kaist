@@ -196,6 +196,17 @@ real_time_sleep (int64_t num, int32_t denom) {
 }
 
 /* codes for alarm clock */
+bool compare_thread_wakeup(struct list_elem* a,
+	struct list_elem* b, void* aux UNUSED)
+{
+	struct thread *t_a, *t_b;
+	t_a = list_entry(a, struct thread, elem);
+	t_b = list_entry(b, struct thread, elem);
+	ASSERT(is_thread(t_a));
+	ASSERT(is_thread(t_b));
+	return (t_a->wakeup_tick < t_b->wakeup_tick);
+}
+
 /* make current thread blocked and insert to sleep queue */
 void thread_sleep_until(int64_t ticks) {
 	// block interrupts
@@ -229,14 +240,4 @@ void refresh_sleep_list (void) {
 		}
 	}
 	return;
-}
-bool compare_thread_wakeup(struct list_elem* a,
-	struct list_elem* b, void* aux UNUSED)
-{
-	struct thread *t_a, *t_b;
-	t_a = list_entry(a, struct thread, elem);
-	t_b = list_entry(b, struct thread, elem);
-	ASSERT(is_thread(t_a));
-	ASSERT(is_thread(t_b));
-	return (t_a->wakeup_tick < t_b->wakeup_tick);
 }
