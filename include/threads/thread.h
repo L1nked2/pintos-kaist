@@ -118,6 +118,9 @@ extern bool thread_mlfqs;
 /* Idle thread. */
 static struct thread *idle_thread;
 
+/* Returns true if T appears to point to a valid thread. */
+#define is_thread(t) ((t) != NULL && (t)->magic == THREAD_MAGIC)
+
 void thread_init (void);
 void thread_start (void);
 

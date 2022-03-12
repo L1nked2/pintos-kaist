@@ -25,6 +25,4 @@ void timer_print_stats (void);
 /* functions for thread sleep */
 void thread_sleep_until(int64_t ticks);
 void refresh_sleep_list(void);
-bool compare_thread_wakeup(struct list_elem* a,
-	struct list_elem* b, void* aux UNUSED);
 #endif /* devices/timer.h */
