@@ -329,3 +329,20 @@ cond_broadcast (struct condition *cond, struct lock *lock) {
 	while (!list_empty (&cond->waiters))
 		cond_signal (cond, lock);
 }
+
+/* campare the priority of waiting thread in semaphores */
+bool compare_sema_priority(struct list_elem* a,
+	struct list_elem* b, void* aux UNUSED)
+{
+	int priority_a, priority_b;
+	struct semaphore_elem *se_a, *se_b;
+	struct list *waiters_a, *waiters_b;
+
+	se_a = list_entry(a, struct semaphore_elem, elem);
+	se_b = list_entry(b, struct semaphore_elem, elem);
+	waiters_a = &((se_a->semaphore).waiters);
+	waiters_b = &((se_b->semaphore).waiters);
+	priority_a = list_entry(list_front(waiters_a), struct thread, elem)->priority
+	priority_b = list_entry(list_front(waiters_b), struct thread, elem)->priority
+	return (priority_a > priority_b);
+}

@@ -615,7 +615,6 @@ void thread_sleep_until(int64_t ticks) {
 	thread_current()->wakeup_tick = ticks;
 	// add to sleep list, but idle thread must on
 	// ready_list always, so check if idle()
-	// TODO: update function to priority queue
 	if(thread_current() != idle_thread){
 		//list_push_back (&sleep_list, &thread_current()->elem);
 		list_insert_ordered(&sleep_list, &thread_current()->elem, compare_thread_wakeup, NULL);
