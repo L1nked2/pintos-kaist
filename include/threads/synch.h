@@ -40,7 +40,7 @@ void cond_broadcast (struct condition *, struct lock *);
 
 /* campare the priority of waiting thread in semaphores */
 bool compare_sema_priority(struct list_elem* a,
-	struct list_elem* b, void* aux UNUSED);
+	struct list_elem* b, void* aux);
 
 /* Optimization barrier.
  *
