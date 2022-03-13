@@ -177,7 +177,6 @@ sema_test_helper (void *sema_) {
 void
 lock_init (struct lock *lock) {
 	ASSERT (lock != NULL);
-	lock->holder_priority = PRI_MIN;
 	lock->holder = NULL;
 	sema_init (&lock->semaphore, 1);
 }
@@ -200,7 +199,8 @@ lock_acquire (struct lock *lock) {
 	donate_priority(lock);
 	sema_down (&lock->semaphore);
 	lock->holder = current_thread;
-	list_push_back(&current_thread->holding_locks, &lock_elem);
+	current_thread->init_priority = current_thread->priority;
+	list_push_back(&current_thread->holding_locks, &lock->elem);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -259,10 +259,11 @@ void donate_priority(struct lock* lock)
     donated thread's wait_on_lock is not NULL */
 	struct thread *current_thread = thread_current ();
 	struct thread *lock_holder = lock->holder;
-	if(lock_holder->priority > current_thread->priority) {
-
+	if(lock_holder != NULL &&
+	   lock_holder->priority < current_thread->priority) {
+		lock_holder->priority = current_thread-> priority;
+		donate_priority(lock_holder->wait_on_lock);
 	}
-
 	return;
 }
 
