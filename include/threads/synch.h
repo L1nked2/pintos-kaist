@@ -35,6 +35,10 @@ bool lock_try_acquire (struct lock *);
 void lock_release (struct lock *);
 bool lock_held_by_current_thread (const struct lock *);
 
+/* codes for priority donation */
+void donate_priority();
+void refresh_priority_on_lock_release();
+
 /* Condition variable. */
 struct condition {
 	struct list waiters;        /* List of Semaphores */

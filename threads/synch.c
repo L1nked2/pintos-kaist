@@ -243,6 +243,31 @@ lock_held_by_current_thread (const struct lock *lock) {
 
 	return lock->holder == thread_current ();
 }
+
+/* codes for priority donation */
+
+/* priority donation helper function
+   used on acquire_lock() */
+void donate_priority()
+{
+	/* check lock_holder and donate priority if 
+   acquiring thread's priority is higher than lock_holder.
+   also if priority is donated, do recursively if 
+   donated thread's wait_on_lock is not NULL */
+	return;
+}
+
+/* priority donation_recovery helper function
+   used on release_lock() */
+void refresh_priority_on_lock_release()
+{
+	/* iterate current thread's holding_locks
+	and refresh priority if lock_holder's priority
+	is higher than current thread. if holding_locks
+	is empty, recover to init_priority saved on lock */
+	return;
+}
+
 
 /* One semaphore in a list. */
 struct semaphore_elem {
