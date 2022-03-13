@@ -181,6 +181,12 @@ thread_create (const char *name, int priority,
 	/* Initialize thread. */
 	init_thread (t, name, priority);
 	tid = t->tid = allocate_tid ();
+	
+	t->wakeup_tick = 0;
+
+	t->init_priority = priority;
+	t->wait_on_lock = NULL;
+	list_init(&t->holding_locks);
 
 	/* Call the kernel_thread if it scheduled.
 	 * Note) rdi is 1st argument, and rsi is 2nd argument. */
@@ -401,13 +407,6 @@ init_thread (struct thread *t, const char *name, int priority) {
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 	t->priority = priority;
-
-	t->wakeup_tick = 0;
-
-	t->init_priority = priority;
-	t->wait_on_lock = NULL;
-	list_init(&t->holding_locks);
-
 	t->magic = THREAD_MAGIC;
 }
 
