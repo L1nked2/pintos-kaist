@@ -192,12 +192,15 @@ lock_init (struct lock *lock) {
    we need to sleep. */
 void
 lock_acquire (struct lock *lock) {
+	struct thread* current_thread = thread_current ();
 	ASSERT (lock != NULL);
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));
 
+	donate_priority(lock);
 	sema_down (&lock->semaphore);
-	lock->holder = thread_current ();
+	lock->holder = current_thread;
+	list_push_back(&current_thread->holding_locks, &lock_elem);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -248,12 +251,18 @@ lock_held_by_current_thread (const struct lock *lock) {
 
 /* priority donation helper function
    used on acquire_lock() */
-void donate_priority()
+void donate_priority(struct lock* lock)
 {
 	/* check lock_holder and donate priority if 
-   acquiring thread's priority is higher than lock_holder.
-   also if priority is donated, do recursively if 
-   donated thread's wait_on_lock is not NULL */
+    acquiring thread's priority is higher than lock_holder.
+    also if priority is donated, do recursively if 
+    donated thread's wait_on_lock is not NULL */
+	struct thread *current_thread = thread_current ();
+	struct thread *lock_holder = lock->holder;
+	if(lock_holder->priority > current_thread->priority) {
+
+	}
+
 	return;
 }
 

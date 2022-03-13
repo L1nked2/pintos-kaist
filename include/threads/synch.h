@@ -21,12 +21,7 @@ struct lock {
 	int holder_priority;		/* Initial priority of the holder. */
 	struct thread *holder;      /* Thread holding lock (for debugging). */
 	struct semaphore semaphore; /* Binary semaphore controlling access. */
-};
-
-/* One lock in a list. */
-struct lock_elem {
 	struct list_elem elem;		/* List element. */
-	struct lock lock;			/* This lock. */
 };
 
 void lock_init (struct lock *);
@@ -36,7 +31,7 @@ void lock_release (struct lock *);
 bool lock_held_by_current_thread (const struct lock *);
 
 /* codes for priority donation */
-void donate_priority();
+void donate_priority(struct lock* lock);
 void refresh_priority_on_lock_release();
 
 /* Condition variable. */
