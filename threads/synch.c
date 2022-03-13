@@ -257,10 +257,12 @@ void donate_priority(struct lock* lock)
     acquiring thread's priority is higher than lock_holder.
     also if priority is donated, do recursively if 
     donated thread's wait_on_lock is not NULL */
+	if(lock == NULL) {
+		return;
+	}
 	struct thread *current_thread = thread_current ();
 	struct thread *lock_holder = lock->holder;
-	if(lock_holder != NULL &&
-	   lock_holder->priority < current_thread->priority) {
+	if(lock_holder->priority < current_thread->priority) {
 		lock_holder->priority = current_thread-> priority;
 		donate_priority(lock_holder->wait_on_lock);
 	}
