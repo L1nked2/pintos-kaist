@@ -27,7 +27,7 @@ struct lock {
 struct lock_elem {
 	struct list_elem elem;		/* List element. */
 	struct lock lock;			/* This lock. */
-}
+};
 
 void lock_init (struct lock *);
 void lock_acquire (struct lock *);
