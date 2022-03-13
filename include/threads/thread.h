@@ -92,7 +92,10 @@ struct thread {
 	char name[16];                      /* Name (for debugging purposes). */
 	int priority;                       /* Priority. */
 	int64_t wakeup_tick; 				/* wakeup tick */
-
+	
+	struct lock *wait_on_lock; 			/* A lock which the thread is waiting on */
+	struct list holding_locks;			/* Locks which the thread holds. */
+	
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
 
