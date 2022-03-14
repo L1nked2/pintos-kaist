@@ -196,6 +196,7 @@ lock_acquire (struct lock *lock) {
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));
 
+  list_init(&current_thread->holding_locks);
 	donate_priority(lock);
 	sema_down (&lock->semaphore);
 	lock->holder = current_thread;
