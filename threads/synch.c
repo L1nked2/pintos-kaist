@@ -195,6 +195,7 @@ lock_acquire (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));
+  current_thread->init_priority = current_thread->priority;
 
   if(lock->holder != NULL)
   {
@@ -205,7 +206,6 @@ lock_acquire (struct lock *lock) {
   
 	sema_down (&lock->semaphore);
 	lock->holder = current_thread;
-	current_thread->init_priority = current_thread->priority;
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -237,7 +237,9 @@ void
 lock_release (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (lock_held_by_current_thread (lock));
+
 	refresh_priority_on_lock_release(lock);
+
 	lock->holder = NULL;
 	sema_up (&lock->semaphore);
 }
@@ -256,7 +258,7 @@ lock_held_by_current_thread (const struct lock *lock) {
 
 /* priority donation helper function
    used on acquire_lock() */
-void donate_priority(struct lock* lock, int depth)
+void donate_priority(struct lock *lock, int depth)
 {
 	/* check lock_holder and donate priority if 
     acquiring thread's priority is higher than lock_holder.
@@ -282,22 +284,37 @@ void refresh_priority_on_lock_release(struct lock* lock)
 	and refresh priority if lock_holder's priority
 	is higher than current thread. if holding_locks
 	is empty, recover to init_priority saved on lock */
-	/*struct thread *cur_thread = thread_current();
+	struct thread *cur_thread = thread_current();
+  struct list *current_holding_locks = &cur_thread->holding_locks;
+  struct lock *current_lock;
+  struct thread *compared_thread;
 	if (list_empty(&cur_thread->holding_locks))
-		cur_thread->priority = cur_thread->init_priority;
+  {
+    cur_thread->priority = cur_thread->init_priority;
+  }
 	else
 	{
-		for (struct list_elem *e = list_front(&cur_thread->holding_locks);
-			e != list_back(&cur_thread->holding_locks);
-			e = list_next(e))
+		for (struct list_elem *e = list_front(current_holding_locks);
+			e != list_back(current_holding_locks);)
 		{
-      struct lock *current_lock = list_entry(e,struct lock, elem);
-			struct thread *compared_thread = list_entry(list_front(&(current_lock->semaphore).waiters), struct thread, elem);
-			if ((compared_thread->priority > cur_thread->priority) &&
-				(compared_thread->wait_on_lock != lock))
-					cur_thread->priority = compared_thread->priority;
+      current_lock = list_entry(e,struct lock, elem);
+			compared_thread = list_entry(list_front(&(current_lock->semaphore).waiters), struct thread, elem);
+      if(current_lock == lock)
+      {
+          //remove lock
+          e = list_remove(e);
+      }
+      else
+      {
+        //iterate through locks and refresh priority
+        if (compared_thread->priority > cur_thread->priority)
+        {
+          cur_thread->priority = compared_thread->priority;
+        }
+        e = list_next(e);
+      }
 		}
-	}*/
+	}
 	return;
 }
 
