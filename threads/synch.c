@@ -200,7 +200,7 @@ lock_acquire (struct lock *lock) {
 	sema_down (&lock->semaphore);
 	lock->holder = current_thread;
 	current_thread->init_priority = current_thread->priority;
-	list_push_back(&current_thread->holding_locks, &lock->elem);
+	//list_push_back(&current_thread->holding_locks, &lock->elem);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
