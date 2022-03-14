@@ -103,7 +103,7 @@ thread_init (void) {
 	initial_thread = running_thread ();
 	init_thread (initial_thread, "main", PRI_DEFAULT);
 	initial_thread->status = THREAD_RUNNING;
-  list_init(&initial_thread->holding_locks);
+  //list_init(&initial_thread->holding_locks);
 	initial_thread->tid = allocate_tid ();
 }
 
@@ -184,7 +184,7 @@ thread_create (const char *name, int priority,
   t->wakeup_tick = 0;
 	t->init_priority = priority;
 	t->wait_on_lock = NULL;
-  list_init(&t->holding_locks);
+  //list_init(&t->holding_locks);
 	tid = t->tid = allocate_tid ();
 
 	/* Call the kernel_thread if it scheduled.
