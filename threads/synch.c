@@ -232,7 +232,7 @@ void
 lock_release (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (lock_held_by_current_thread (lock));
-
+	refresh_priority_on_lock_release(lock);
 	lock->holder = NULL;
 	sema_up (&lock->semaphore);
 }
@@ -271,14 +271,30 @@ void donate_priority(struct lock* lock)
 
 /* priority donation_recovery helper function
    used on release_lock() */
-void refresh_priority_on_lock_release()
+void refresh_priority_on_lock_release(struct *lock lock)
 {
 	/* iterate current thread's holding_locks
 	and refresh priority if lock_holder's priority
 	is higher than current thread. if holding_locks
 	is empty, recover to init_priority saved on lock */
+	struct thread *cur_thread = thread_current();
+	if (list_empty(cur_thread->holding_locks))
+		cur_thread->priority = cur_thread->init_priority;
+	else
+	{
+		for (struct list_elem *e = list_front(cur_thread->holding_locks);
+			e != list_back(cur_thread->holding_locks);
+			e = list_next(e))
+		{
+			struct thread *compared_thread = list_entry(list_front((e->semaphore).waiters), struct thread, elem);
+			if ((compared_thread->priority > cur_thread->priority) &&
+				(compared_thread->wait_on_lock != lock))
+					cur_thread->priority = list_entry(list_front((e->semaphore).waiters), struct thread, elem)->priority;
+		}
+	}
 	return;
 }
+
 
 
 /* One semaphore in a list. */
