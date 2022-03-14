@@ -196,7 +196,7 @@ lock_acquire (struct lock *lock) {
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));
 
-  current_thread->init_priority = current_thread->priority;
+  //current_thread->init_priority = current_thread->priority;
   
   if(lock->holder != NULL)
   {
@@ -241,9 +241,9 @@ lock_release (struct lock *lock) {
 
   //remove lock that current_thread is releasing
   list_remove(&lock->elem);
+  lock->holder = NULL;
 	refresh_priority_on_lock_release();
 
-  lock->holder = NULL;
 	sema_up (&lock->semaphore);
 }
 
@@ -301,6 +301,7 @@ void refresh_priority_on_lock_release()
   }
 
   //refresh priority from locks that current_thread is holding
+  //iterate through locks and refresh priority
   for (struct list_elem *e = list_front(current_holding_locks);
     e != list_back(current_holding_locks);
     e = list_next(e))
@@ -312,7 +313,6 @@ void refresh_priority_on_lock_release()
       continue;
     }
     iter_thread = list_entry(list_front(&(iter_lock->semaphore).waiters), struct thread, elem);
-    //iterate through locks and refresh priority
     if (current_thread->priority < iter_thread->priority)
     {
       current_thread->priority = iter_thread->priority;
