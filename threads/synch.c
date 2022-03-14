@@ -238,9 +238,10 @@ lock_release (struct lock *lock) {
 	ASSERT (lock != NULL);
 	ASSERT (lock_held_by_current_thread (lock));
 
+  lock->holder = NULL;
+
 	refresh_priority_on_lock_release(lock);
-  
-	lock->holder = NULL;
+
 	sema_up (&lock->semaphore);
 }
 
@@ -286,8 +287,8 @@ void refresh_priority_on_lock_release(struct lock* lock)
 	is empty, recover to init_priority saved on lock */
 	struct thread *current_thread = thread_current();
   struct list *current_holding_locks = &current_thread->holding_locks;
-  struct lock *current_lock;
-  struct thread *compared_thread;
+  struct lock *iter_lock;
+  struct thread *iter_thread;
 	
   //restore priority to init_priority
   current_thread->priority = current_thread->init_priority;
@@ -300,20 +301,20 @@ void refresh_priority_on_lock_release(struct lock* lock)
   }
 
   //refresh priority from locks that current_thread is holding
-  for (struct list_elem *e = list_front(current_holding_locks);
-    e != list_back(current_holding_locks);)
+  for (struct list_elem *e = list_begin(current_holding_locks);
+    e != list_end(current_holding_locks);)
   {
-    current_lock = list_entry(e, struct lock, elem);
+    iter_lock = list_entry(e, struct lock, elem);
     //if semaphore is empty, no action needed
-    if(list_empty(&(current_lock->semaphore).waiters))
+    if(list_empty(&(iter_lock->semaphore).waiters))
     {
       continue;
     }
-    compared_thread = list_entry(list_front(&(current_lock->semaphore).waiters), struct thread, elem);
+    iter_thread = list_entry(list_front(&(iter_lock->semaphore).waiters), struct thread, elem);
     //iterate through locks and refresh priority
-    if (current_thread->priority < compared_thread->priority)
+    if (current_thread->priority < iter_thread->priority)
     {
-      current_thread->priority = compared_thread->priority;
+      current_thread->priority = iter_thread->priority;
     }
     e = list_next(e);
   }
