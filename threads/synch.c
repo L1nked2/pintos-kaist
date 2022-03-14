@@ -196,11 +196,16 @@ lock_acquire (struct lock *lock) {
 	ASSERT (!intr_context ());
 	ASSERT (!lock_held_by_current_thread (lock));
 
-	//donate_priority(lock);
+  if(lock->holder != NULL)
+  {
+    current_thread->wait_on_lock = lock;
+    list_push_back(&current_thread->holding_locks, &lock->elem);
+	  donate_priority(lock, 0);
+  }
+  
 	sema_down (&lock->semaphore);
 	lock->holder = current_thread;
 	current_thread->init_priority = current_thread->priority;
-	//list_push_back(&current_thread->holding_locks, &lock->elem);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -251,20 +256,20 @@ lock_held_by_current_thread (const struct lock *lock) {
 
 /* priority donation helper function
    used on acquire_lock() */
-void donate_priority(struct lock* lock)
+void donate_priority(struct lock* lock, int depth)
 {
 	/* check lock_holder and donate priority if 
     acquiring thread's priority is higher than lock_holder.
     also if priority is donated, do recursively if 
     donated thread's wait_on_lock is not NULL */
-	if(lock == NULL) {
+	if(lock == NULL || depth > PRIORITY_DONATION_MAX_DEPTH) {
 		return;
 	}
 	struct thread *current_thread = thread_current ();
 	struct thread *lock_holder = lock->holder;
 	if(lock_holder->priority < current_thread->priority) {
-		lock_holder->priority = current_thread-> priority;
-		donate_priority(lock_holder->wait_on_lock);
+		lock_holder->priority = current_thread->priority;
+		donate_priority(lock_holder->wait_on_lock, depth++);
 	}
 	return;
 }
