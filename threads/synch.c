@@ -282,22 +282,22 @@ void refresh_priority_on_lock_release(struct lock* lock)
 	and refresh priority if lock_holder's priority
 	is higher than current thread. if holding_locks
 	is empty, recover to init_priority saved on lock */
-	/*struct thread *cur_thread = thread_current();
+	struct thread *cur_thread = thread_current();
 	if (list_empty(&cur_thread->holding_locks))
 		cur_thread->priority = cur_thread->init_priority;
 	else
 	{
-		for (struct list_elem *e = list_front(&cur_thread->holding_locks);
-			e != list_back(&cur_thread->holding_locks);
+		for (struct list_elem *e = list_begin(&cur_thread->holding_locks);
+			e != list_end(&cur_thread->holding_locks);
 			e = list_next(e))
 		{
       struct lock *current_lock = list_entry(e,struct lock, elem);
-			struct thread *compared_thread = list_entry(list_front(&(current_lock->semaphore).waiters), struct thread, elem);
+			struct thread *compared_thread = list_entry(list_begin(&(current_lock->semaphore).waiters), struct thread, elem);
 			if ((compared_thread->priority > cur_thread->priority) &&
 				(compared_thread->wait_on_lock != lock))
 					cur_thread->priority = compared_thread->priority;
 		}
-	}*/
+	}
 	return;
 }
 
