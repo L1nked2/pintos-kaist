@@ -405,7 +405,7 @@ init_thread (struct thread *t, const char *name, int priority) {
   t->wakeup_tick = 0;
 	t->init_priority = priority;
 	t->wait_on_lock = NULL;
-  list_init(&t->holding_locks);
+  //list_init(&t->holding_locks);
 	t->magic = THREAD_MAGIC;
 }
 
