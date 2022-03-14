@@ -93,12 +93,12 @@ struct thread {
 	int priority;                       /* Priority. */
 	
 	/* Owned by timer.c. */
-	int64_t wakeup_tick; 				/* wakeup tick */
+	int64_t wakeup_tick; 				        /* wakeup tick */
 
 	/* Owned by synch.c. */
-	int init_priority;					/* initial priority for priority recovery */
-	struct lock *wait_on_lock; 			/* A lock which the thread is waiting on */
-	struct list holding_locks;			/* Locks which the thread holds. */
+	int init_priority;					        /* initial priority for priority recovery */
+	struct lock *wait_on_lock; 			    /* A lock which the thread is waiting on */
+	struct list holding_locks;			    /* Locks which the thread holds. */
 	
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
