@@ -284,37 +284,36 @@ void refresh_priority_on_lock_release(struct lock* lock)
 	and refresh priority if lock_holder's priority
 	is higher than current thread. if holding_locks
 	is empty, recover to init_priority saved on lock */
-	struct thread *cur_thread = thread_current();
-  struct list *current_holding_locks = &cur_thread->holding_locks;
+	struct thread *current_thread = thread_current();
+  struct list *current_holding_locks = &current_thread->holding_locks;
   struct lock *current_lock;
   struct thread *compared_thread;
-	if (list_empty(&cur_thread->holding_locks))
+	
+  //restore priority to init_priority
+  current_thread->priority = current_thread->init_priority;
+
+  //remove lock that current_thread is releasing
+  //and refresh priority from locks that current_thread is holding
+  for (struct list_elem *e = list_front(current_holding_locks);
+    e != list_back(current_holding_locks);)
   {
-    cur_thread->priority = cur_thread->init_priority;
+    current_lock = list_entry(e, struct lock, elem);
+    compared_thread = list_entry(list_front(&(current_lock->semaphore).waiters), struct thread, elem);
+    if(current_lock == lock)
+    {
+        //remove lock that is released
+        e = list_remove(e);
+    }
+    else
+    {
+      //iterate through locks and refresh priority
+      if (current_thread->priority < compared_thread->priority)
+      {
+        current_thread->priority = compared_thread->priority;
+      }
+      e = list_next(e);
+    }
   }
-	else
-	{
-		for (struct list_elem *e = list_front(current_holding_locks);
-			e != list_back(current_holding_locks);)
-		{
-      current_lock = list_entry(e,struct lock, elem);
-			compared_thread = list_entry(list_front(&(current_lock->semaphore).waiters), struct thread, elem);
-      if(current_lock == lock)
-      {
-          //remove lock
-          e = list_remove(e);
-      }
-      else
-      {
-        //iterate through locks and refresh priority
-        if (compared_thread->priority > cur_thread->priority)
-        {
-          cur_thread->priority = compared_thread->priority;
-        }
-        e = list_next(e);
-      }
-		}
-	}
 	return;
 }
 
