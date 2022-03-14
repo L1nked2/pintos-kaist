@@ -313,7 +313,6 @@ void refresh_priority_on_lock_release()
       continue;
     }
     iter_thread = list_entry(list_front(&(iter_lock->semaphore).waiters), struct thread, elem);
-    printf("test: current_thread=%d, iter_thread=%d\n",current_thread->priority,iter_thread->priority);
     if (current_thread->priority < iter_thread->priority)
     {
       current_thread->priority = iter_thread->priority;
