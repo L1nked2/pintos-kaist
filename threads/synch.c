@@ -200,11 +200,11 @@ lock_acquire (struct lock *lock) {
   if(lock->holder != NULL)
   {
     current_thread->wait_on_lock = lock;
-    list_push_back(&current_thread->holding_locks, &lock->elem);
 	  donate_priority(lock, 0);
   }
   
 	sema_down (&lock->semaphore);
+  list_push_back(&current_thread->holding_locks, &lock->elem);
 	lock->holder = current_thread;
 }
 
@@ -291,32 +291,26 @@ void refresh_priority_on_lock_release(struct lock* lock)
 	
   //restore priority to init_priority
   current_thread->priority = current_thread->init_priority;
+  //remove lock that current_thread is releasing
+  list_remove(&lock->elem);
+  //if holding_locks is empty, no action needed
   if(list_empty(current_holding_locks))
   {
     return;
   }
 
-  //remove lock that current_thread is releasing
-  //and refresh priority from locks that current_thread is holding
+  //refresh priority from locks that current_thread is holding
   for (struct list_elem *e = list_front(current_holding_locks);
     e != list_back(current_holding_locks);)
   {
     current_lock = list_entry(e, struct lock, elem);
     compared_thread = list_entry(list_front(&(current_lock->semaphore).waiters), struct thread, elem);
-    if(current_lock == lock)
+    //iterate through locks and refresh priority
+    if (current_thread->priority < compared_thread->priority)
     {
-        //remove lock that is released
-        e = list_remove(e);
+      current_thread->priority = compared_thread->priority;
     }
-    else
-    {
-      //iterate through locks and refresh priority
-      if (current_thread->priority < compared_thread->priority)
-      {
-        current_thread->priority = compared_thread->priority;
-      }
-      e = list_next(e);
-    }
+    e = list_next(e);
   }
 	return;
 }

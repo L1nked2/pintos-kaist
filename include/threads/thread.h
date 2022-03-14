@@ -99,6 +99,8 @@ struct thread {
 	int init_priority;					        /* initial priority for priority recovery */
 	struct lock *wait_on_lock; 			    /* A lock which the thread is waiting on */
 	struct list holding_locks;			    /* Locks which the thread holds. */
+  //struct list donating_threads;			  /* List of threads donating priority */
+  //struct list_elem *donating_elems;	  /* List element of donating threads */
 	
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
