@@ -303,7 +303,7 @@ void refresh_priority_on_lock_release()
   //refresh priority from locks that current_thread is holding
   for (struct list_elem *e = list_front(current_holding_locks);
     e != list_back(current_holding_locks);
-    e = list_next(e);)
+    e = list_next(e))
   {
     iter_lock = list_entry(e, struct lock, elem);
     //if semaphore is empty, no action needed
