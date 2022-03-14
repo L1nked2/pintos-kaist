@@ -103,7 +103,7 @@ thread_init (void) {
 	initial_thread = running_thread ();
 	init_thread (initial_thread, "main", PRI_DEFAULT);
 	initial_thread->status = THREAD_RUNNING;
-  //list_init(&initial_thread->holding_locks);
+  list_init(&initial_thread->holding_locks);
 	initial_thread->tid = allocate_tid ();
 }
 
