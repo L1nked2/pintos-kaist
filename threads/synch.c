@@ -239,8 +239,10 @@ lock_release (struct lock *lock) {
 	ASSERT (lock_held_by_current_thread (lock));
 
   lock->holder = NULL;
+  //remove lock that current_thread is releasing
+  list_remove(&lock->elem);
 
-	refresh_priority_on_lock_release(lock);
+	refresh_priority_on_lock_release();
 
 	sema_up (&lock->semaphore);
 }
@@ -279,7 +281,7 @@ void donate_priority(struct lock *lock, int depth)
 
 /* priority donation_recovery helper function
    used on release_lock() */
-void refresh_priority_on_lock_release(struct lock* lock)
+void refresh_priority_on_lock_release()
 {
 	/* iterate current thread's holding_locks
 	and refresh priority if lock_holder's priority
@@ -292,8 +294,6 @@ void refresh_priority_on_lock_release(struct lock* lock)
 	
   //restore priority to init_priority
   current_thread->priority = current_thread->init_priority;
-  //remove lock that current_thread is releasing
-  list_remove(&lock->elem);
   //if holding_locks is empty, no action needed
   if(list_empty(current_holding_locks))
   {
