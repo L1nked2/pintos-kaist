@@ -180,12 +180,6 @@ thread_create (const char *name, int priority,
 
 	/* Initialize thread. */
 	init_thread (t, name, priority);
-
-	t->wakeup_tick = 0;
-
-	t->init_priority = priority;
-	t->wait_on_lock = NULL;
-
 	tid = t->tid = allocate_tid ();
 
 	/* Call the kernel_thread if it scheduled.
@@ -407,6 +401,9 @@ init_thread (struct thread *t, const char *name, int priority) {
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 	t->priority = priority;
+  t->wakeup_tick = 0;
+	t->init_priority = priority;
+	t->wait_on_lock = NULL;
 	t->magic = THREAD_MAGIC;
 }
 
