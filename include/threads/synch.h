@@ -31,7 +31,7 @@ bool lock_held_by_current_thread (const struct lock *);
 
 /* codes for priority donation */
 #define PRIORITY_DONATION_MAX_DEPTH 8
-void donate_priority(struct lock* lock);
+void donate_priority(struct lock* lock, int depth);
 void refresh_priority_on_lock_release();
 
 /* Condition variable. */
