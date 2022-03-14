@@ -199,12 +199,18 @@ lock_acquire (struct lock *lock) {
 
   if(lock->holder != NULL)
   {
+    // if holder exists, donate priority and wait for lock released.
     current_thread->wait_on_lock = lock;
-	  donate_priority(lock, 0);
+    // add current thread to donating list of lock->holder
+    list_insert_ordered(&lock->holder->donating_threads,
+                      &current_thread->donating_elem,
+                      compare_thread_donating_priority,
+                      NULL);
+	  donate_priority(current_thread, 0);
   }
   
-	sema_down (&lock->semaphore);
-  list_push_back(&current_thread->holding_locks, &lock->elem);
+	sema_down (&lock->semaphore); 
+  current_thread->wait_on_lock = NULL;
 	lock->holder = current_thread;
 }
 
@@ -261,27 +267,26 @@ lock_held_by_current_thread (const struct lock *lock) {
 
 /* priority donation helper function
    used on acquire_lock() */
-void donate_priority(struct lock *lock, int depth)
+void donate_priority(struct thread *target_thread, int depth)
 {
-	/* check lock_holder and donate priority if 
+	/* check lock->holder and donate priority if 
     acquiring thread's priority is higher than lock_holder.
     also if priority is donated, do recursively if 
     donated thread's wait_on_lock is not NULL */
-	if(lock == NULL || depth > PRIORITY_DONATION_MAX_DEPTH) {
+	if(target_thread->wait_on_lock == NULL || depth > PRIORITY_DONATION_MAX_DEPTH) {
 		return;
 	}
-	struct thread *current_thread = thread_current ();
-	struct thread *lock_holder = lock->holder;
-	if(lock_holder->priority < current_thread->priority) {
-		lock_holder->priority = current_thread->priority;
-		donate_priority(lock_holder->wait_on_lock, depth++);
+  struct lock *lock = target_thread->wait_on_lock;
+	if(lock->holder->priority < target_thread->priority) {
+		lock->holder->priority = target_thread->priority;
+		donate_priority(lock->holder, depth++);
 	}
 	return;
 }
 
 /* priority donation_recovery helper function
    used on release_lock() */
-void refresh_priority_on_lock_release()
+void refresh_priority()
 {
 	/* iterate current thread's holding_locks
 	and refresh priority if lock_holder's priority

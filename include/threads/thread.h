@@ -98,9 +98,8 @@ struct thread {
 	/* Owned by synch.c. */
 	int init_priority;					        /* initial priority for priority recovery */
 	struct lock *wait_on_lock; 			    /* A lock which the thread is waiting on */
-	struct list holding_locks;			    /* Locks which the thread holds. */
-  //struct list donating_threads;			  /* List of threads donating priority */
-  //struct list_elem *donating_elems;	  /* List element of donating threads */
+  struct list donating_threads;			  /* List of threads donating priority */
+  struct list_elem donating_elem;	  /* List element of donating threads */
 	
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
@@ -168,4 +167,8 @@ void do_iret (struct intr_frame *tf);
 bool compare_thread_priority(struct list_elem* a,
 	struct list_elem* b, void* aux UNUSED);
 void schedule_preemptively(void);
+
+/* functions for priority donation */
+bool compare_thread_donating_priority(struct list_elem* a,
+	struct list_elem* b, void* aux UNUSED);
 #endif /* threads/thread.h */

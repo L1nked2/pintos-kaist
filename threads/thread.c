@@ -405,7 +405,7 @@ init_thread (struct thread *t, const char *name, int priority) {
   t->wakeup_tick = 0;
 	t->init_priority = priority;
 	t->wait_on_lock = NULL;
-  list_init(&t->holding_locks);
+  list_init(&t->donating_threads);
 	t->magic = THREAD_MAGIC;
 }
 
@@ -594,6 +594,18 @@ bool compare_thread_priority(struct list_elem* a,
 	struct thread *t_a, *t_b;
 	t_a = list_entry(a, struct thread, elem);
 	t_b = list_entry(b, struct thread, elem);
+	ASSERT(is_thread(t_a));
+	ASSERT(is_thread(t_b));
+	return (t_a->priority > t_b->priority);
+}
+
+/* codes for priority scheduling */
+bool compare_thread_donating_priority(struct list_elem* a,
+	struct list_elem* b, void* aux UNUSED)
+{
+	struct thread *t_a, *t_b;
+	t_a = list_entry(a, struct thread, donating_elem);
+	t_b = list_entry(b, struct thread, donating_elem);
 	ASSERT(is_thread(t_a));
 	ASSERT(is_thread(t_b));
 	return (t_a->priority > t_b->priority);
