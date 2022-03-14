@@ -239,7 +239,7 @@ lock_release (struct lock *lock) {
 	ASSERT (lock_held_by_current_thread (lock));
 
 	refresh_priority_on_lock_release(lock);
-
+  
 	lock->holder = NULL;
 	sema_up (&lock->semaphore);
 }
@@ -304,6 +304,11 @@ void refresh_priority_on_lock_release(struct lock* lock)
     e != list_back(current_holding_locks);)
   {
     current_lock = list_entry(e, struct lock, elem);
+    //if semaphore is empty, no action needed
+    if(list_empty(&(current_lock->semaphore).waiters))
+    {
+      continue;
+    }
     compared_thread = list_entry(list_front(&(current_lock->semaphore).waiters), struct thread, elem);
     //iterate through locks and refresh priority
     if (current_thread->priority < compared_thread->priority)
