@@ -291,6 +291,10 @@ void refresh_priority_on_lock_release(struct lock* lock)
 	
   //restore priority to init_priority
   current_thread->priority = current_thread->init_priority;
+  if(list_empty(current_holding_locks))
+  {
+    return;
+  }
 
   //remove lock that current_thread is releasing
   //and refresh priority from locks that current_thread is holding
