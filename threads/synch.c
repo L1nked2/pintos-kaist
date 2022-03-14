@@ -302,8 +302,8 @@ void refresh_priority_on_lock_release()
 
   //refresh priority from locks that current_thread is holding
   //iterate through locks and refresh priority
-  for (struct list_elem *e = list_front(current_holding_locks);
-    e != list_back(current_holding_locks);
+  for (struct list_elem *e = list_begin(current_holding_locks);
+    e != list_end(current_holding_locks);
     e = list_next(e))
   {
     iter_lock = list_entry(e, struct lock, elem);
