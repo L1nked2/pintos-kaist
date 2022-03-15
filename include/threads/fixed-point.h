@@ -24,4 +24,4 @@ int mul_fp_by_n(int x, int n) {return x*n;}
 
 int div_fp(int x, int y) {return ((int64_t)x)*F/y;}
 
-int div_dp_by_n(int x, int n) {return x/n;}
+int div_fp_by_n(int x, int n) {return x/n;}

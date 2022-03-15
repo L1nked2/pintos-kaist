@@ -2,6 +2,7 @@
   "files.associations": {
     "tests.h": "c",
     "synch.h": "c",
-    "list.h": "c"
+    "list.h": "c",
+    "interrupt.h": "c"
   }
 }

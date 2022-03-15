@@ -10,7 +10,9 @@
 #include "threads/palloc.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "threads/fixed-point.h"
 #include "intrinsic.h"
+
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -45,6 +47,7 @@ static unsigned thread_ticks;   /* # of timer ticks since last yield. */
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 bool thread_mlfqs;
+extern int load_avg;
 
 static void kernel_thread (thread_func *, void *aux);
 
@@ -114,6 +117,8 @@ thread_start (void) {
 	struct semaphore idle_started;
 	sema_init (&idle_started, 0);
 	thread_create ("idle", PRI_MIN, idle, &idle_started);
+
+	load_avg = LOAD_AVG_DEFAULT;
 
 	/* Start preemptive thread scheduling. */
 	intr_enable ();
@@ -402,10 +407,12 @@ init_thread (struct thread *t, const char *name, int priority) {
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 	t->priority = priority;
-  t->wakeup_tick = 0;
+ 	t->wakeup_tick = 0;
 	t->init_priority = priority;
 	t->wait_on_lock = NULL;
-  list_init(&t->holding_locks);
+  	list_init(&t->holding_locks);
+	t->nice = NICE_DEFAULT;
+	t->recent_cpu = RECENT_CPU_DEFAULT;
 	t->magic = THREAD_MAGIC;
 }
 
@@ -589,8 +596,7 @@ allocate_tid (void) {
 
 /* codes for priority scheduling */
 bool compare_thread_priority(struct list_elem* a,
-	struct list_elem* b, void* aux UNUSED)
-{
+	struct list_elem* b, void* aux UNUSED) {
 	struct thread *t_a, *t_b;
 	t_a = list_entry(a, struct thread, elem);
 	t_b = list_entry(b, struct thread, elem);
@@ -600,10 +606,27 @@ bool compare_thread_priority(struct list_elem* a,
 }
 
 /* if the priority of thread is changed, yield thread by comparing both priorities. */
-void schedule_preemptively(void)
-{
+void schedule_preemptively(void) {
 	if (!list_empty(&ready_list) &&
 	compare_thread_priority(list_front(&ready_list), &thread_current()->elem, NULL))
 		thread_yield();
 	return;
+}
+
+/* Helper function for mlfqs */
+void mlfqs_priority(struct thread *thread) {
+	if (thread == idle_thread)
+		thread->priority = PRI_DEFAULT;
+	else
+		// priority = PRI_MAX - (thread->recent_cpu / TIME_SLICE) - (thread->nice * 2);
+		thread->priority = fp_to_n(add_n_to_fp(-add_n_to_fp(div_fp_by_n(thread->recent_cpu, TIME_SLICE), thread->nice*2), PRI_MAX));
+}
+
+void mlfqs_recent_cpu(struct thread *thread) {
+	if (thread == idle_thread)
+		thread->recent_cpu = RECENT_CPU_DEFAULT;
+	else
+		// recent_cpu = (2*load_avg)/(2*load_avg + 1)*recent_cpu + nice
+		// NOT IMPLEMENTED YET
+		return;
 }
