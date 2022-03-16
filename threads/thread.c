@@ -715,10 +715,6 @@ void mlfqs_update_priority_all(void) {
 	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
 		mlfqs_update_priority(list_entry(e, struct thread, elem));
 	}
-  // update threads in sleep_list
-	for (struct list_elem* e = list_begin(&sleep_list); e != list_end(&sleep_list); e = list_next(e)) {
-		mlfqs_update_priority(list_entry(e, struct thread, elem));
-	}
 }
 
 void mlfqs_update_recent_cpu_all(void) {
@@ -726,10 +722,6 @@ void mlfqs_update_recent_cpu_all(void) {
 	mlfqs_update_recent_cpu(thread_current());
 	// update threads in ready_list
 	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
-		mlfqs_update_recent_cpu(list_entry(e, struct thread, elem));
-	}
-  // update threads in sleep_list
-	for (struct list_elem* e = list_begin(&sleep_list); e != list_end(&sleep_list); e = list_next(e)) {
 		mlfqs_update_recent_cpu(list_entry(e, struct thread, elem));
 	}
 }
