@@ -106,6 +106,8 @@ thread_init (void) {
 	init_thread (initial_thread, "main", PRI_DEFAULT);
 	initial_thread->status = THREAD_RUNNING;
 	initial_thread->tid = allocate_tid ();
+  initial_thread->nice = NICE_DEFAULT;
+  initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
 
 	// initialize load_avg for mlfqs
 	load_avg = LOAD_AVG_DEFAULT;
@@ -419,9 +421,9 @@ init_thread (struct thread *t, const char *name, int priority) {
  	t->wakeup_tick = 0;
 	t->init_priority = priority;
 	t->wait_on_lock = NULL;
-  	list_init(&t->holding_locks);
-	t->nice = NICE_DEFAULT;
-	t->recent_cpu = RECENT_CPU_DEFAULT;
+  list_init(&t->holding_locks);
+	t->nice = thread_current() -> nice;
+	t->recent_cpu = thread_current() -> recent_cpu;
 	t->magic = THREAD_MAGIC;
 }
 
