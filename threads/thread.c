@@ -308,8 +308,9 @@ thread_yield (void) {
 /* Sets the current thread's priority to NEW_PRIORITY. */
 void
 thread_set_priority (int new_priority) {
+	if (thread_mlfqs) return;
 	thread_current()->init_priority = new_priority;
-  refresh_priority_on_lock_release();
+  	refresh_priority_on_lock_release();
 	schedule_preemptively();
 }
 
@@ -688,8 +689,8 @@ void mlfqs_update_load_avg(void) {
 }
 
 void mlfqs_update_all(void) {
-	mlfqs_priority(thread_current());
-	mlfqs_recent_cpu(thread_current());
+	mlfqs_update_priority(thread_current());
+	mlfqs_update_recent_cpu(thread_current());
 	for (e = list_begin(ready_list); e != list_end(ready_list); e = list_next(e)) {
 		mlfqs_update_priority(list_entry(e, struct thread, elem));
 		mlfps_update_recent_cpu(list_entry(e, struct thread, elem));
