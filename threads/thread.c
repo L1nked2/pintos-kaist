@@ -712,7 +712,7 @@ void mlfqs_update_priority_all(void) {
 	intr_set_level (old_level);
 }
 
-void mlfqs_update_priority_all(void) {
+void mlfqs_update_recent_cpu_all(void) {
 	// turn off interrupts
 	enum intr_level old_level;
 	old_level = intr_disable ();
