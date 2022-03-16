@@ -310,7 +310,7 @@ void
 thread_set_priority (int new_priority) {
 	if (thread_mlfqs) return;
 	thread_current()->init_priority = new_priority;
-  	refresh_priority_on_lock_release();
+  refresh_priority_on_lock_release();
 	schedule_preemptively();
 }
 
@@ -323,11 +323,10 @@ thread_get_priority (void) {
 /* Sets the current thread's nice value to NICE. */
 void
 thread_set_nice (int nice UNUSED) {
-	intr_disable_wraper(
-		unsafe_thread_set_nice(nice);
-		mlfqs_update_priority(thread_current());
-		schedule_preemptively();
-	);
+	//intr_disable_wraper(unsafe_thread_set_nice(nice));
+  unsafe_thread_set_nice(nice);
+	mlfqs_update_priority(thread_current());
+	schedule_preemptively();
 	return;
 }
 
