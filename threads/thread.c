@@ -623,49 +623,58 @@ void schedule_preemptively(void) {
 /* integer: priority, nice, ready_threads */
 void mlfqs_update_priority(struct thread *thread) {
 	// priority = PRI_MAX - (recent_cpu/TIME_SLICE) - (2*nice)
+  int new_priority;
+  // skip updating priority if idle
 	if (thread == idle_thread)
 		return;
-	else
-		thread->priority =
-		fp_to_n(
-			fp_plus_n(
-				-fp_plus_n(
-					fp_div_n(
-						thread->recent_cpu,
-						TIME_SLICE
-					),
-					2*thread->nice
-				),
-				PRI_MAX
-			)
-		);
+  // calculate new priority
+  new_priority =
+    fp_to_n(
+      fp_plus_n(
+        -fp_plus_n(
+          fp_div_n(
+            thread->recent_cpu,
+            TIME_SLICE
+          ),
+          2*thread->nice
+        ),
+        PRI_MAX
+      )
+    );
+  // scale to PRI_MIN to PRI_MAX
+  if(new_priority < PRI_MIN)
+    new_priority = PRI_MIN;
+  if(new_priority > PRI_MAX)
+    new_priority = PRI_MAX;
+  thread->priority = new_priority;
 }
 
 void mlfqs_update_recent_cpu(struct thread *thread) {
 	// recent_cpu = (2*load_avg)/(2*load_avg + 1)*recent_cpu + nice
+  // skip updating recent_cpu if idle
 	if (thread == idle_thread)
 		return;
-	else
-		thread->recent_cpu =
-		fp_plus_n(
-			fp_mul_fp(
-				fp_div_fp(
-					fp_mul_n(
-						load_avg,
-						2
-					),
-					fp_plus_n(
-						fp_mul_n(
-							load_avg,
-							2
-						),
-						1
-					)
-				),
-				thread->recent_cpu
-			),
-			thread->nice
-		);
+  // calculate new recent_cpu
+  thread->recent_cpu =
+  fp_plus_n(
+    fp_mul_fp(
+      fp_div_fp(
+        fp_mul_n(
+          load_avg,
+          2
+        ),
+        fp_plus_n(
+          fp_mul_n(
+            load_avg,
+            2
+          ),
+          1
+        )
+      ),
+      thread->recent_cpu
+    ),
+    thread->nice
+  );
 }
 
 void mlfqs_update_load_avg(void) {
