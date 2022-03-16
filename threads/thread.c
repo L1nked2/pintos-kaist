@@ -324,6 +324,8 @@ thread_get_priority (void) {
 void
 thread_set_nice (int nice UNUSED) {
 	intr_disable_wraper(unsafe_thread_set_nice(nice));
+	mlfqs_update_priority(thread_current());
+	schedule_preemptively();
 	return;
 }
 

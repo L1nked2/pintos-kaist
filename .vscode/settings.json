@@ -11,6 +11,7 @@
     "stdio.h": "c",
     "init.h": "c",
     "thread.h": "c",
-    "pte.h": "c"
+    "pte.h": "c",
+    "lib.h": "c"
   }
 }
