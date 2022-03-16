@@ -11,6 +11,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "intrinsic.h"
+#include "devices/timer.h"
 
 #ifdef USERPROG
 #include "userprog/process.h"
@@ -653,6 +654,7 @@ void mlfqs_update_priority(struct thread *thread) {
   if(new_priority > PRI_MAX)
     new_priority = PRI_MAX;
   thread->priority = new_priority;
+  schedule_preemptively();
 }
 
 void mlfqs_update_recent_cpu(struct thread *thread) {
@@ -686,8 +688,8 @@ void mlfqs_update_recent_cpu(struct thread *thread) {
 void mlfqs_update_load_avg(void) {
 	// load_avg = (59/60)*load_avg + (1/60)*ready_threads
 	int ready_threads = (thread_current() == idle_thread) ?
-		list_size(&ready_list) :
-		list_size(&ready_list) + 1;
+		list_size(&ready_list) + list_size(&sleep_list) :
+		list_size(&ready_list) + list_size(&sleep_list) + 1;
 	load_avg =
 	fp_plus_fp(
 		fp_mul_fp(
@@ -714,6 +716,10 @@ void mlfqs_update_priority_all(void) {
 	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
 		mlfqs_update_priority(list_entry(e, struct thread, elem));
 	}
+  // update threads in sleep_list
+	for (struct list_elem* e = list_begin(&sleep_list); e != list_end(&sleep_list); e = list_next(e)) {
+		mlfqs_update_priority(list_entry(e, struct thread, elem));
+	}
 }
 
 void mlfqs_update_recent_cpu_all(void) {
@@ -721,6 +727,10 @@ void mlfqs_update_recent_cpu_all(void) {
 	mlfqs_update_recent_cpu(thread_current());
 	// update threads in ready_list
 	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
+		mlfqs_update_recent_cpu(list_entry(e, struct thread, elem));
+	}
+  // update threads in sleep_list
+	for (struct list_elem* e = list_begin(&sleep_list); e != list_end(&sleep_list); e = list_next(e)) {
 		mlfqs_update_recent_cpu(list_entry(e, struct thread, elem));
 	}
 }

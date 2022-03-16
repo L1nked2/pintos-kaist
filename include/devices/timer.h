@@ -22,6 +22,8 @@ void timer_nsleep (int64_t nanoseconds);
 
 void timer_print_stats (void);
 
+/* List of sleeping threads */
+static struct list sleep_list;
 /* functions for thread sleep */
 void thread_sleep_until(int64_t ticks);
 void refresh_sleep_list(void);
