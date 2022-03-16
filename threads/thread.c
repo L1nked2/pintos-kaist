@@ -633,7 +633,7 @@ void mlfqs_update_priority(struct thread *thread) {
 	else
 		thread->priority =
 		fp_to_n(
-			fp_puls_n(
+			fp_plus_n(
 				-fp_plus_n(
 					fp_div_n(
 						thread->recent_cpu,
@@ -702,11 +702,11 @@ void mlfqs_update_all(void) {
 	enum intr_level old_level;
 	old_level = intr_disable ();
 	// update current thread priority
-	mlfqs_recent_cpu(thread_current());
-	mlfqs_priority(thread_current());
+	mlfqs_update_recent_cpu(thread_current());
+	mlfqs_update_priority(thread_current());
 	// update threads in ready_list
 	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
-		mlfps_update_recent_cpu(list_entry(e, struct thread, elem));
+		mlfqs_update_recent_cpu(list_entry(e, struct thread, elem));
 		mlfqs_update_priority(list_entry(e, struct thread, elem));
 	}
 	// recover intr_level
