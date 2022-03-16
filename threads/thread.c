@@ -691,8 +691,8 @@ void mlfqs_update_load_avg(void) {
 
 void mlfqs_update_priority_all(void) {
 	// turn off interrupts
-	enum intr_level old_level;
-	old_level = intr_disable ();
+	// enum intr_level old_level;
+	// old_level = intr_disable ();
 	// update current thread's priority
 	mlfqs_update_priority(thread_current());
 	// update threads in ready_list
@@ -705,8 +705,8 @@ void mlfqs_update_priority_all(void) {
 
 void mlfqs_update_recent_cpu_all(void) {
 	// turn off interrupts
-	enum intr_level old_level;
-	old_level = intr_disable ();
+	// enum intr_level old_level;
+	// old_level = intr_disable ();
 	// update current thread's recent_cpu
 	mlfqs_update_recent_cpu(thread_current());
 	// update threads in ready_list
