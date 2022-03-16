@@ -139,7 +139,6 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 	// mlfqs implementation
 	if (thread_mlfqs)
 	{
-		mlfqs_increment_recent_cpu();
 		if(ticks % TIMER_FREQ == 0)
 		{
 			mlfqs_update_load_avg();
@@ -149,6 +148,7 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 		{
 			mlfqs_update_priority_all();
 		}
+		mlfqs_increment_recent_cpu();
 	}
 }
 
