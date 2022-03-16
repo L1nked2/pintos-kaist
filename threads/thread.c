@@ -339,21 +339,21 @@ thread_set_nice (int nice UNUSED) {
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void) {
-	ASSERT (intr_get_level () == INTR_OFF);
+	//ASSERT (intr_get_level () == INTR_OFF);
 	return thread_current ()->nice;
 }
 
 /* Returns 100 times the system load average. */
 int
 thread_get_load_avg (void) {
-	ASSERT (intr_get_level () == INTR_OFF);
+	//ASSERT (intr_get_level () == INTR_OFF);
 	return load_avg*100;
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void) {
-	ASSERT (intr_get_level () == INTR_OFF);
+	//ASSERT (intr_get_level () == INTR_OFF);
 	return thread_current ()->recent_cpu*100;
 }
 
