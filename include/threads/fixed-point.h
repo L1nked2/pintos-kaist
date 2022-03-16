@@ -1,5 +1,6 @@
 #include <stdint.h>
-
+#ifndef THREADS_FIXED_POINT_H
+#define THREADS_FIXED_POINT_H
 #define F (1<<14)
 #define INT_MAX ((1<<31) - 1)
 #define INT_MIN (-(1<<31))
@@ -15,3 +16,5 @@ int fp_mul_fp(int x, int y) {return ((int64_t)x)*y/F;}
 int fp_mul_n(int x, int n) {return x*n;}
 int fp_div_fp(int x, int y) {return ((int64_t)x)*F/y;}
 int fp_div_n(int x, int n) {return x/n;}
+
+#endif /* threads/fixed-point.h */
