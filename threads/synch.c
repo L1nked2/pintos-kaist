@@ -198,7 +198,7 @@ lock_acquire (struct lock *lock) {
 
     //current_thread->init_priority = current_thread->priority;
   
-  	if((lock->holder != NULL) && (!thread_mlfqs)) {
+  	if((lock->holder != NULL)) {
     	current_thread->wait_on_lock = lock;
 	  	donate_priority(lock, 0);
   	}
@@ -241,8 +241,7 @@ lock_release (struct lock *lock) {
   	//remove lock that current_thread is releasing
   	list_remove(&lock->elem);
   	lock->holder = NULL;
-	if (thread_mlfqs)
-		refresh_priority_on_lock_release();
+	refresh_priority_on_lock_release();
 
 	sema_up (&lock->semaphore);
 }
@@ -267,6 +266,11 @@ void donate_priority(struct lock *lock, int depth)
     acquiring thread's priority is higher than lock_holder.
     also if priority is donated, do recursively if 
     donated thread's wait_on_lock is not NULL */
+
+	// turn off priority donation on mlfqs
+	if(thread_mlfqs) {
+		return;
+	}
 	if(lock == NULL || depth > PRIORITY_DONATION_MAX_DEPTH) {
 		return;
 	}
@@ -291,7 +295,10 @@ void refresh_priority_on_lock_release()
   	struct list *current_holding_locks = &current_thread->holding_locks;
   	struct lock *iter_lock;
   	struct thread *iter_thread;
-	
+	// turn off priority donation on mlfqs
+	if(thread_mlfqs) {
+		return;
+	}
   	//restore priority to init_priority
   	current_thread->priority = current_thread->init_priority;
   	//if holding_locks is empty, no action needed
