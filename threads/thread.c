@@ -323,9 +323,11 @@ thread_get_priority (void) {
 /* Sets the current thread's nice value to NICE. */
 void
 thread_set_nice (int nice UNUSED) {
-	intr_disable_wraper(unsafe_thread_set_nice(nice));
-	mlfqs_update_priority(thread_current());
-	schedule_preemptively();
+	intr_disable_wraper(
+		unsafe_thread_set_nice(nice);
+		mlfqs_update_priority(thread_current());
+		schedule_preemptively();
+	);
 	return;
 }
 
@@ -692,31 +694,21 @@ void mlfqs_update_load_avg(void) {
 }
 
 void mlfqs_update_priority_all(void) {
-	// turn off interrupts
-	// enum intr_level old_level;
-	// old_level = intr_disable ();
 	// update current thread's priority
 	mlfqs_update_priority(thread_current());
 	// update threads in ready_list
 	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
 		mlfqs_update_priority(list_entry(e, struct thread, elem));
 	}
-	// recover intr_level
-	// intr_set_level (old_level);
 }
 
 void mlfqs_update_recent_cpu_all(void) {
-	// turn off interrupts
-	// enum intr_level old_level;
-	// old_level = intr_disable ();
 	// update current thread's recent_cpu
 	mlfqs_update_recent_cpu(thread_current());
 	// update threads in ready_list
 	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
 		mlfqs_update_recent_cpu(list_entry(e, struct thread, elem));
 	}
-	// recover intr_level
-	// intr_set_level (old_level);
 }
 
 void mlfqs_increment_recent_cpu(void) {
