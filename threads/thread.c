@@ -630,15 +630,15 @@ void mlfqs_update_priority(struct thread *thread) {
   // calculate new priority
   new_priority =
     fp_to_n(
-      fp_plus_n(
-        -fp_plus_n(
+      fp_minus_fp(
+        n_to_fp(PRI_MAX),
+        fp_plus_n(
           fp_div_n(
             thread->recent_cpu,
             TIME_SLICE
           ),
           2*thread->nice
-        ),
-        PRI_MAX
+        )
       )
     );
   // scale to PRI_MIN to PRI_MAX
