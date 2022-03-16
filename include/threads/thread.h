@@ -183,7 +183,8 @@ void schedule_preemptively(void);
 void mlfqs_update_priority(struct thread *thread);
 void mlfqs_update_recent_cpu(struct thread *thread);
 void mlfqs_update_load_avg(void);
-void mlfqs_update_all(void);
+void mlfqs_update_priority_all(void);
+void mlfqs_update_recent_cpu_all(void);
 void mlfqs_increment_recent_cpu(void);
 
 #endif /* threads/thread.h */

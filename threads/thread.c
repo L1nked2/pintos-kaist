@@ -144,11 +144,6 @@ thread_tick (void) {
 	else
 		kernel_ticks++;
 
-	if (thread_mlfqs && thread_ticks % TIME_SLICE == 0)
-	{
-		mlfqs_update_all();
-	}
-
 	/* Enforce preemption. */
 	if (++thread_ticks >= TIME_SLICE)
 		intr_yield_on_return ();
@@ -703,17 +698,29 @@ void mlfqs_update_load_avg(void) {
 	);
 }
 
-void mlfqs_update_all(void) {
+void mlfqs_update_priority_all(void) {
 	// turn off interrupts
 	enum intr_level old_level;
 	old_level = intr_disable ();
-	// update current thread priority
-	mlfqs_update_recent_cpu(thread_current());
+	// update current thread's priority
 	mlfqs_update_priority(thread_current());
 	// update threads in ready_list
 	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
-		mlfqs_update_recent_cpu(list_entry(e, struct thread, elem));
 		mlfqs_update_priority(list_entry(e, struct thread, elem));
+	}
+	// recover intr_level
+	intr_set_level (old_level);
+}
+
+void mlfqs_update_priority_all(void) {
+	// turn off interrupts
+	enum intr_level old_level;
+	old_level = intr_disable ();
+	// update current thread's recent_cpu
+	mlfqs_update_recent_cpu(thread_current());
+	// update threads in ready_list
+	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
+		mlfqs_update_recent_cpu(list_entry(e, struct thread, elem));
 	}
 	// recover intr_level
 	intr_set_level (old_level);

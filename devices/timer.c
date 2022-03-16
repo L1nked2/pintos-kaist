@@ -136,6 +136,20 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 	// check sleep_list and 
 	// move threads which need to be waked up to ready_list
 	refresh_sleep_list();
+	// mlfqs implementation
+	if (thread_mlfqs)
+	{
+		mlfqs_increment_recent_cpu();
+		if(ticks % 4 == 0)
+		{
+			mlfqs_update_priority_all();
+			if(ticks % TIMER_FREQ == 0)
+			{
+				mlfqs_update_recent_cpu_all();
+				mlfqs_update_load_avg();
+			}
+		}
+	}
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
