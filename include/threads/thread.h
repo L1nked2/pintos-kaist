@@ -178,4 +178,12 @@ void do_iret (struct intr_frame *tf);
 bool compare_thread_priority(struct list_elem* a,
 	struct list_elem* b, void* aux UNUSED);
 void schedule_preemptively(void);
+
+/* functions for mlfqs */
+void mlfqs_update_priority(struct thread *thread);
+void mlfqs_update_recent_cpu(struct thread *thread);
+void mlfqs_update_load_avg(void);
+void mlfqs_update_all(void);
+void mlfqs_increment_recent_cpu(void);
+
 #endif /* threads/thread.h */

@@ -613,7 +613,7 @@ void schedule_preemptively(void) {
 /* Helper function for mlfqs */
 /* real number: recent_cpu, load_avg */
 /* integer: priority, nice, ready_threads */
-void mlfqs_priority(struct thread *thread) {
+void mlfqs_update_priority(struct thread *thread) {
 	// priority = PRI_MAX - (recent_cpu/TIME_SLICE) - (2*nice)
 	if (thread == idle_thread)
 		return;
@@ -633,7 +633,7 @@ void mlfqs_priority(struct thread *thread) {
 		);
 }
 
-void mlfqs_recent_cpu(struct thread *thread) {
+void mlfqs_update_recent_cpu(struct thread *thread) {
 	// recent_cpu = (2*load_avg)/(2*load_avg + 1)*recent_cpu + nice
 	if (thread == idle_thread)
 		return;
@@ -660,7 +660,7 @@ void mlfqs_recent_cpu(struct thread *thread) {
 		);
 }
 
-void mlfqs_load_avg(void) {
+void mlfqs_update_load_avg(void) {
 	// load_avg = (59/60)*load_avg + (1/60)*ready_threads
 	int ready_threads = (thread_current() == idle_thread) ?
 		list_size(&ready_list) :
@@ -682,4 +682,18 @@ void mlfqs_load_avg(void) {
 			ready_threads
 		)
 	);
+}
+
+void mlfqs_update_all(void) {
+	mlfqs_priority(thread_current());
+	mlfqs_recent_cpu(thread_current());
+	for (e = list_begin(ready_list); e != list_end(ready_list); e = list_next(e)) {
+		mlfqs_update_priority(list_entry(e, struct thread, elem));
+		mlfps_update_recent_cpu(list_entry(e, struct thread, elem));
+	}
+}
+
+void mlfqs_increment_recent_cpu(void) {
+	if (thread_current() == idle_thread) return;
+	else thread_current()->recent_cpu = fp_plus_n(thread_current()->recent_cpu, 1);
 }
