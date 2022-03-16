@@ -6,6 +6,11 @@
     "list.h": "c",
     "interrupt.h": "c",
     "debug.h": "c",
-    "stdint.h": "c"
+    "stdint.h": "c",
+    "timer.h": "c",
+    "stdio.h": "c",
+    "init.h": "c",
+    "thread.h": "c",
+    "pte.h": "c"
   }
 }

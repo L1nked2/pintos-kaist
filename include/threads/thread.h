@@ -179,10 +179,10 @@ int thread_get_load_avg (void);
 	int value = func;\
 	intr_set_level (old_level);
 
-int unsafe_thread_get_load_avg (void){return fp_to_n_rounded(fp_mul_n(load_avg, 100));}
-int unsafe_thread_get_nice (void){return thread_current ()->nice;}
-int unsafe_thread_set_nice (int nice){thread_current()->nice = nice;return nice;}
-int unsafe_thread_get_recent_cpu (void){return fp_to_n_rounded(fp_mul_n(thread_current()->recent_cpu, 100));}
+static inline int unsafe_thread_get_load_avg (void){return fp_to_n_rounded(fp_mul_n(load_avg, 100));}
+static inline int unsafe_thread_get_nice (void){return thread_current ()->nice;}
+static inline int unsafe_thread_set_nice (int nice){thread_current()->nice = nice;return nice;}
+static inline int unsafe_thread_get_recent_cpu (void){return fp_to_n_rounded(fp_mul_n(thread_current()->recent_cpu, 100));}
 
 void do_iret (struct intr_frame *tf);
 
