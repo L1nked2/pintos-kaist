@@ -654,7 +654,6 @@ void mlfqs_update_priority(struct thread *thread) {
   if(new_priority > PRI_MAX)
     new_priority = PRI_MAX;
   thread->priority = new_priority;
-  schedule_preemptively();
 }
 
 void mlfqs_update_recent_cpu(struct thread *thread) {
