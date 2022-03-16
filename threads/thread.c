@@ -339,7 +339,7 @@ thread_set_nice (int nice UNUSED) {
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void) {
-	ASSERT (intr_get_level () == INTR_OFF);
+	//ASSERT (intr_get_level () == INTR_OFF);
 	return thread_current ()->nice;
 }
 
