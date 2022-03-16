@@ -10,7 +10,6 @@
 #include "threads/palloc.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
-#include "threads/fixed-point.h"
 #include "intrinsic.h"
 
 #ifdef USERPROG
@@ -324,37 +323,45 @@ thread_get_priority (void) {
 /* Sets the current thread's nice value to NICE. */
 void
 thread_set_nice (int nice UNUSED) {
-	enum intr_level old_level = intr_disable ();
+	/*enum intr_level old_level = intr_disable ();
 	thread_current()->nice = nice;
 	intr_set_level (old_level);
+	return;*/
+	intr_disable_wraper(unsafe_thread_set_nice(nice));
 	return;
 }
 
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void) {
-	enum intr_level old_level = intr_disable ();
+	/*enum intr_level old_level = intr_disable ();
 	int current_nice = thread_current ()->nice;
 	intr_set_level (old_level);
-	return current_nice;
+	return current_nice*/
+	intr_disable_wraper(unsafe_thread_get_nice());
+	return value;
 }
 
 /* Returns 100 times the system load average. */
 int
 thread_get_load_avg (void) {
-	enum intr_level old_level = intr_disable ();
+	/*enum intr_level old_level = intr_disable ();
 	int load_avg_value = fp_to_n_rounded(fp_mul_n(load_avg, 100));
 	intr_set_level (old_level);
-	return load_avg_value;
+	return load_avg_value;*/
+	intr_disable_wraper(unsafe_thread_get_load_avg());
+	return value;
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void) {
-	enum intr_level old_level = intr_disable ();
+	/*enum intr_level old_level = intr_disable ();
 	int recent_cpu_value = fp_to_n_rounded(fp_mul_n(thread_current()->recent_cpu, 100));
 	intr_set_level (old_level);
-	return recent_cpu_value;
+	return recent_cpu_value;*/
+	intr_disable_wraper(unsafe_thread_get_recent_cpu());
+	return value;
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.

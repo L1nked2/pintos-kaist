@@ -1,8 +1,10 @@
 {
   "files.associations": {
+    "*.ejs": "html",
     "tests.h": "c",
     "synch.h": "c",
     "list.h": "c",
-    "interrupt.h": "c"
+    "interrupt.h": "c",
+    "debug.h": "c"
   }
 }
