@@ -309,7 +309,7 @@ thread_yield (void) {
 void
 thread_set_priority (int new_priority) {
 	thread_current()->init_priority = new_priority;
-  refresh_priority_on_lock_release();
+	refresh_priority_on_lock_release();
 	schedule_preemptively();
 }
 
@@ -322,28 +322,25 @@ thread_get_priority (void) {
 /* Sets the current thread's nice value to NICE. */
 void
 thread_set_nice (int nice UNUSED) {
-	/* TODO: Your implementation goes here */
+	thread_current()->nice = nice;
 }
 
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void) {
-	/* TODO: Your implementation goes here */
-	return 0;
+	return thread_current ()->nice;
 }
 
 /* Returns 100 times the system load average. */
 int
 thread_get_load_avg (void) {
-	/* TODO: Your implementation goes here */
-	return 0;
+	return load_avg*100;
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void) {
-	/* TODO: Your implementation goes here */
-	return 0;
+	return thread_current ()->recent_cpu*100;
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
