@@ -118,6 +118,7 @@ thread_start (void) {
 	sema_init (&idle_started, 0);
 	thread_create ("idle", PRI_MIN, idle, &idle_started);
 
+	// initialize load_avg for mlfqs
 	load_avg = LOAD_AVG_DEFAULT;
 
 	/* Start preemptive thread scheduling. */
@@ -142,6 +143,11 @@ thread_tick (void) {
 #endif
 	else
 		kernel_ticks++;
+
+	if (thread_mlfqs && thread_ticks % TIME_SLICE == 0)
+	{
+		mlfqs_update_all();
+	}
 
 	/* Enforce preemption. */
 	if (++thread_ticks >= TIME_SLICE)
@@ -322,24 +328,31 @@ thread_get_priority (void) {
 /* Sets the current thread's nice value to NICE. */
 void
 thread_set_nice (int nice UNUSED) {
+	enum intr_level old_level;
+	old_level = intr_disable ();
 	thread_current()->nice = nice;
+	intr_set_level (old_level);
+	return;
 }
 
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void) {
+	ASSERT (intr_get_level () == INTR_OFF);
 	return thread_current ()->nice;
 }
 
 /* Returns 100 times the system load average. */
 int
 thread_get_load_avg (void) {
+	ASSERT (intr_get_level () == INTR_OFF);
 	return load_avg*100;
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void) {
+	ASSERT (intr_get_level () == INTR_OFF);
 	return thread_current ()->recent_cpu*100;
 }
 
@@ -685,12 +698,19 @@ void mlfqs_update_load_avg(void) {
 }
 
 void mlfqs_update_all(void) {
-	mlfqs_priority(thread_current());
+	// turn off interrupts
+	enum intr_level old_level;
+	old_level = intr_disable ();
+	// update current thread priority
 	mlfqs_recent_cpu(thread_current());
-	for (e = list_begin(ready_list); e != list_end(ready_list); e = list_next(e)) {
-		mlfqs_update_priority(list_entry(e, struct thread, elem));
+	mlfqs_priority(thread_current());
+	// update threads in ready_list
+	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
 		mlfps_update_recent_cpu(list_entry(e, struct thread, elem));
+		mlfqs_update_priority(list_entry(e, struct thread, elem));
 	}
+	// recover intr_level
+	intr_set_level (old_level);
 }
 
 void mlfqs_increment_recent_cpu(void) {
