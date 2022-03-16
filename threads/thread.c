@@ -714,7 +714,6 @@ void mlfqs_update_priority_all(void) {
 	for (struct list_elem* e = list_begin(&ready_list); e != list_end(&ready_list); e = list_next(e)) {
 		mlfqs_update_priority(list_entry(e, struct thread, elem));
 	}
-  schedule_preemptively();
 }
 
 void mlfqs_update_recent_cpu_all(void) {
