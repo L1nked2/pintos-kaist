@@ -700,7 +700,7 @@ void mlfqs_update_priority_all(void) {
 		mlfqs_update_priority(list_entry(e, struct thread, elem));
 	}
 	// recover intr_level
-	intr_set_level (old_level);
+	// intr_set_level (old_level);
 }
 
 void mlfqs_update_recent_cpu_all(void) {
@@ -714,7 +714,7 @@ void mlfqs_update_recent_cpu_all(void) {
 		mlfqs_update_recent_cpu(list_entry(e, struct thread, elem));
 	}
 	// recover intr_level
-	intr_set_level (old_level);
+	// intr_set_level (old_level);
 }
 
 void mlfqs_increment_recent_cpu(void) {
