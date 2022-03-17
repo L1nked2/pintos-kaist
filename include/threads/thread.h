@@ -33,7 +33,7 @@ typedef int tid_t;
 #define NICE_DEFAULT 0
 #define RECENT_CPU_DEFAULT 0
 #define LOAD_AVG_DEFAULT 0
-int load_avg;
+int load_avg, prev_load_avg;
 
 /* A kernel thread or user process.
  *
@@ -115,6 +115,7 @@ struct thread {
 	/* Used for mlfqs */
 	int nice;
 	int recent_cpu;
+  int prev_recent_cpu;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
@@ -179,10 +180,10 @@ int thread_get_load_avg (void);
 	int value = func;\
 	intr_set_level (old_level);
 
-static inline int unsafe_thread_get_load_avg (void){return fp_to_n_rounded(fp_mul_n(load_avg, 100));}
+static inline int unsafe_thread_get_load_avg (void){return fp_to_n_rounded(fp_mul_n(prev_load_avg, 100));}
 static inline int unsafe_thread_get_nice (void){return thread_current ()->nice;}
 static inline int unsafe_thread_set_nice (int nice){thread_current()->nice = nice;return nice;}
-static inline int unsafe_thread_get_recent_cpu (void){return fp_to_n_rounded(fp_mul_n(thread_current()->recent_cpu, 100));}
+static inline int unsafe_thread_get_recent_cpu (void){return fp_to_n_rounded(fp_mul_n(thread_current()->prev_recent_cpu, 100));}
 
 void do_iret (struct intr_frame *tf);
 
