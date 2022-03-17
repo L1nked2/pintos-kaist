@@ -668,12 +668,12 @@ void mlfqs_update_recent_cpu(struct thread *thread) {
     fp_mul_fp(
       fp_div_fp(
         fp_mul_n(
-          load_avg,
+          prev_load_avg,
           2
         ),
         fp_plus_n(
           fp_mul_n(
-            load_avg,
+            prev_load_avg,
             2
           ),
           1
@@ -687,6 +687,7 @@ void mlfqs_update_recent_cpu(struct thread *thread) {
 
 void mlfqs_update_load_avg(void) {
 	// load_avg = (59/60)*load_avg + (1/60)*ready_threads
+  prev_load_avg = load_avg;
 	int ready_threads = (thread_current() == idle_thread) ?
 		list_size(&ready_list) :
 		list_size(&ready_list) + 1;
