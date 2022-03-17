@@ -202,6 +202,9 @@ thread_create (const char *name, int priority,
 
 	/* Add to run queue. */
 	thread_unblock (t);
+  if(thread_mlfqs) {
+    mlfqs_update_priority(t);
+  }
 	schedule_preemptively();
 
 	return tid;
@@ -422,8 +425,8 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->init_priority = priority;
 	t->wait_on_lock = NULL;
   list_init(&t->holding_locks);
-	t->nice = NICE_DEFAULT;
-	t->recent_cpu = RECENT_CPU_DEFAULT;
+	t->nice = running_thread () -> nice;
+	t->recent_cpu = running_thread () -> recent_cpu;
 	t->magic = THREAD_MAGIC;
 }
 
