@@ -45,6 +45,7 @@ timer_init (void) {
 	intr_register_ext (0x20, timer_interrupt, "8254 Timer");
 
 	list_init (&sleep_list);//if doesn't works, turn off interrupts
+  is_first_update = true;
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -139,7 +140,10 @@ timer_interrupt (struct intr_frame *args UNUSED) {
     mlfqs_increment_recent_cpu();
 		if(ticks % TIMER_FREQ == 0)
 		{
-      mlfqs_update_load_avg();
+      if(!is_first_update)
+      {
+        mlfqs_update_load_avg();
+      }
       mlfqs_update_recent_cpu_all();
 		}
     if(ticks % 4 == 0)

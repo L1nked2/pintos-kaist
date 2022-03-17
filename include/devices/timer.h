@@ -27,4 +27,6 @@ static struct list sleep_list;
 /* functions for thread sleep */
 void thread_sleep_until(int64_t ticks);
 void refresh_sleep_list(void);
+/* skip first load_avg update */
+bool is_first_update;
 #endif /* devices/timer.h */
