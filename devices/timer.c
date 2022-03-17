@@ -128,12 +128,6 @@ timer_print_stats (void) {
 /* Timer interrupt handler. */
 static void
 timer_interrupt (struct intr_frame *args UNUSED) {
-	ticks++;
-	thread_tick ();
-	// check sleep_list and 
-	// move threads which need to be waked up to ready_list
-	refresh_sleep_list();
-	// mlfqs implementation
 	if (thread_mlfqs)
 	{
     mlfqs_increment_recent_cpu();
@@ -147,6 +141,25 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 			mlfqs_update_priority_all();
 		}
 	}
+	ticks++;
+	thread_tick ();
+	// check sleep_list and 
+	// move threads which need to be waked up to ready_list
+	refresh_sleep_list();
+	// mlfqs implementation
+	// if (thread_mlfqs)
+	// {
+    // mlfqs_increment_recent_cpu();
+	// 	if(ticks % TIMER_FREQ == 0)
+	// 	{
+    //   mlfqs_update_load_avg();
+    //   mlfqs_update_recent_cpu_all();
+	// 	}
+    // if(ticks % 4 == 0)
+	// 	{
+	// 		mlfqs_update_priority_all();
+	// 	}
+	// }
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer
