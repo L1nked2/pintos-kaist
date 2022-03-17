@@ -751,7 +751,7 @@ void mlfqs_update_recent_cpu_all(void) {
 
 void mlfqs_increment_recent_cpu(void) {
 	if (thread_current() == idle_thread) return;
-	else {}
+	else {
     thread_current()->recent_cpu = fp_plus_n(thread_current()->recent_cpu, 1);
     thread_current()->prev_recent_cpu = fp_plus_n(thread_current()->prev_recent_cpu, 1);
   }
