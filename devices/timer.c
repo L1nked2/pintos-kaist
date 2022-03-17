@@ -145,6 +145,7 @@ timer_interrupt (struct intr_frame *args UNUSED) {
         mlfqs_update_load_avg();
       }
       mlfqs_update_recent_cpu_all();
+      is_first_update = false;
 		}
     if(ticks % 4 == 0)
 		{
