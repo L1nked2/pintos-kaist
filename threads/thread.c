@@ -107,6 +107,7 @@ thread_init (void) {
 	initial_thread->tid = allocate_tid ();
   initial_thread->nice = NICE_DEFAULT;
   initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
+  initial_thread->prev_recent_cpu = RECENT_CPU_DEFAULT;
 
 	// initialize load_avg for mlfqs
 	load_avg = LOAD_AVG_DEFAULT;
@@ -663,7 +664,7 @@ void mlfqs_update_recent_cpu(struct thread *thread) {
 	if (thread == idle_thread)
 		return;
   // calculate new recent_cpu
-  thread->recent_cpu =
+  thread->prev_recent_cpu =
   fp_plus_n(
     fp_mul_fp(
       fp_div_fp(
@@ -674,6 +675,26 @@ void mlfqs_update_recent_cpu(struct thread *thread) {
         fp_plus_n(
           fp_mul_n(
             prev_load_avg,
+            2
+          ),
+          1
+        )
+      ),
+      thread->prev_recent_cpu
+    ),
+    thread->nice
+  );
+  thread->recent_cpu =
+  fp_plus_n(
+    fp_mul_fp(
+      fp_div_fp(
+        fp_mul_n(
+          load_avg,
+          2
+        ),
+        fp_plus_n(
+          fp_mul_n(
+            load_avg,
             2
           ),
           1
