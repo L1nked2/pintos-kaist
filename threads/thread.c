@@ -663,7 +663,7 @@ void mlfqs_update_recent_cpu(struct thread *thread) {
 	if (thread == idle_thread)
 		return;
   // calculate new recent_cpu
-  thread->prev_recent_cpu = thread->recent_cpu;
+  thread->prev_recent_cpu = thread->recent_cpu - 100;
   thread->recent_cpu =
   fp_plus_n(
     fp_mul_fp(
