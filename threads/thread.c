@@ -423,11 +423,9 @@ init_thread (struct thread *t, const char *name, int priority) {
  	t->wakeup_tick = 0;
 	t->init_priority = priority;
 	t->wait_on_lock = NULL;
-    list_init(&t->holding_locks);
-	//t->nice = running_thread () -> nice;
-	//t->recent_cpu = running_thread () -> recent_cpu;
-	t->nice = NICE_DEFAULT;
-	t->recent_cpu = RECENT_CPU_DEFAULT;
+  list_init(&t->holding_locks);
+	t->nice = running_thread () -> nice;
+	t->recent_cpu = running_thread () -> recent_cpu;
 	t->magic = THREAD_MAGIC;
 }
 
@@ -665,7 +663,6 @@ void mlfqs_update_recent_cpu(struct thread *thread) {
 	if (thread == idle_thread)
 		return;
   // calculate new recent_cpu
-  thread->prev_recent_cpu = thread->recent_cpu - 100;
   thread->recent_cpu =
   fp_plus_n(
     fp_mul_fp(
@@ -690,7 +687,6 @@ void mlfqs_update_recent_cpu(struct thread *thread) {
 
 void mlfqs_update_load_avg(void) {
 	// load_avg = (59/60)*load_avg + (1/60)*ready_threads
-  prev_load_avg = load_avg;
 	int ready_threads = (thread_current() == idle_thread) ?
 		list_size(&ready_list) :
 		list_size(&ready_list) + 1;
