@@ -33,7 +33,7 @@ typedef int tid_t;
 #define NICE_DEFAULT 0
 #define RECENT_CPU_DEFAULT 0
 #define LOAD_AVG_DEFAULT 0
-int load_avg;
+int load_avg, prev_load_avg;
 
 /* A kernel thread or user process.
  *
