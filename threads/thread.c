@@ -423,9 +423,11 @@ init_thread (struct thread *t, const char *name, int priority) {
  	t->wakeup_tick = 0;
 	t->init_priority = priority;
 	t->wait_on_lock = NULL;
-  list_init(&t->holding_locks);
-	t->nice = running_thread () -> nice;
-	t->recent_cpu = running_thread () -> recent_cpu;
+    list_init(&t->holding_locks);
+	//t->nice = running_thread () -> nice;
+	//t->recent_cpu = running_thread () -> recent_cpu;
+	t->nice = NICE_DEFAULT;
+	t->recent_cpu = RECENT_CPU_DEFAULT;
 	t->magic = THREAD_MAGIC;
 }
 
