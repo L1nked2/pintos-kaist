@@ -690,6 +690,7 @@ void mlfqs_update_load_avg(void) {
 	// load_avg = (59/60)*load_avg + (1/60)*ready_threads
   if(is_load_avg_initialized == false) {
     is_load_avg_initialized = true;
+    load_avg = LOAD_AVG_DEFAULT;
     return;
   }
 	int ready_threads = (thread_current() == idle_thread) ?
