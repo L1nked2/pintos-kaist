@@ -134,7 +134,7 @@ timer_interrupt (struct intr_frame *args UNUSED) {
 	// move threads which need to be waked up to ready_list
 	refresh_sleep_list();
 	// mlfqs implementation
-	if (thread_mlfqs)
+	if (thread_mlfqs && ticks>0)
 	{
 		if(ticks % TIMER_FREQ == 0)
 		{

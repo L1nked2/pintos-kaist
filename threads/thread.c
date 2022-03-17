@@ -328,7 +328,7 @@ thread_get_priority (void) {
 /* Sets the current thread's nice value to NICE. */
 void
 thread_set_nice (int nice UNUSED) {
-	//intr_disable_wraper(unsafe_thread_set_nice(nice));
+	//intr_disable_wrapper(unsafe_thread_set_nice(nice));
   //return;
   unsafe_thread_set_nice(nice);
 	mlfqs_update_priority(thread_current());
@@ -339,7 +339,7 @@ thread_set_nice (int nice UNUSED) {
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void) {
-	intr_disable_wraper(unsafe_thread_get_nice());
+	intr_disable_wrapper(unsafe_thread_get_nice());
 	return value;
   //return unsafe_thread_get_nice();
 }
@@ -347,7 +347,7 @@ thread_get_nice (void) {
 /* Returns 100 times the system load average. */
 int
 thread_get_load_avg (void) {
-	intr_disable_wraper(unsafe_thread_get_load_avg());
+	intr_disable_wrapper(unsafe_thread_get_load_avg());
   return value;
   //return unsafe_thread_get_load_avg();
 }
@@ -355,7 +355,7 @@ thread_get_load_avg (void) {
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void) {
-	intr_disable_wraper(unsafe_thread_get_recent_cpu());
+	intr_disable_wrapper(unsafe_thread_get_recent_cpu());
   return value;
   //return unsafe_thread_get_recent_cpu();
 }

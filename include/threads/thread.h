@@ -174,7 +174,7 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
 // intr wrapping functions and macros
-#define intr_disable_wraper(func) \
+#define intr_disable_wrapper(func) \
 	enum intr_level old_level = intr_disable ();\
 	int value = func;\
 	intr_set_level (old_level);
