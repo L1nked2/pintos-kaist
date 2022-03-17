@@ -18,7 +18,7 @@
 #endif
 
 /* Number of timer ticks since OS booted. */
-static int64_t ticks;
+static int64_t ticks = 0;
 
 /* Number of loops per timer tick.
    Initialized by timer_calibrate(). */
