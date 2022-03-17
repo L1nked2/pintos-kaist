@@ -34,6 +34,7 @@ typedef int tid_t;
 #define RECENT_CPU_DEFAULT 0
 #define LOAD_AVG_DEFAULT 0
 int load_avg;
+bool is_load_avg_initialized;
 
 /* A kernel thread or user process.
  *

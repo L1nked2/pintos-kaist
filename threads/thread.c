@@ -46,7 +46,6 @@ static unsigned thread_ticks;   /* # of timer ticks since last yield. */
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 bool thread_mlfqs;
-extern int load_avg;
 
 static void kernel_thread (thread_func *, void *aux);
 
@@ -111,6 +110,7 @@ thread_init (void) {
 
 	// initialize load_avg for mlfqs
 	load_avg = LOAD_AVG_DEFAULT;
+  is_load_avg_initialized = false;
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -688,6 +688,10 @@ void mlfqs_update_recent_cpu(struct thread *thread) {
 
 void mlfqs_update_load_avg(void) {
 	// load_avg = (59/60)*load_avg + (1/60)*ready_threads
+  if(is_load_avg_initialized == false) {
+    is_load_avg_initialized = true;
+    return;
+  }
 	int ready_threads = (thread_current() == idle_thread) ?
 		list_size(&ready_list) :
 		list_size(&ready_list) + 1;
