@@ -339,25 +339,25 @@ thread_set_nice (int nice UNUSED) {
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void) {
-	//intr_disable_wraper(unsafe_thread_get_nice());
-	//return value;
-  return unsafe_thread_get_nice();
+	intr_disable_wraper(unsafe_thread_get_nice());
+	return value;
+  //return unsafe_thread_get_nice();
 }
 
 /* Returns 100 times the system load average. */
 int
 thread_get_load_avg (void) {
-	//intr_disable_wraper(unsafe_thread_get_load_avg());
-  //return value;
-  return unsafe_thread_get_load_avg();
+	intr_disable_wraper(unsafe_thread_get_load_avg());
+  return value;
+  //return unsafe_thread_get_load_avg();
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void) {
-	//intr_disable_wraper(unsafe_thread_get_recent_cpu());
-  //return value;
-  return unsafe_thread_get_recent_cpu();
+	intr_disable_wraper(unsafe_thread_get_recent_cpu());
+  return value;
+  //return unsafe_thread_get_recent_cpu();
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
