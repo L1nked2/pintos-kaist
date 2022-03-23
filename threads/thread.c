@@ -105,9 +105,9 @@ thread_init (void) {
 	init_thread (initial_thread, "main", PRI_DEFAULT);
 	initial_thread->status = THREAD_RUNNING;
 	initial_thread->tid = allocate_tid ();
-  initial_thread->nice = NICE_DEFAULT;
-  initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
-  initial_thread->prev_recent_cpu = RECENT_CPU_DEFAULT;
+  	initial_thread->nice = NICE_DEFAULT;
+  	initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
+  	initial_thread->prev_recent_cpu = RECENT_CPU_DEFAULT;
 
 	// initialize load_avg for mlfqs
 	load_avg = LOAD_AVG_DEFAULT;
@@ -202,9 +202,9 @@ thread_create (const char *name, int priority,
 
 	/* Add to run queue. */
 	thread_unblock (t);
-  if(thread_mlfqs) {
-    mlfqs_update_priority(t);
-  }
+ 	if(thread_mlfqs) {
+    	mlfqs_update_priority(t);
+  	}
 	schedule_preemptively();
 
 	return tid;

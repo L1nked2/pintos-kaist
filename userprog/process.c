@@ -49,7 +49,7 @@ process_create_initd (const char *file_name) {
 	if (fn_copy == NULL)
 		return TID_ERROR;
 	strlcpy (fn_copy, file_name, PGSIZE);
-
+	
 	/* Create a new thread to execute FILE_NAME. */
 	tid = thread_create (file_name, PRI_DEFAULT, initd, fn_copy);
 	if (tid == TID_ERROR)
@@ -163,6 +163,11 @@ error:
 int
 process_exec (void *f_name) {
 	char *file_name = f_name;
+	
+	// we can use strtok_r() at array rather than char*. 
+	char *fn_copy[];
+	memcpy(fn_copy, file_name, strlen(file_name) + 1);
+
 	bool success;
 
 	/* We cannot use the intr_frame in the thread structure.
@@ -176,8 +181,13 @@ process_exec (void *f_name) {
 	/* We first kill the current context */
 	process_cleanup ();
 
+	char *tok, *next, *fn_real;
+	tok = strtok_r(fn_copy, " ", &next);
+	fn_real = tok;
+
 	/* And then load the binary */
-	success = load (file_name, &_if);
+	//success = load(file_name, &_if);
+	success = load(fn_real, &_if);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
