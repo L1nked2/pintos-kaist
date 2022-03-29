@@ -227,16 +227,16 @@ void insert_args(int argc, char **argv, struct intr_frame *_if)
 	// first, insert raw parsed command line to stack
 	for(int i = argc-1; i >= 0; i--) {
 		// move stack pointer
-		argv_len = strlen(argv[i]) + 1; // with '\0'
-		_if->rsp -= argv_len;
+		argv_len = strlen(argv[i]);
+		_if->rsp -= argv_len + 1;
 		// copy raw command to stack
-		memcpy(_if->rsp, argv[i], argv_len);
+		memcpy(_if->rsp, argv[i], argv_len + 1);
 		// and save stack pointer
 		argv_ptr[i] = _if->rsp;
 	}
 	// second, insert padding for word-align
-	while (_if->rsp%BYTE_SIZE) {
-		_if->rsp--;
+	while (_if->rsp % BYTE_SIZE) {
+		_if->rsp -= 1;
 		memset(_if->rsp, 0, sizeof(uint8_t));
 	}
 	// third, insert pointers of argv
