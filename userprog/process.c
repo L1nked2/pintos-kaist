@@ -222,22 +222,22 @@ int parse_args(char *raw_text, char **argv)
 
 void insert_args(int argc, char **argv, struct intr_frame *_if)
 {
-	int argv_len = 0;
+	int argv_len;
 	char *argv_ptr[64];
 	// first, insert raw parsed command line to stack
 	for(int i = argc-1; i >= 0; i--) {
 		// move stack pointer
-		argv_len = strlen(argv[i]);
-		_if->rsp -= argv_len + 1;
+		argv_len = strlen(argv[i]) + 1; // with '\0'
+		_if->rsp -= argv_len;
 		// copy raw command to stack
-		memcpy(_if->rsp, argv[i], argv_len + 1);
+		memcpy(_if->rsp, argv[i], argv_len);
 		// and save stack pointer
 		argv_ptr[i] = _if->rsp;
 	}
 	// second, insert padding for word-align
-	while(_if->rsp % BYTE_SIZE != 0) {
-		*(char *)(_if->rsp) = 0;
-		_if->rsp -= 1;
+	while (_if->rsp%BYTE_SIZE) {
+		_if->rsp--;
+		memset(_if->rsp, 0, sizeof(uint8_t));
 	}
 	// third, insert pointers of argv
 	// note That argv[argc] inserted as 0 by memset
@@ -249,12 +249,12 @@ void insert_args(int argc, char **argv, struct intr_frame *_if)
 		// copy stack pointer to stack
 		memcpy(_if->rsp, &argv_ptr[i], BYTE_SIZE);
 	}
-	// fourth, set fake return address
+	// fourth, point %rsi to argv and set %rdi to arc
+	(_if->R).rsi = _if->rsp;
+	(_if->R).rdi = argc;
+	// finally, set fake return address
 	_if->rsp -= BYTE_SIZE;
 	memset(_if->rsp, 0, BYTE_SIZE);
-	// finally, set registers
-	(_if->R).rsi = _if->rsp + BYTE_SIZE;
-	(_if->R).rdi = argc;
 	return;
 }
 
