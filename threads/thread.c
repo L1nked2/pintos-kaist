@@ -621,6 +621,9 @@ bool compare_thread_priority(struct list_elem* a,
 
 /* if the priority of thread is changed, yield thread by comparing both priorities. */
 void schedule_preemptively(void) {
+	if(intr_get_level == INTR_OFF) {
+		return;
+	}
 	if (!list_empty(&ready_list) &&
 	compare_thread_priority(list_front(&ready_list), &thread_current()->elem, NULL))
 		thread_yield();
