@@ -164,6 +164,8 @@ int
 process_exec (void *f_name) {
 	char *file_name = f_name;
 	bool success;
+	int argc = 0;
+	char *argv[64];
 
 	/* We cannot use the intr_frame in the thread structure.
 	 * This is because when current thread rescheduled,
@@ -176,8 +178,17 @@ process_exec (void *f_name) {
 	/* We first kill the current context */
 	process_cleanup ();
 
+	/* Parse the given command, and let file name
+	   be the program */
+	argc = parse_args(file_name, argv);
+
 	/* And then load the binary */
 	success = load(file_name, &_if);
+
+	/* Insert arguments to stack */
+	insert_args(argc, argv, &_if);
+	//test codes arguments
+	hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
@@ -189,6 +200,63 @@ process_exec (void *f_name) {
 	NOT_REACHED ();
 }
 
+/* codes for project 2 */
+/* parse raw command to program and arguments. returns argc*/
+int parse_args(char *raw_text, char **argv)
+{
+	char *token, *save_ptr;
+	int argc = 0;
+	// extract program name first
+	token = strtok_r(raw_text, " ", &save_ptr);
+	argv[argc] = token;
+	argc++;
+	// parse rest argument
+	while(token != NULL)
+	{
+		token = strtok_r(NULL, " ", &save_ptr);
+		argv[argc] = token;
+		argc++;
+	}
+	return argc;
+}
+
+void insert_args(int argc, char **argv, struct intr_frame *_if)
+{
+	int argv_len = 0;
+	char *argv_ptr[64];
+	// first, insert raw parsed command line to stack
+	for(int i = argc-1; i >= 0; i--) {
+		// move stack pointer
+		argv_len = strlen(argv[i]);
+		_if->rsp -= argv_len + 1;
+		// copy raw command to stack
+		memcpy(_if->rsp, argv[i], argv_len + 1);
+		// and save stack pointer
+		argv_ptr[i] = _if->rsp;
+	}
+	// second, insert padding for word-align
+	while(_if->rsp % BYTE_SIZE != 0) {
+		*(char *)(_if->rsp) = 0;
+		_if->rsp -= 1;
+	}
+	// third, insert pointers of argv
+	// note That argv[argc] inserted as 0 by memset
+	_if->rsp -= BYTE_SIZE;
+	memset(_if->rsp, 0, BYTE_SIZE);
+	for(int i = argc-1; i >= 0; i--) {
+		// move stack pointer
+		_if->rsp -= BYTE_SIZE;
+		// copy stack pointer to stack
+		memcpy(_if->rsp, &argv_ptr[i], BYTE_SIZE);
+	}
+	// fourth, set fake return address
+	_if->rsp -= BYTE_SIZE;
+	memset(_if->rsp, 0, BYTE_SIZE);
+	// finally, set registers
+	(_if->R).rsi = _if->rsp + BYTE_SIZE;
+	(_if->R).rdi = argc;
+	return;
+}
 
 /* Waits for thread TID to die and returns its exit status.  If
  * it was terminated by the kernel (i.e. killed due to an

@@ -10,4 +10,9 @@ int process_wait (tid_t);
 void process_exit (void);
 void process_activate (struct thread *next);
 
+/* codes for project 2 */
+int parse_args (char *raw_text, char**argv);
+void insert_args(int argc, char **argv, struct intr_frame *_if);
+#define BYTE_SIZE 8
+
 #endif /* userprog/process.h */

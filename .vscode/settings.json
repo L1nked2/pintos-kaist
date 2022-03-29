@@ -12,6 +12,7 @@
     "init.h": "c",
     "thread.h": "c",
     "pte.h": "c",
-    "lib.h": "c"
+    "lib.h": "c",
+    "process.h": "c"
   }
 }
