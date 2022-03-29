@@ -13,6 +13,7 @@
     "thread.h": "c",
     "pte.h": "c",
     "lib.h": "c",
-    "process.h": "c"
+    "process.h": "c",
+    "disk.h": "c"
   }
 }
