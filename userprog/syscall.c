@@ -46,8 +46,10 @@ syscall_handler (struct intr_frame *f UNUSED) {
 	modifying the rax member of struct intr_frame */
 	switch ((f->R).rax) {
 		case SYS_HALT:
+      halt();
 			break;	
 		case SYS_EXIT:
+      
 			break;
 		case SYS_FORK:
 			break;
@@ -75,3 +77,29 @@ syscall_handler (struct intr_frame *f UNUSED) {
 	}
 	thread_exit ();
 }
+void halt()
+{
+  power_off()
+  return;
+}
+void exit(int status)
+{
+  
+  return;
+}
+/*
+
+tid_t fork (const char *thread_name);
+int exec (const char *cmd_line);
+int wait (tid_t tid);
+bool create (const char *file, unsigned initial_size);
+bool remove (const char *file);
+int open (const char *file);
+int filesize (int fd);
+int read (int fd, void *buffer, unsigned size);
+int write (int fd, const void *buffer, unsigned size);
+void seek (int fd, unsigned position);
+unsigned tell (int fd);
+void close (int fd);
+*/
+printf ("%s: exit(%d)\n", ...);
