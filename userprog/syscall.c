@@ -8,6 +8,8 @@
 #include "threads/flags.h"
 #include "intrinsic.h"
 
+#include "filesys/filesys.h" // for file system call.
+
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 
@@ -74,4 +76,77 @@ syscall_handler (struct intr_frame *f UNUSED) {
 		case SYS_CLOSE:
 	}
 	thread_exit ();
+}
+
+/* addr must be in user space. */
+void validate_addr(const uint64_t *addr) {
+	if ((addr == NULL)
+	|| (pml4_get_page(thread_current()->pml4, addr) == NULL)
+	|| !(is_user_vaddr(addr))) {
+		exit(-1);
+	}
+}
+
+void halt(void) {
+	power_off();
+}
+
+void exit(int status) {
+	struct thread *cur_thread = thread_current();
+	cur_thread->exit_status = status;
+	printf("%s: exit(%d)\n", cur_thread->name, status);
+	thread_exit();
+}
+
+uint64_t fork(const char *thread_name) {
+	return;
+}
+
+int exec(const char *cmd_line) {
+	return;
+}
+
+int wait(uint64_t pid) {
+	return;
+}
+
+bool create(const char *file, unsigned initial_size) {
+	validate_addr(file);
+	bool success = filesys_create(file, initial_size);
+	return success;
+}
+
+bool remove(const char *file) {
+	validate_addr(file);
+	bool success = filesys_remove(file);
+	return success;
+}
+
+int open(const char *file) {
+	validate_addr(file);
+	return;
+}
+
+int filesize(int fd) {
+	return;
+}
+
+int read(int fd, void *buffer, unsigned size) {
+	return;
+}
+
+int write(int fd, const void *buffer, unsigned size) {
+	return;
+}
+
+void seek(int fd, unsigned position) {
+	return;
+}
+
+unsigned tell(int fd) {
+	return;
+}
+
+void close(int fd) {
+	return;
 }
