@@ -15,7 +15,7 @@
     "lib.h": "c",
     "process.h": "c",
     "disk.h": "c",
-    "syscall.h": "c"
-  },
-  "C_Cpp.errorSquiggles": "Disabled"
+    "syscall.h": "c",
+    "*.inc": "c"
+  }
 }
