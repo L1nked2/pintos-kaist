@@ -128,8 +128,8 @@ int sys_wait(tid_t pid) {
   return;
 }
 
-bool sys_create(const char *file, unsigned *initial_size) {
-	return filesys_create(file, *initial_size);
+bool sys_create(const char *file, unsigned initial_size) {
+	return filesys_create(file, initial_size);
 }
 
 bool sys_remove(const char *file) {
