@@ -200,6 +200,14 @@ thread_create (const char *name, int priority,
 	t->tf.cs = SEL_KCSEG;
 	t->tf.eflags = FLAG_IF;
 
+  /* set parent thread and add itself to child list of
+   * parent thread. we need to it in thread_create()
+   * because allocate_tid() is needed */
+  t->parent_thread = thread_current();
+  list_push_back(&(thread_current()->child_tids), &(t->child_elem));
+  sema_init(&(t->load_sema), 0);
+  sema_init(&(t->exit_sema), 0);
+
 	/* Add to run queue. */
 	thread_unblock (t);
  	if(thread_mlfqs) {
@@ -428,6 +436,8 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->nice = running_thread () -> nice;
 	t->recent_cpu = running_thread () -> recent_cpu;
 	t->magic = THREAD_MAGIC;
+  // init part of project 2
+  list_init(&t->child_tids);
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should

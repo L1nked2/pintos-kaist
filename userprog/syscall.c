@@ -8,6 +8,7 @@
 #include "threads/flags.h"
 #include "intrinsic.h"
 
+#include "userprog/process.h"
 #include "filesys/filesys.h" // for file system call.
 
 void syscall_entry (void);
@@ -41,25 +42,39 @@ syscall_init (void) {
 
 /* The main system call interface */
 void
-syscall_handler (struct intr_frame *f UNUSED) {
+syscall_handler (struct intr_frame *f) {
 	// TODO: Your implementation goes here.
 	printf ("system call!\n");
 	/* System calls that return a value can do so by
 	modifying the rax member of struct intr_frame */
+
+  // check address depending on syscall argc
 	switch ((f->R).rax) {
 		case SYS_HALT:
-      halt();
+      sys_halt();
 			break;	
 		case SYS_EXIT:
-      
+      validate_addr((f->R).rdi);
+      sys_exit((f->R).rdi);
 			break;
 		case SYS_FORK:
+      validate_addr((f->R).rdi);
+      (f->R).rax = sys_fork((f->R).rdi, f);
 			break;
 		case SYS_EXEC:
+      validate_addr((f->R).rdi);
+      if(sys_exec((f->R).rdi) == -1) {
+        sys_exit(-1);
+      }
 			break;
 		case SYS_WAIT:
+      validate_addr((f->R).rdi);
+      sys_wait((f->R).rdi);
 			break;
 		case SYS_CREATE:
+      validate_addr((f->R).rdi);
+      validate_addr((f->R).rsi);
+      sys_create((f->R).rdi, (f->R).rsi);
 			break;
 		case SYS_REMOVE:
 			break;
@@ -76,6 +91,7 @@ syscall_handler (struct intr_frame *f UNUSED) {
 		case SYS_TELL:
 			break;
 		case SYS_CLOSE:
+      break;
 	}
 	thread_exit ();
 }
@@ -85,70 +101,66 @@ void validate_addr(const uint64_t *addr) {
 	if ((addr == NULL)
 	|| (pml4_get_page(thread_current()->pml4, addr) == NULL)
 	|| !(is_user_vaddr(addr))) {
-		exit(-1);
+		sys_exit(-1);
 	}
 }
 
-void halt(void) {
+void sys_halt(void) {
 	power_off();
 }
 
-void exit(int status) {
+void sys_exit(int status) {
 	struct thread *cur_thread = thread_current();
 	cur_thread->exit_status = status;
-	printf("%s: exit(%d)\n", cur_thread->name, status);
 	thread_exit();
 }
 
-uint64_t fork(const char *thread_name) {
+tid_t sys_fork(const char *thread_name, struct intr_frame *if_) {
+  return process_fork(thread_name, if_);
+}
+
+int sys_exec(const char *cmd_line) {
+	return process_exec(cmd_line);
+}
+
+int sys_wait(tid_t pid) {
+  process_wait(pid);
 	return;
 }
 
-int exec(const char *cmd_line) {
+bool sys_create(const char *file, off_t *initial_size) {
+	return filesys_create(file, *initial_size);
+}
+
+bool sys_remove(const char *file) {
+	return filesys_remove(file);
+}
+
+int sys_open(const char *file) {
+  struct file *open_file = filesys_open(file);
 	return;
 }
 
-int wait(uint64_t pid) {
+int sys_filesize(int fd) {
 	return;
 }
 
-bool create(const char *file, unsigned initial_size) {
-	validate_addr(file);
-	bool success = filesys_create(file, initial_size);
-	return success;
-}
-
-bool remove(const char *file) {
-	validate_addr(file);
-	bool success = filesys_remove(file);
-	return success;
-}
-
-int open(const char *file) {
-	validate_addr(file);
+int sys_read(int fd, void *buffer, unsigned size) {
 	return;
 }
 
-int filesize(int fd) {
+int sys_write(int fd, const void *buffer, unsigned size) {
 	return;
 }
 
-int read(int fd, void *buffer, unsigned size) {
+void sys_seek(int fd, unsigned position) {
 	return;
 }
 
-int write(int fd, const void *buffer, unsigned size) {
+unsigned sys_tell(int fd) {
 	return;
 }
 
-void seek(int fd, unsigned position) {
-	return;
-}
-
-unsigned tell(int fd) {
-	return;
-}
-
-void close(int fd) {
+void sys_close(int fd) {
 	return;
 }

@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "threads/fixed-point.h"
 #include "threads/interrupt.h"
+#include "threads/synch.h"
 #ifdef VM
 #include "vm/vm.h"
 #endif
@@ -106,8 +107,6 @@ struct thread {
 	int init_priority;					        /* initial priority for priority recovery */
 	struct lock *wait_on_lock; 			    /* A lock which the thread is waiting on */
 	struct list holding_locks;			    /* Locks which the thread holds. */
- 	//struct list donating_threads;			  /* List of threads donating priority */
-  	//struct list_elem *donating_elems;	  /* List element of donating threads */
 	
 	/* Shared between thread.c and synch.c. */
 	struct list_elem elem;              /* List element. */
@@ -115,6 +114,17 @@ struct thread {
 	/* Used for mlfqs */
 	int nice;
 	int recent_cpu,prev_recent_cpu;
+
+  /* fields for Project 2 */
+  /* Owned by process.c. */
+  struct thread *parent_thread;                   /* parent thread id. */
+  struct list child_tids;             /* child thread id list. */
+  struct list_elem child_elem;        /* list element of child threads */
+  struct intr_frame user_if;         /* intr_frame of userland */
+
+  struct semaphore load_sema;
+  struct semaphore exit_sema;
+  int exit_status;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
@@ -128,9 +138,6 @@ struct thread {
 	/* Owned by thread.c. */
 	struct intr_frame tf;               /* Information for switching */
 	unsigned magic;                     /* Detects stack overflow. */
-
-	/* for Project 2 */
-	int exit_status;
 };
 
 /* If false (default), use round-robin scheduler.

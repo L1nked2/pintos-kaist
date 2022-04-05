@@ -16,6 +16,12 @@
     "process.h": "c",
     "disk.h": "c",
     "syscall.h": "c",
-    "*.inc": "c"
-  }
+    "*.inc": "c",
+    "syscall-nr.h": "c",
+    "loader.h": "c",
+    "gdt.h": "c",
+    "intrinsic.h": "c",
+    "mmu.h": "c",
+    "filesys.h": "c"
+  },
 }

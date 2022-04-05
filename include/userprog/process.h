@@ -14,5 +14,6 @@ void process_activate (struct thread *next);
 int parse_args (char *raw_text, char**argv);
 void insert_args(int argc, char **argv, struct intr_frame *_if);
 #define BYTE_SIZE 8
+struct thread* get_child_thread (tid_t tid);
 
 #endif /* userprog/process.h */

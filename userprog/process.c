@@ -31,6 +31,7 @@ static void __do_fork (void *);
 static void
 process_init (void) {
 	struct thread *current = thread_current ();
+  sema_up(&current->load_sema);
 }
 
 /* Starts the first userland program, called "initd", loaded from FILE_NAME.
@@ -76,8 +77,18 @@ initd (void *f_name) {
 tid_t
 process_fork (const char *name, struct intr_frame *if_ UNUSED) {
 	/* Clone current thread to new thread.*/
-	return thread_create (name,
-			PRI_DEFAULT, __do_fork, thread_current ());
+  struct thread *child;
+  tid_t child_tid;
+
+  memcpy(&thread_current()->user_if, if_, sizeof(struct intr_frame));
+	child_tid = thread_create (name,PRI_DEFAULT, __do_fork, thread_current ());
+  if (child_tid == TID_ERROR) {
+		return TID_ERROR;
+	}
+  child = get_child_thread(child_tid);
+  sema_down(&child->load_sema);
+
+  return child_tid;
 }
 
 #ifndef VM
@@ -91,22 +102,48 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
 	void *newpage;
 	bool writable;
 
-	/* 1. TODO: If the parent_page is kernel page, then return immediately. */
-
-	/* 2. Resolve VA from the parent's page map level 4. */
+	/* 1. TODO: If the va is kernel address, then return immediately. */ // fixed comments, parent_page -> va
+  if(is_kernel_vaddr(va)) {
+    return true;
+  }
+	/* 2. Resolve parent_page from the parent's page map level 4. */ // fixed comments, va -> parent_page
 	parent_page = pml4_get_page (parent->pml4, va);
+  // parent_page now holds the address of page and it is
+  // traslated address of user virtual address to kernel virtual address.
+  // we need translation because concating parent->pml4 and va gives only physical frame info.
+  // Thus, we need kernel virtual address pointing to target physical frame info.
 
 	/* 3. TODO: Allocate new PAL_USER page for the child and set result to
 	 *    TODO: NEWPAGE. */
+  newpage = palloc_get_page(PAL_USER | PAL_ZERO);
+  // newpage holds kernel virtual addresses
+  // and it is page of user pool.
+  // it is pointing to empty physical frame(zerofilled).
+  if(newpage == NULL) {
+    printf("Error: fork() failed while allocating new page\n");
+    return false;
+  }
 
 	/* 4. TODO: Duplicate parent's page to the new page and
 	 *    TODO: check whether parent's page is writable or not (set WRITABLE
 	 *    TODO: according to the result). */
+  memcpy(newpage, parent_page, PGSIZE);
+  writable = is_writable(pte);
+  // information in parent_page is duplicated, 
+  // from now dereferencing newpage gives result
+  // identical to dereferencing parent page.
 
 	/* 5. Add new page to child's page table at address VA with WRITABLE
 	 *    permission. */
 	if (!pml4_set_page (current->pml4, va, newpage, writable)) {
+    // now we add mapping, current->pml4 to newpage
+    // but we should use same va for correct duplication.
+    // this function gives that feature, from now
+    // concating current->pml4 and va gives physical frame
+    // identical to physical frame refered by newpage. 
 		/* 6. TODO: if fail to insert page, do error handling. */
+    printf("Error: fork() failed while setting new page\n");
+    return false;
 	}
 	return true;
 }
@@ -122,7 +159,7 @@ __do_fork (void *aux) {
 	struct thread *parent = (struct thread *) aux;
 	struct thread *current = thread_current ();
 	/* TODO: somehow pass the parent_if. (i.e. process_fork()'s if_) */
-	struct intr_frame *parent_if;
+	struct intr_frame *parent_if = &parent->user_if;
 	bool succ = true;
 
 	/* 1. Read the cpu context to local stack. */
@@ -258,6 +295,21 @@ void insert_args(int argc, char **argv, struct intr_frame *_if)
 	return;
 }
 
+/* find child_thread from child thread list of current thread by tid.
+ * returns pointer to target if success, otherwise return NULL. */
+struct thread* get_child_thread (tid_t tid) {
+  struct thread *t;
+  struct list_elem *e;
+  struct list* child_list = &(thread_current()->child_tids);
+  for (e=list_begin(child_list); e!=list_end(child_list); e=list_next(e)) {
+    t = list_entry(e, struct thread, child_elem)->tid;
+    if(tid == t) {
+      return t;
+    }
+  }
+  return NULL;
+}
+
 /* Waits for thread TID to die and returns its exit status.  If
  * it was terminated by the kernel (i.e. killed due to an
  * exception), returns -1.  If TID is invalid or if it was not a
@@ -272,6 +324,16 @@ process_wait (tid_t child_tid UNUSED) {
 	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
+  struct thread *child = get_child_thread(child_tid);
+  int exit_status;
+  // return if thread not exists on child list
+  if (child == NULL)
+		return -1;
+  // parent thread waits for child
+  sema_down(&child->exit_sema);
+  // remove child from child list
+  list_remove(&child->child_elem);
+  exit_status = child->exit_status;
 	return -1;
 }
 
@@ -283,8 +345,11 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
-
+  printf("%s: exit(%d)\n", curr->name, curr->exit_status);
+  //wakeup parent thread
+  sema_up(&curr->exit_sema);
 	process_cleanup ();
+  return;
 }
 
 /* Free the current process's resources. */
