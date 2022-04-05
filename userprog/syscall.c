@@ -9,7 +9,8 @@
 #include "intrinsic.h"
 
 #include "userprog/process.h"
-#include "filesys/filesys.h" // for file system call.
+#include "filesys/filesys.h"	// for file system call.
+#include "filesys/file.h"		// for file system call.
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
@@ -115,7 +116,8 @@ bool validate_fd(int fd) {
 	}
 }
 
-struct file *search_file(int fd) {
+/* search the file with file discriptor */
+static struct file *search_file(int fd) {
 	if (validate_fd(fd)) {
 		return (thread_current()->fd)[fd];
 	}
@@ -196,11 +198,11 @@ int sys_write(int fd, const void *buffer, unsigned size) {
 }
 
 void sys_seek(int fd, unsigned position) {
-	return;
+	search_file(fd)->pos = position;
 }
 
 unsigned sys_tell(int fd) {
-	return;
+	return file_tell(seach_file(fd));
 }
 
 void sys_close(int fd) {
