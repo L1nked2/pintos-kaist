@@ -302,8 +302,8 @@ struct thread* get_child_thread (tid_t tid) {
   struct list_elem *e;
   struct list* child_list = &(thread_current()->child_tids);
   for (e=list_begin(child_list); e!=list_end(child_list); e=list_next(e)) {
-    t = list_entry(e, struct thread, child_elem)->tid;
-    if(tid == t) {
+    t = list_entry(e, struct thread, child_elem);
+    if(tid == t->tid) {
       return t;
     }
   }
@@ -331,9 +331,9 @@ process_wait (tid_t child_tid UNUSED) {
 		return -1;
   // parent thread waits for child
   sema_down(&child->exit_sema);
+  exit_status = child->exit_status;
   // remove child from child list
   list_remove(&child->child_elem);
-  exit_status = child->exit_status;
 	return -1;
 }
 
