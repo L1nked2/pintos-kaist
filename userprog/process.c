@@ -245,13 +245,11 @@ int parse_args(char *raw_text, char **argv)
 	int argc = 0;
 	// extract program name first
 	token = strtok_r(raw_text, " ", &save_ptr);
-	argv[argc] = token;
-	argc++;
 	// parse rest argument
 	while(token != NULL)
 	{
+    argv[argc] = token;
 		token = strtok_r(NULL, " ", &save_ptr);
-		argv[argc] = token;
 		argc++;
 	}
 	return argc;
