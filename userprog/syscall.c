@@ -157,6 +157,18 @@ int sys_filesize(int fd) {
 }
 
 int sys_read(int fd, void *buffer, unsigned size) {
+  if(fd == 0) {
+    for(int i=0; i<size; i++)
+    {
+        ((char*)buffer)[i] = (char)input_getc();
+        if(((char*)buffer)[i] == '\0') {
+          break;
+        }
+    }
+  }
+  else {
+  
+  }
 	return;
 }
 
