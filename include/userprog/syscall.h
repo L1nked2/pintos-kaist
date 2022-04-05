@@ -10,7 +10,7 @@ void sys_exit(int status);
 tid_t sys_fork(const char *thread_name, struct intr_frame *if_);
 int sys_exec (const char *cmd_line);
 int sys_wait (tid_t tid);
-bool sys_create (const char *file, unsigned initial_size);
+bool sys_create (const char *file, off_t initial_size);
 bool sys_remove (const char *file);
 int sys_open (const char *file);
 int sys_filesize (int fd);
