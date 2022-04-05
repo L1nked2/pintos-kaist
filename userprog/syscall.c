@@ -105,6 +105,25 @@ void validate_addr(const uint64_t *addr) {
 	}
 }
 
+/* check whether file descriptor is valid or not*/
+bool validate_fd(int fd) {
+	if (fd < 0 || fd >= FD_MAX_INDEX) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+struct file *search_file(int fd) {
+	if (validate_fd(fd)) {
+		return (thread_current()->fd)[fd];
+	}
+	else {
+		return NULL;
+	}
+}
+
 void sys_halt(void) {
 	power_off();
 }
@@ -153,7 +172,7 @@ int sys_open(const char *file) {
 }
 
 int sys_filesize(int fd) {
-	return;
+	return file_length(search_file(fd));
 }
 
 int sys_read(int fd, void *buffer, unsigned size) {
