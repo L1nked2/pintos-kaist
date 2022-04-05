@@ -36,6 +36,10 @@ typedef int tid_t;
 #define LOAD_AVG_DEFAULT 0
 int load_avg, prev_load_avg;
 
+/* Default value for file descriptors */
+#define FD_NR_START_INDEX 3
+#define FD_MAX_INDEX 128
+
 /* A kernel thread or user process.
  *
  * Each thread structure is stored in its own 4 kB page.  The
@@ -117,10 +121,11 @@ struct thread {
 
   /* fields for Project 2 */
   /* Owned by process.c. */
-  struct thread *parent_thread;                   /* parent thread id. */
+  struct thread *parent_thread;       /* parent thread id. */
   struct list child_tids;             /* child thread id list. */
   struct list_elem child_elem;        /* list element of child threads */
   struct intr_frame user_if;         /* intr_frame of userland */
+  struct file* fd[FD_MAX_INDEX];	 /* file descriptor table. */
 
   struct semaphore load_sema;
   struct semaphore exit_sema;

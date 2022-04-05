@@ -138,7 +138,18 @@ bool sys_remove(const char *file) {
 
 int sys_open(const char *file) {
   struct file *open_file = filesys_open(file);
-	return;
+  if(open_file == NULL) {
+    return -1;
+  }
+  else {
+    for (int i=FD_NR_START_INDEX; i<128; i++) {
+      if (thread_current()->fd[i] == NULL) {
+        thread_current()->fd[i] = open_file; 
+        return i;
+      }
+    }
+  }
+	return -1; // fd table is full
 }
 
 int sys_filesize(int fd) {

@@ -438,6 +438,9 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->magic = THREAD_MAGIC;
   // init part of project 2
   list_init(&t->child_tids);
+  for (int i = 0; i < FD_MAX_INDEX; i++) {                                                         
+      t->fd[i] = NULL;                                                                
+  }
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
