@@ -206,5 +206,8 @@ unsigned sys_tell(int fd) {
 }
 
 void sys_close(int fd) {
+	if (validate_fd(fd)) {
+		thread_current()->fd[fd] = NULL;
+	}
 	return;
 }
