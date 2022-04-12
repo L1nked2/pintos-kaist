@@ -217,7 +217,7 @@ void sys_seek(int fd, unsigned position) {
 }
 
 unsigned sys_tell(int fd) {
-	return file_tell(seach_file(fd));
+	return file_tell(search_file(fd));
 }
 
 void sys_close(int fd) {
