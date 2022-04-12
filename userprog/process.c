@@ -81,7 +81,7 @@ process_fork (const char *name, struct intr_frame *if_ UNUSED) {
   tid_t child_tid;
 
   memcpy(&thread_current()->user_if, if_, sizeof(struct intr_frame));
-	child_tid = thread_create (name,PRI_DEFAULT, __do_fork, thread_current ());
+	child_tid = thread_create (name, PRI_DEFAULT, __do_fork, thread_current ());
   if (child_tid == TID_ERROR) {
 		return TID_ERROR;
 	}

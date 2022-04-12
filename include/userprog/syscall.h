@@ -2,6 +2,10 @@
 #define USERPROG_SYSCALL_H
 #include <stdbool.h>
 #include "threads/thread.h"
+
+/* for using rw */
+struct lock file_lock;
+
 void syscall_init (void);
 
 /* codes for project 2 */

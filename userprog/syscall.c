@@ -194,6 +194,21 @@ int sys_read(int fd, void *buffer, unsigned size) {
 }
 
 int sys_write(int fd, const void *buffer, unsigned size) {
+	validate_addr(buffer);
+	lock_acquire(&file_lock);
+	struct file* file = search_file(fd);
+	if (file == NULL) {
+		lock_release(&file_lock);
+		return -1;
+	}
+	if (fd == 1) {
+		putbuf(buffer, size);
+		lock_release(&file_lock);
+		return size;
+	} else {
+		lock_release(&file_lock);
+		return file_write(file, buffer, size);
+	}
 	return;
 }
 
