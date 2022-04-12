@@ -225,7 +225,7 @@ process_exec (void *f_name) {
 	/* Insert arguments to stack */
 	insert_args(argc, argv, &_if);
 	//test codes arguments
-	hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
+	//hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
