@@ -216,8 +216,7 @@ int sys_read(int fd, void *buffer, unsigned size) {
     }
   }
   else if (file == NULL) {
-		lock_release(&file_lock);
-		return -1;
+		result = -1;
 	}
   else {
     result = file_read(search_file(fd), buffer, size);
@@ -236,8 +235,7 @@ int sys_write(int fd, const void *buffer, unsigned size) {
 		result = size;
 	}
 	else if (file == NULL) {
-		lock_release(&file_lock);
-		return -1;
+		result = -1;
 	}
   else {
 		result = file_write(file, buffer, size);

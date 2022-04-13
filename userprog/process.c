@@ -226,6 +226,7 @@ process_exec (void *f_name) {
 	insert_args(argc, argv, &_if);
 	//test codes arguments
 	hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
+  printf("test: rdi: %x, rsi: %x\n",_if.R.rdi, _if.R.rsi);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
@@ -284,7 +285,7 @@ void insert_args(int argc, char **argv, struct intr_frame *_if)
 		// copy stack pointer to stack
 		memcpy(_if->rsp, &argv_ptr[i], sizeof(char*));
 	}
-	// fourth, point %rsi to argv and set %rdi to arc
+	// fourth, point %rsi to argv and set %rdi to argc
 	(_if->R).rsi = _if->rsp;
 	(_if->R).rdi = argc;
 	// finally, set fake return address
