@@ -228,6 +228,9 @@ process_exec (void *f_name) {
 	hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
   printf("test: rdi: %d, rsi: %x\n",_if.R.rdi, _if.R.rsi);
 
+  /* save user_if for further usage, such as exit message */
+  memcpy(&thread_current()->user_if, &_if, sizeof(struct intr_frame));
+
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
 	if (!success)
@@ -344,7 +347,7 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
-  printf("%x: exit(%d)\n", curr->tf.R.rsi, curr->exit_status);
+  printf("%s: exit(%d)\n", *(char*)(curr->user_if.R.rsi), curr->exit_status);
   //wakeup parent thread
   sema_up(&curr->exit_sema);
 	process_cleanup ();
