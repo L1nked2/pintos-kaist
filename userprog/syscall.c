@@ -189,7 +189,7 @@ int sys_open(const char *file) {
     return -1;
   }
   else {
-    for (int i=FD_NR_START_INDEX; i<128; i++) {
+    for (int i=FD_NR_START_INDEX; i<FD_MAX_INDEX; i++) {
       if (thread_current()->fdt[i] == NULL) {
         thread_current()->fdt[i] = open_file;
         // deny write to executable
