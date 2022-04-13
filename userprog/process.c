@@ -338,7 +338,7 @@ process_wait (tid_t child_tid UNUSED) {
   exit_status = child->exit_status;
   // remove child from child list
   list_remove(&child->child_elem);
-	return -1;
+	return exit_status;
 }
 
 /* Exit the process. This function is called by thread_exit (). */
