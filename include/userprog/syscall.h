@@ -26,6 +26,4 @@ int sys_write (int fd, const void *buffer, unsigned size);
 void sys_seek (int fd, unsigned position);
 unsigned sys_tell (int fd);
 void sys_close (int fd);
-
-struct lock filesys_lock;
 #endif /* userprog/syscall.h */

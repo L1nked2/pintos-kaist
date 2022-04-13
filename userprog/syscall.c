@@ -40,8 +40,8 @@ syscall_init (void) {
 	write_msr(MSR_SYSCALL_MASK,
 			FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
 
-  // init filesys_lock
-  lock_init(&filesys_lock);
+  // init file_lock
+  lock_init(&file_lock);
 }
 
 /* The main system call interface */
@@ -156,7 +156,7 @@ int sys_wait(tid_t pid) {
 
 bool sys_create(const char *file, unsigned initial_size) {
   bool result;
-  lock_acquire(&filesys_lock);
+  lock_acquire(&file_lock);
 	result = filesys_create(file, initial_size);
   lock_release(&filesys_lock);
   return result;
@@ -164,7 +164,7 @@ bool sys_create(const char *file, unsigned initial_size) {
 
 bool sys_remove(const char *file) {
   bool result;
-  lock_acquire(&filesys_lock);
+  lock_acquire(&file_lock);
 	result = filesys_remove(file);
   lock_release(&filesys_lock);
   return result;
@@ -192,7 +192,7 @@ int sys_filesize(int fd) {
 
 int sys_read(int fd, void *buffer, unsigned size) {
   int result;
-  lock_acquire(&filesys_lock);
+  lock_acquire(&file_lock);
   if(fd == 0) {
     for(int i=0; i<size; i++)
     {
@@ -206,7 +206,7 @@ int sys_read(int fd, void *buffer, unsigned size) {
   else {
   
   }
-  lock_release(&filesys_lock);
+  lock_release(&file_lock);
 	return result;
 }
 
