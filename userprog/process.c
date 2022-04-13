@@ -192,14 +192,24 @@ __do_fork (void *aux) {
 	 * TODO:       in include/filesys/file.h. Note that parent should not return
 	 * TODO:       from the fork() until this function successfully duplicates
 	 * TODO:       the resources of parent.*/
-
+  // duplicate file objects
+  for(int i=0; i<FD_MAX_INDEX; i++) {
+    struct file *file = parent->fdt[i];
+    struct file *duplicated_file;
+    if (file != NULL) {
+      duplicated_file = file_duplicate(file);
+      current->fdt[i] = duplicated_file;
+    }
+  }
 	process_init ();
 
 	/* Finally, switch to the newly created process. */
 	if (succ)
 		do_iret (&if_);
 error:
-	thread_exit ();
+	current->exit_status = TID_ERROR;
+	sema_up(&current->load_sema);
+	exit(TID_ERROR);
 }
 
 /* Switch the current execution context to the f_name.
