@@ -372,7 +372,7 @@ process_exit (void) {
 static void
 process_cleanup (void) {
 	struct thread *curr = thread_current ();
-
+  // free fdt here?
 #ifdef VM
 	supplemental_page_table_kill (&curr->spt);
 #endif
