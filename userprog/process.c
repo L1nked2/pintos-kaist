@@ -71,7 +71,7 @@ initd (void *f_name) {
   strlcpy(f_name_copy, f_name, strlen(f_name)+1);
   char* name = strtok_r(f_name_copy, " ", &save_ptr);
   strlcpy(&thread_current()->name, name, strlen(name)+1);
-
+  palloc_free_page(f_name_copy);
 	if (process_exec (f_name) < 0)
 		PANIC("Fail to launch initd\n");
 	NOT_REACHED ();
