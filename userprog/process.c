@@ -225,7 +225,7 @@ process_exec (void *f_name) {
 	/* Insert arguments to stack */
 	insert_args(argc, argv, &_if);
 	//test codes arguments
-	//hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
+	hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
@@ -270,26 +270,26 @@ void insert_args(int argc, char **argv, struct intr_frame *_if)
 		argv_ptr[i] = _if->rsp;
 	}
 	// second, insert padding for word-align
-	while (_if->rsp % BYTE_SIZE) {
+	while (_if->rsp % sizeof(char*)) {
 		_if->rsp -= 1;
-		memset(_if->rsp, 0, 1);
+		memset(_if->rsp, 0, sizeof(uint8_t));
 	}
 	// third, insert pointers of argv
 	// note That argv[argc] inserted as 0 by memset
-	_if->rsp -= BYTE_SIZE;
-	memset(_if->rsp, 0, BYTE_SIZE);
+	_if->rsp -= sizeof(char*);
+	memset(_if->rsp, 0, sizeof(char*));
 	for(int i = argc-1; i >= 0; i--) {
 		// move stack pointer
-		_if->rsp -= BYTE_SIZE;
+		_if->rsp -= sizeof(char*);
 		// copy stack pointer to stack
-		memcpy(_if->rsp, &argv_ptr[i], BYTE_SIZE);
+		memcpy(_if->rsp, &argv_ptr[i], sizeof(char*));
 	}
 	// fourth, point %rsi to argv and set %rdi to arc
 	(_if->R).rsi = _if->rsp;
 	(_if->R).rdi = argc;
 	// finally, set fake return address
-	_if->rsp -= BYTE_SIZE;
-	memset(_if->rsp, 0, BYTE_SIZE);
+	_if->rsp -= sizeof(char*);
+	memset(_if->rsp, 0, sizeof(char*));
 	return;
 }
 
