@@ -213,7 +213,7 @@ __do_fork (void *aux) {
 error:
 	current->exit_status = TID_ERROR;
 	sema_up(&current->load_sema);
-  sema_up(&curr->wait_sema);
+  sema_up(&current->wait_sema);
 	sys_exit(TID_ERROR);
 }
 
