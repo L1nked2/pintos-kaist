@@ -386,6 +386,10 @@ process_exit (void) {
     struct thread *t = list_entry(e, struct thread, child_elem);
     sema_up(&t->exit_sema);
   }
+  // free fdt here? lets try
+  for(int i=FD_NR_START_INDEX; i<FD_MAX_INDEX; i++) {
+    sys_close(i);
+  }
 	process_cleanup ();
   return;
 }
@@ -394,14 +398,9 @@ process_exit (void) {
 static void
 process_cleanup (void) {
 	struct thread *curr = thread_current ();
-  
 #ifdef VM
 	supplemental_page_table_kill (&curr->spt);
 #endif
-  // free fdt here? lets try
-  for(int i=FD_NR_START_INDEX; i<FD_MAX_INDEX; i++) {
-    sys_close(i);
-  }
 	uint64_t *pml4;
 	/* Destroy the current process's page directory and switch back
 	 * to the kernel-only page directory. */
