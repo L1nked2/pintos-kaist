@@ -150,12 +150,12 @@ tid_t sys_fork(const char *thread_name, struct intr_frame *if_) {
 int sys_exec(const char *cmd_line) {
   validate_addr(cmd_line);
   // duplicate cmd_line
-	char *cmdline_copy = palloc_get_page(PAL_ZERO);
-	if (cmdline_copy == NULL) {
+	char *cmd_line_copy = palloc_get_page(PAL_ZERO);
+	if (cmd_line_copy == NULL) {
 		sys_exit(-1);
 	}
-	strlcpy(cmdline_copy, cmd_line, strlen(cmd_line)+1);
-	return process_exec(cmd_line);
+	strlcpy(cmd_line_copy, cmd_line, strlen(cmd_line)+1);
+	return process_exec(cmd_line_copy);
 }
 
 int sys_wait(tid_t pid) {
