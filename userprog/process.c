@@ -209,7 +209,7 @@ __do_fork (void *aux) {
 error:
 	current->exit_status = TID_ERROR;
 	sema_up(&current->load_sema);
-	exit(TID_ERROR);
+	sys_exit(TID_ERROR);
 }
 
 /* Switch the current execution context to the f_name.
