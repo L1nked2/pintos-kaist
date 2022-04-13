@@ -161,7 +161,7 @@ __do_fork (void *aux) {
 	/* TODO: somehow pass the parent_if. (i.e. process_fork()'s if_) */
 	struct intr_frame *parent_if = &parent->user_if;
 	bool succ = true;
-
+  printf("__do_fork() started\n");
 	/* 1. Read the cpu context to local stack. */
 	memcpy (&if_, parent_if, sizeof (struct intr_frame));
 
@@ -192,7 +192,6 @@ __do_fork (void *aux) {
 	if (succ)
 		do_iret (&if_);
 error:
-  printf("error while forking\n");
 	thread_exit ();
 }
 
