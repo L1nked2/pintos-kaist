@@ -22,6 +22,7 @@
     "gdt.h": "c",
     "intrinsic.h": "c",
     "mmu.h": "c",
-    "filesys.h": "c"
+    "filesys.h": "c",
+    "file.h": "c"
   },
 }

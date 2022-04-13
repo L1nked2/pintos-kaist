@@ -211,21 +211,21 @@ int sys_read(int fd, void *buffer, unsigned size) {
 }
 
 int sys_write(int fd, const void *buffer, unsigned size) {
-  int result;
-  lock_acquire(&filesys_lock);
-  if(fd == 1) {
-    putbuf(buffer, size);
-		result = size;
+	validate_addr(buffer);
+	lock_acquire(&file_lock);
+	struct file* file = search_file(fd);
+	if (file == NULL) {
+		lock_release(&file_lock);
+		return -1;
 	}
-  else {
-    if( != NULL) {
-			result = file_write(fd, buffer, size);
-		}
-		else {
-			result = -1;
-		}
-  }
-  lock_release(&filesys_lock);
+	if (fd == 1) {
+		putbuf(buffer, size);
+		lock_release(&file_lock);
+		return size;
+	} else {
+		lock_release(&file_lock);
+		return file_write(file, buffer, size);
+	}
 	return;
 }
 
@@ -234,7 +234,7 @@ void sys_seek(int fd, unsigned position) {
 }
 
 unsigned sys_tell(int fd) {
-	return file_tell(seach_file(fd));
+	return file_tell(search_file(fd));
 }
 
 void sys_close(int fd) {
