@@ -272,7 +272,7 @@ void insert_args(int argc, char **argv, struct intr_frame *_if)
 	// second, insert padding for word-align
 	while (_if->rsp % BYTE_SIZE) {
 		_if->rsp -= 1;
-		memset(_if->rsp, 0, sizeof(uint8_t));
+		memset(_if->rsp, 0, 1);
 	}
 	// third, insert pointers of argv
 	// note That argv[argc] inserted as 0 by memset

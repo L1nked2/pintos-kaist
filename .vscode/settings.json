@@ -24,6 +24,7 @@
     "mmu.h": "c",
     "filesys.h": "c",
     "file.h": "c",
-    "corecrt.h": "c"
+    "corecrt.h": "c",
+    "string.h": "c"
   },
 }
