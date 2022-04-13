@@ -353,10 +353,12 @@ process_wait (tid_t child_tid UNUSED) {
   if (child == NULL)
 		return -1;
   // parent thread waits for child
-  sema_down(&child->exit_sema);
+  sema_down(&child->wait_sema);
   exit_status = child->exit_status;
   // remove child from child list
   list_remove(&child->child_elem);
+  // let child to exit
+  sema_up(&child->exit_sema);
 	return exit_status;
 }
 
@@ -368,16 +370,22 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
-  
-  // delete itself from child_tids from parent_thread
-  list_remove(&curr->child_elem);
 
   // print termination message
   if(curr->is_user_thread) {
     printf("%s: exit(%d)\n", curr->name, curr->exit_status);
   }
-  //wakeup parent thread
-  sema_up(&curr->exit_sema);
+  // wakeup parent thread
+  sema_up(&curr->wait_sema);
+  // wait until parent get exit_status info
+  sema_down(&curr->exit_sema);
+  // let all child threads can exit
+  struct list_elem *e;
+  struct list* child_list = &(curr->child_tids);
+  for (e=list_begin(child_list); e!=list_end(child_list); e=list_next(e)) {
+    struct thread *t = list_entry(e, struct thread, child_elem);
+    sema_up(&t->exit_sema);
+  }
 	process_cleanup ();
   return;
 }

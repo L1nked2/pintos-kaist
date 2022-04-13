@@ -129,6 +129,7 @@ struct thread {
   bool is_user_thread;	              /* flag for user thread */
 
   struct semaphore load_sema;
+  struct semaphore wait_sema;
   struct semaphore exit_sema;
   int exit_status;
 
