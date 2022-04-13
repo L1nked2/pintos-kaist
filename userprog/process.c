@@ -72,6 +72,10 @@ initd (void *f_name) {
   char* name = strtok_r(f_name_copy, " ", &save_ptr);
   strlcpy(&thread_current()->name, name, strlen(name)+1);
   palloc_free_page(f_name_copy);
+
+  /* user_thread flag set to true */
+  thread_current()->is_user_thread = true;
+
 	if (process_exec (f_name) < 0)
 		PANIC("Fail to launch initd\n");
 	NOT_REACHED ();
@@ -361,7 +365,10 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
-  printf("%s: exit(%d)\n", curr->name, curr->exit_status);
+  if(curr->is_user_thread) {
+    printf("%s: exit(%d)\n", curr->name, curr->exit_status);
+  }
+
   //wakeup parent thread
   sema_up(&curr->exit_sema);
 	process_cleanup ();
