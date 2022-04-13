@@ -26,6 +26,9 @@
     "file.h": "c",
     "corecrt.h": "c",
     "string.h": "c",
-    "console.h": "c"
+    "console.h": "c",
+    "exception.h": "c",
+    "malloc.h": "c",
+    "inode.h": "c"
   },
 }

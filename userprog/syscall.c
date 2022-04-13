@@ -190,7 +190,11 @@ int sys_open(const char *file) {
   else {
     for (int i=FD_NR_START_INDEX; i<128; i++) {
       if (thread_current()->fdt[i] == NULL) {
-        thread_current()->fdt[i] = open_file; 
+        thread_current()->fdt[i] = open_file;
+        // deny write to executable
+        if(!strcmp(thread_current() -> name, file)) {
+          file_deny_write(open_file);
+        }
         return i;
       }
     }
