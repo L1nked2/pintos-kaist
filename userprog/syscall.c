@@ -106,10 +106,11 @@ syscall_handler (struct intr_frame *f) {
 /* addr must be in user space. */
 void validate_addr(const uint64_t *addr) {
 	if ((addr == NULL)
-	|| (pml4_get_page(thread_current()->pml4, addr) == NULL)
-	|| !(is_user_vaddr(addr))) {
+  || !(is_user_vaddr(addr))
+	|| (pml4_get_page(thread_current()->pml4, addr) == NULL)) {
 		sys_exit(-1);
 	}
+  return;
 }
 
 /* check whether file descriptor is valid or not*/
