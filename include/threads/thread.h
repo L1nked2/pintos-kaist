@@ -38,7 +38,7 @@ int load_avg, prev_load_avg;
 
 /* Default value for file descriptors */
 #define FD_NR_START_INDEX 3
-#define FD_MAX_INDEX 128
+#define FD_MAX_INDEX 32
 
 /* A kernel thread or user process.
  *
