@@ -192,6 +192,7 @@ __do_fork (void *aux) {
 	if (succ)
 		do_iret (&if_);
 error:
+  printf("error while forking\n");
 	thread_exit ();
 }
 
