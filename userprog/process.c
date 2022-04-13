@@ -67,8 +67,9 @@ initd (void *f_name) {
 	process_init ();
   /* save name for exit message */
   char f_name_copy[128];
+  char *save_ptr;
   strlcpy(f_name_copy, f_name, strlen(f_name)+1);
-  char* name = strtok_r(f_name_copy, " ", NULL);
+  char* name = strtok_r(f_name_copy, " ", *save_ptr);
   strlcpy(&thread_current()->name, name, strlen(name)+1);
 
 	if (process_exec (f_name) < 0)
