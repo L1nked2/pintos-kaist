@@ -230,16 +230,16 @@ process_exec (void *f_name) {
   // need to add file_lock inside of precess_exec
 	success = load(file_name, &_if);
 
-	/* Insert arguments to stack */
-	insert_args(argc, argv, &_if);
-	//test codes arguments
-	//hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
-  //printf("test: rdi: %d, rsi: %x\n",_if.R.rdi, _if.R.rsi);
-
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
 	if (!success)
 		return -1;
+
+  /* Insert arguments to stack */
+	insert_args(argc, argv, &_if);
+	//test codes arguments
+	//hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
+  //printf("test: rdi: %d, rsi: %x\n",_if.R.rdi, _if.R.rsi);
 
 	/* Start switched process. */
 	do_iret (&_if);
