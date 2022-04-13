@@ -202,7 +202,7 @@ process_exec (void *f_name) {
 	char *file_name = f_name;
 	bool success;
 	int argc = 0;
-	char *token, *save_ptr, *argv[64];
+	char *argv[64];
 
 	/* We cannot use the intr_frame in the thread structure.
 	 * This is because when current thread rescheduled,
@@ -217,18 +217,8 @@ process_exec (void *f_name) {
 
 	/* Parse the given command, and let file name
 	   be the program */
-	//argc = parse_args(file_name, argv);
-
-  // extract program name first
-	token = strtok_r(file_name, " ", &save_ptr);
-	// parse rest argument
-	while(token != NULL)
-	{
-    argv[argc] = token;
-		token = strtok_r(NULL, " ", &save_ptr);
-		argc++;
-	}
-
+	argc = parse_args(file_name, argv);
+  
 	/* And then load the binary */
 	success = load(file_name, &_if);
 
@@ -237,6 +227,8 @@ process_exec (void *f_name) {
 	//test codes arguments
 	//hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
   //printf("test: rdi: %d, rsi: %x\n",_if.R.rdi, _if.R.rsi);
+  printf("file_name : %s`\n", file_name);
+  printf("argv[0] : %s`\n", argv[0]);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
