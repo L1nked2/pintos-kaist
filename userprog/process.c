@@ -213,7 +213,7 @@ __do_fork (void *aux) {
 error:
 	current->exit_status = TID_ERROR;
 	sema_up(&current->load_sema);
-	//thread_exit();
+	thread_exit();
 }
 
 /* Switch the current execution context to the f_name.
@@ -384,7 +384,8 @@ process_exit (void) {
   struct list* child_list = &(curr->child_tids);
   for (e=list_begin(child_list); e!=list_end(child_list); e=list_next(e)) {
     struct thread *t = list_entry(e, struct thread, child_elem);
-    sema_up(&t->exit_sema);
+    //sema_up(&t->exit_sema);
+    process_wait(t->tid);
   }
   // free fdt here? lets try
   for(int i=FD_NR_START_INDEX; i<FD_MAX_INDEX; i++) {
