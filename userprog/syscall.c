@@ -152,7 +152,7 @@ int sys_exec(const char *cmd_line) {
   // duplicate cmd_line
 	char *cmdline_copy = palloc_get_page(PAL_ZERO);
 	if (cmdline_copy == NULL) {
-		exit(-1);
+		sys_exit(-1);
 	}
 	strlcpy(cmdline_copy, cmd_line, strlen(cmd_line)+1);
 	return process_exec(cmd_line);
