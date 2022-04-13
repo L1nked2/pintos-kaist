@@ -344,7 +344,7 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
-  printf("%s: exit(%d)\n", *(char *)(curr->tf.R.rsi), curr->exit_status);
+  printf("%x: exit(%d)\n", curr->tf.R.rsi, curr->exit_status);
   //wakeup parent thread
   sema_up(&curr->exit_sema);
 	process_cleanup ();
