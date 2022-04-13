@@ -64,8 +64,12 @@ initd (void *f_name) {
 #ifdef VM
 	supplemental_page_table_init (&thread_current ()->spt);
 #endif
-
 	process_init ();
+  /* save name for exit message */
+  char f_name_copy[128];
+  strlcpy(f_name_copy, f_name, strlen(f_name)+1);
+  char* name = strtok_r(f_name_copy, " ", NULL);
+  strlcpy(&thread_current()->name, name, strlen(name)+1);
 
 	if (process_exec (f_name) < 0)
 		PANIC("Fail to launch initd\n");
@@ -230,9 +234,6 @@ process_exec (void *f_name) {
 	//test codes arguments
 	//hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
   //printf("test: rdi: %d, rsi: %x\n",_if.R.rdi, _if.R.rsi);
-
-  /* save name for exit message */
-  strlcpy(&thread_current()->name, argv[0], strlen(argv[0])+1);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
