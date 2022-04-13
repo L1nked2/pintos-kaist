@@ -11,6 +11,7 @@
 #include "userprog/process.h"
 #include "filesys/filesys.h"	// for file system call.
 #include "filesys/file.h"		// for file system call.
+#include "threads/palloc.h" // for exec system call
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
@@ -148,7 +149,12 @@ tid_t sys_fork(const char *thread_name, struct intr_frame *if_) {
 
 int sys_exec(const char *cmd_line) {
   validate_addr(cmd_line);
-  // need to add filesys_lock inside of precess_exec
+  // duplicate cmd_line
+	char *cmdline_copy = palloc_get_page(PAL_ZERO);
+	if (cmdline_copy == NULL) {
+		exit(-1);
+	}
+	strlcpy(cmdline_copy, cmd_line, strlen(cmd_line)+1);
 	return process_exec(cmd_line);
 }
 

@@ -222,6 +222,7 @@ process_exec (void *f_name) {
 	argc = parse_args(file_name, argv);
   
 	/* And then load the binary */
+  // need to add filesys_lock inside of precess_exec
 	success = load(file_name, &_if);
 
 	/* Insert arguments to stack */
