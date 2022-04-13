@@ -161,15 +161,17 @@ __do_fork (void *aux) {
 	/* TODO: somehow pass the parent_if. (i.e. process_fork()'s if_) */
 	struct intr_frame *parent_if = &parent->user_if;
 	bool succ = true;
-  printf("__do_fork() started\n");
+
 	/* 1. Read the cpu context to local stack. */
 	memcpy (&if_, parent_if, sizeof (struct intr_frame));
+  /* return value of child process is 0 */
+  if_.R.rax = 0;
 
 	/* 2. Duplicate PT */
 	current->pml4 = pml4_create();
 	if (current->pml4 == NULL)
 		goto error;
-  printf("duplicate_pml4 done\n");
+
 	process_activate (current);
 #ifdef VM
 	supplemental_page_table_init (&current->spt);
@@ -179,7 +181,6 @@ __do_fork (void *aux) {
 	if (!pml4_for_each (parent->pml4, duplicate_pte, parent))
 		goto error;
 #endif
-  printf("duplicate_pt done\n");
 
 	/* TODO: Your code goes here.
 	 * TODO: Hint) To duplicate the file object, use `file_duplicate`
