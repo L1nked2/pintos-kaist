@@ -73,9 +73,6 @@ initd (void *f_name) {
   strlcpy(&thread_current()->name, name, strlen(name)+1);
   palloc_free_page(f_name_copy);
 
-  /* user_thread flag set to true */
-  thread_current()->is_user_thread = true;
-
 	if (process_exec (f_name) < 0)
 		PANIC("Fail to launch initd\n");
 	NOT_REACHED ();
@@ -253,6 +250,9 @@ process_exec (void *f_name) {
 	palloc_free_page (file_name);
 	if (!success)
 		return -1;
+
+  /* user_thread flag set to true */
+  thread_current()->is_user_thread = true;
 
 	/* Start switched process. */
 	do_iret (&_if);
