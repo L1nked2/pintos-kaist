@@ -48,7 +48,7 @@ syscall_init (void) {
 void
 syscall_handler (struct intr_frame *f) {
 	// TODO: Your implementation goes here.
-	printf ("system call!\n");
+	// printf ("system call!\n");
 	/* System calls that return a value can do so by
 	modifying the rax member of struct intr_frame */
 
@@ -205,10 +205,6 @@ int sys_read(int fd, void *buffer, unsigned size) {
   int result;
   lock_acquire(&file_lock);
   struct file* file = search_file(fd);
-	if (file == NULL) {
-		lock_release(&file_lock);
-		return -1;
-	}
   if(fd == 0) {
     for(int i=0; i<size; i++)
     {
@@ -219,6 +215,10 @@ int sys_read(int fd, void *buffer, unsigned size) {
       }
     }
   }
+  else if (file == NULL) {
+		lock_release(&file_lock);
+		return -1;
+	}
   else {
     result = file_read(search_file(fd), buffer, size);
   }
@@ -231,13 +231,13 @@ int sys_write(int fd, const void *buffer, unsigned size) {
   int result;
 	lock_acquire(&file_lock);
 	struct file* file = search_file(fd);
-	if (file == NULL) {
-		lock_release(&file_lock);
-		return -1;
-	}
-	if (fd == 1) {
+  if (fd == 1) {
 		putbuf(buffer, size);
 		result = size;
+	}
+	else if (file == NULL) {
+		lock_release(&file_lock);
+		return -1;
 	}
   else {
 		result = file_write(file, buffer, size);

@@ -23,6 +23,7 @@
     "intrinsic.h": "c",
     "mmu.h": "c",
     "filesys.h": "c",
-    "file.h": "c"
+    "file.h": "c",
+    "corecrt.h": "c"
   },
 }
