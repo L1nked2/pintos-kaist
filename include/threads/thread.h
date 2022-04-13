@@ -101,7 +101,7 @@ struct thread {
 	/* Owned by thread.c. */
 	tid_t tid;                          /* Thread identifier. */
 	enum thread_status status;          /* Thread state. */
-	char name[128];                     /* Name (for debugging purposes). */
+	char name[32];                     /* Name (for debugging purposes). */
 	int priority;                       /* Priority. */
 	
 	/* Owned by timer.c. */

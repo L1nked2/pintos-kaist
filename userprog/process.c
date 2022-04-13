@@ -66,7 +66,7 @@ initd (void *f_name) {
 #endif
 	process_init ();
   /* save name for exit message */
-  char f_name_copy[128];
+  char *f_name_copy = palloc_get_page(PAL_ZERO);
   char *save_ptr;
   strlcpy(f_name_copy, f_name, strlen(f_name)+1);
   char* name = strtok_r(f_name_copy, " ", &save_ptr);
@@ -227,7 +227,7 @@ process_exec (void *f_name) {
 	argc = parse_args(file_name, argv);
   
 	/* And then load the binary */
-  // need to add filesys_lock inside of precess_exec
+  // need to add file_lock inside of precess_exec
 	success = load(file_name, &_if);
 
 	/* Insert arguments to stack */
