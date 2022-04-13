@@ -99,7 +99,7 @@ syscall_handler (struct intr_frame *f) {
       sys_close((f->R).rdi);
       break;
 	}
-	thread_exit ();
+  return;
 }
 
 /* addr must be in user space. */
