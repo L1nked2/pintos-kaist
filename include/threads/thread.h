@@ -125,7 +125,7 @@ struct thread {
   struct list child_tids;             /* child thread id list. */
   struct list_elem child_elem;        /* list element of child threads */
   struct intr_frame user_if;         /* intr_frame of userland */
-  struct file* fd[FD_MAX_INDEX];	 /* file descriptor table. */
+  struct file* fdt[FD_MAX_INDEX];	 /* file descriptor table. */
 
   struct semaphore load_sema;
   struct semaphore exit_sema;
