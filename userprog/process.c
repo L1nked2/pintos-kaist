@@ -229,7 +229,7 @@ process_exec (void *f_name) {
   //printf("test: rdi: %d, rsi: %x\n",_if.R.rdi, _if.R.rsi);
 
   /* save name for exit message */
-  memcpy(&thread_current()->name, argv[0], strlen(argv[0]));
+  strlcpy(&thread_current()->name, argv[0], strlen(argv[0]));
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
