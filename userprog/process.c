@@ -368,10 +368,14 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
+  
+  // delete itself from child_tids from parent_thread
+  list_remove(&curr->child_elem);
+
+  // print termination message
   if(curr->is_user_thread) {
     printf("%s: exit(%d)\n", curr->name, curr->exit_status);
   }
-
   //wakeup parent thread
   sema_up(&curr->exit_sema);
 	process_cleanup ();
