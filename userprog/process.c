@@ -227,8 +227,6 @@ process_exec (void *f_name) {
 	//test codes arguments
 	//hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
   //printf("test: rdi: %d, rsi: %x\n",_if.R.rdi, _if.R.rsi);
-  printf("file_name : %s`\n", file_name);
-  printf("argv[0] : %s`\n", argv[0]);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
@@ -550,6 +548,7 @@ load (const char *file_name, struct intr_frame *if_) {
 
 	/* TODO: Your code goes here.
 	 * TODO: Implement argument passing (see project2/argument_passing.html). */
+  strcpy(t->name, file_name);
 
 	success = true;
 
