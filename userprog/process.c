@@ -169,7 +169,7 @@ __do_fork (void *aux) {
 	current->pml4 = pml4_create();
 	if (current->pml4 == NULL)
 		goto error;
-
+  printf("duplicate_pml4 done\n");
 	process_activate (current);
 #ifdef VM
 	supplemental_page_table_init (&current->spt);
@@ -179,6 +179,7 @@ __do_fork (void *aux) {
 	if (!pml4_for_each (parent->pml4, duplicate_pte, parent))
 		goto error;
 #endif
+  printf("duplicate_pt done\n");
 
 	/* TODO: Your code goes here.
 	 * TODO: Hint) To duplicate the file object, use `file_duplicate`
