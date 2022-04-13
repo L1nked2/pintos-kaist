@@ -39,6 +39,9 @@ syscall_init (void) {
 	 * mode stack. Therefore, we masked the FLAG_FL. */
 	write_msr(MSR_SYSCALL_MASK,
 			FLAG_IF | FLAG_TF | FLAG_DF | FLAG_IOPL | FLAG_AC | FLAG_NT);
+
+  // init filesys_lock
+  lock_init(&filesys_lock);
 }
 
 /* The main system call interface */
@@ -141,6 +144,8 @@ tid_t sys_fork(const char *thread_name, struct intr_frame *if_) {
 }
 
 int sys_exec(const char *cmd_line) {
+  int result;
+  // need to add filesys_lock inside of precess_exec
 	return process_exec(cmd_line);
 }
 
@@ -150,11 +155,19 @@ int sys_wait(tid_t pid) {
 }
 
 bool sys_create(const char *file, unsigned initial_size) {
-	return filesys_create(file, initial_size);
+  bool result;
+  lock_acquire(&filesys_lock);
+	result = filesys_create(file, initial_size);
+  lock_release(&filesys_lock);
+  return result;
 }
 
 bool sys_remove(const char *file) {
-	return filesys_remove(file);
+  bool result;
+  lock_acquire(&filesys_lock);
+	result = filesys_remove(file);
+  lock_release(&filesys_lock);
+  return result;
 }
 
 int sys_open(const char *file) {
@@ -178,10 +191,13 @@ int sys_filesize(int fd) {
 }
 
 int sys_read(int fd, void *buffer, unsigned size) {
+  int result;
+  lock_acquire(&filesys_lock);
   if(fd == 0) {
     for(int i=0; i<size; i++)
     {
         ((char*)buffer)[i] = (char)input_getc();
+        result = i;
         if(((char*)buffer)[i] == '\0') {
           break;
         }
@@ -190,10 +206,26 @@ int sys_read(int fd, void *buffer, unsigned size) {
   else {
   
   }
-	return;
+  lock_release(&filesys_lock);
+	return result;
 }
 
 int sys_write(int fd, const void *buffer, unsigned size) {
+  int result;
+  lock_acquire(&filesys_lock);
+  if(fd == 1) {
+    putbuf(buffer, size);
+		result = size;
+	}
+  else {
+    if( != NULL) {
+			result = file_write(fd, buffer, size);
+		}
+		else {
+			result = -1;
+		}
+  }
+  lock_release(&filesys_lock);
 	return;
 }
 
