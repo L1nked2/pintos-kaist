@@ -250,8 +250,9 @@ process_exec (void *f_name) {
   }
 
 	/* If load failed, quit. */
-	palloc_free_page (file_name);
+	//palloc_free_page (file_name);
 	if (!success)
+		palloc_free_page (file_name);
 		return -1;
 
   /* user_thread flag set to true */
