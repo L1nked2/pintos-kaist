@@ -388,7 +388,7 @@ process_exit (void) {
     process_wait(t->tid);
   }
   // free fdt here? lets try
-  palloc_free_page(curr->fdt);
+  //palloc_free_page(curr->fdt);
   for(int i=FD_NR_START_INDEX; i<FD_MAX_INDEX; i++) {
     sys_close(i);
   }
