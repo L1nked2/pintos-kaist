@@ -258,6 +258,8 @@ process_exec (void *f_name) {
   /* user_thread flag set to true */
   thread_current()->is_user_thread = true;
 
+	palloc_free_page (file_name);
+
 	/* Start switched process. */
 	do_iret (&_if);
 	NOT_REACHED ();
