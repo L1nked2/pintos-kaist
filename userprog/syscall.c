@@ -138,9 +138,9 @@ static struct file *search_file(int fd) {
   struct list* fdt = &(thread_current()->fdt);
 	if (validate_fd(fd)) {
 		for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
-      struct fd *fd = list_entry(e, struct fd, fd_elem);
-      if(fd->index == fd) {
-        return fd->fp;
+      struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+      if(fd_entry->index == fd) {
+        return fd_entry->fp;
       }
     }
 	}
@@ -306,9 +306,9 @@ void sys_close(int fd) {
 	struct list_elem *e;
   struct list* fdt = &(thread_current()->fdt);
   for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
-    struct fd *fd = list_entry(e, struct fd, fd_elem);
-    if(fd->index == fd) {
-      file_close(fd->fp);
+    struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+    if(fd_entry->index == fd) {
+      file_close(fd_entry->fp);
       list_remove(e);
       free(list_entry(e, struct fd, fd_elem));
       break;
