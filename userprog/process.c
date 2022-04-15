@@ -115,7 +115,9 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
     return true;
   }
 	/* 2. Resolve parent_page from the parent's page map level 4. */ // fixed comments, va -> parent_page
-	parent_page = pml4_get_page (parent->pml4, va);
+	if ((parent_page = pml4_get_page (parent->pml4, va)) == NULL) {
+		return false;
+	}
   // parent_page now holds the address of page and it is
   // traslated address of user virtual address to kernel virtual address.
   // we need translation because concating parent->pml4 and va gives only physical frame info.
@@ -123,11 +125,11 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
 
 	/* 3. TODO: Allocate new PAL_USER page for the child and set result to
 	 *    TODO: NEWPAGE. */
-  newpage = palloc_get_page(PAL_USER | PAL_ZERO);
+  //newpage = palloc_get_page(PAL_USER | PAL_ZERO);
   // newpage holds kernel virtual addresses
   // and it is page of user pool.
   // it is pointing to empty physical frame(zerofilled).
-  if(newpage == NULL) {
+  if((newpage = palloc_get_page(PAL_USER | PAL_ZERO)) == NULL) {
     printf("Error: fork() failed while allocating new page\n");
     return false;
   }
@@ -150,8 +152,8 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
     // concating current->pml4 and va gives physical frame
     // identical to physical frame refered by newpage. 
 		/* 6. TODO: if fail to insert page, do error handling. */
-    printf("Error: fork() failed while setting new page\n");
-    return false;
+      printf("Error: fork() failed while setting new page\n");
+      return false;
 	}
 	return true;
 }
