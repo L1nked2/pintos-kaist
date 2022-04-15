@@ -401,11 +401,15 @@ process_exit (void) {
   }
   // free fdt here? lets try
   struct list* fdt = &(curr->fdt);
-  for (e=list_begin(fdt); e!=list_end(fdt);) {
-    struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    sys_close(fd_entry->index);
-    e = list_remove(e);
-    free(fd_entry);
+  // for (e=list_begin(fdt); e!=list_end(fdt);) {
+  //   struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+  //   sys_close(fd_entry->index);
+  //   e = list_remove(e);
+  //   free(fd_entry);
+  // }
+  for (int i=FD_NR_START_INDEX; i<curr->fdt_index; i++)
+  {
+    sys_close(i);
   }
 	process_cleanup ();
   return;
