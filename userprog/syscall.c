@@ -338,7 +338,7 @@ int sys_dup2(int oldfd, int newfd) {
   sys_close(newfd);
   struct list_elem *e;
   struct list *cur_fdt = &(thread_current()->fdt);
-  for (e = list_begin(cur_fdt); e != lest_end(cur_fdt); e = list_next(e)) {
+  for (e = list_begin(cur_fdt); e != list_end(cur_fdt); e = list_next(e)) {
     struct fd *fd = list_entry(e, struct fd, fd_elem);
     if (fd->index == newfd) {
       fd->fp = file;
