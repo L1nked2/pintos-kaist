@@ -26,4 +26,5 @@ int sys_write (int fd, const void *buffer, unsigned size);
 void sys_seek (int fd, unsigned position);
 unsigned sys_tell (int fd);
 void sys_close (int fd);
+int sys_dup2(int oldfd, int newfd);
 #endif /* userprog/syscall.h */

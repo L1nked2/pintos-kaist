@@ -128,6 +128,9 @@ struct thread {
   struct file *fdt[FD_MAX_INDEX];	    /* file descriptor table. */
   bool is_user_thread;	              /* flag for user thread */
 
+  int stdin_cnt;					  /* for dup2, count of stdin */
+  int stdout_cnt;					  /* for dup2, count of stdout */
+
   struct semaphore load_sema;
   struct semaphore wait_sema;
   struct semaphore exit_sema;
