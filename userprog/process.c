@@ -211,6 +211,10 @@ __do_fork (void *aux) {
       goto error;
     }
     dst_fd->fp = file_duplicate(src_fd->fp);
+    if(dst_fd->fp == NULL) {
+      free(dst_fd);
+      goto error;
+    }
     dst_fd->index = src_fd->index;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
