@@ -335,7 +335,22 @@ int sys_dup2(int oldfd, int newfd) {
   else {
     file->dup_cnt += 1;
   }
-  close(newfd);
-  thread_current()->fdt;
+  sys_close(newfd);
+  struct list_elem *e;
+  struct list *cur_fdt = &(thread_current()->fdt);
+  for (e = list_begin(cur_fdt); e != lest_end(cur_fdt); e = list_next(e)) {
+    struct fd *fd = list_entry(e, struct fd, fd_elem);
+    if (fd->index == newfd) {
+      fd->fp = file;
+      return newfd;
+    }
+    else {
+      continue;
+    }
+  }
+  struct fd *fd;
+  fd->file = file;
+  fd->index = newfd;
+  list_push_back(&cur_fdt, &(fd->fd_elem));
   return newfd;
 }
