@@ -106,7 +106,7 @@ syscall_handler (struct intr_frame *f) {
       (f->R).rax = sys_dup2((f->R).rdi, (f->R).rsi);
       break;
     default:
-      exit(-1);
+      sys_exit(-1);
       break;
 	}
   return;
@@ -336,7 +336,7 @@ int sys_dup2(int oldfd, int newfd) {
   else {
     file->dup_cnt += 1;
   }
-  close(newfd);
+  sys_close(newfd);
   thread_current()->fdt;
   return newfd;
 }
