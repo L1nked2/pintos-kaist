@@ -13,6 +13,9 @@
 #include "filesys/file.h"		// for file system call.
 #include "threads/palloc.h" // for exec system call
 
+#define STDIN 0
+#define STDOUT 1
+
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 
@@ -98,6 +101,12 @@ syscall_handler (struct intr_frame *f) {
 			break;
 		case SYS_CLOSE:
       sys_close((f->R).rdi);
+      break;
+    case SYS_DUP2:
+      (f->R).rax = sys_dup2((f->R).rdi, (f->R).rsi);
+      break;
+    default:
+      exit(-1);
       break;
 	}
   return;
@@ -227,12 +236,18 @@ int sys_read(int fd, void *buffer, unsigned size) {
   lock_acquire(&file_lock);
   struct file* file = search_file(fd);
   if(fd == 0) {
-    for(int i=0; i<size; i++)
-    {
-      ((char*)buffer)[i] = (char)input_getc();
-      result = i;
-      if(((char*)buffer)[i] == '\0') {
-        break;
+    if (thread_current()->stdin_cnt == 0){
+      // file remove
+      result = -1;
+    }
+    else {
+      for(int i=0; i<size; i++)
+      {
+        ((char*)buffer)[i] = (char)input_getc();
+        result = i;
+        if(((char*)buffer)[i] == '\0') {
+          break;
+        }
       }
     }
   }
@@ -302,4 +317,26 @@ void sys_close(int fd) {
   }
   lock_release(&file_lock);
 	return;
+}
+
+int sys_dup2(int oldfd, int newfd) {
+  struct file *file = search_file(oldfd);
+  if (file == NULL) {
+    return -1;                              /* newfd is not closed */
+  }
+  if (oldfd == newfd) {
+    return newfd;
+  }
+  if (oldfd == STDIN) {
+    thread_current()->stdin_cnt += 1;
+  }
+  else if (oldfd == STDOUT) {
+    thread_current()->stdout_cnt += 1;
+  }
+  else {
+    file->dup_cnt += 1;
+  }
+  close(newfd);
+  thread_current()->fdt;
+  return newfd;
 }
