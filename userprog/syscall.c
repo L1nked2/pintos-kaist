@@ -305,13 +305,16 @@ void sys_close(int fd) {
   }
 	struct list_elem *e;
   struct list* fdt = &(thread_current()->fdt);
-  for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
+  for(e=list_begin(fdt); e!=list_end(fdt);) {
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
     if(fd_entry->index == fd) {
       file_close(fd_entry->fp);
-      list_remove(e);
-      free(list_entry(e, struct fd, fd_elem));
+      e = list_remove(e);
+      free(fd_entry);
       break;
+    }
+    else {
+       e = list_next(e);
     }
   }
   lock_release(&file_lock);
