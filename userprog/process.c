@@ -205,12 +205,11 @@ __do_fork (void *aux) {
     }
   }
 	
-	//process_init ();
+	process_init ();
 
   // copy is_user_thread flag
   current->is_user_thread = parent->is_user_thread;
   
-  sema_up(&current->load_sema);
 	/* Finally, switch to the newly created process. */
 	if (succ)
 		do_iret (&if_);
