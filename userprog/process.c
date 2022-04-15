@@ -210,7 +210,7 @@ __do_fork (void *aux) {
     }
     dst_fd->fp = file_duplicate(src_fd->fp);
     dst_fd->index = src_fd->index;
-    list_push_back(&current->fdt, &dst_fd->fd_elem);
+    list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
   current->fdt_index = parent->fdt_index;
 	
@@ -402,10 +402,11 @@ process_exit (void) {
   // free fdt here? lets try
   struct list* fdt = &(curr->fdt);
   for (e=list_begin(fdt); e!=list_end(fdt);) {
-    struct fd *fd = list_entry(e, struct fd, fd_elem);
-    sys_close(fd->index);
+    struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+    printf("file descriptor freeing, index: %d",fd_entry->index);
+    sys_close(fd_entry->index);
     list_remove(e);
-    free(fd);
+    free(fd_entry);
   }
 	process_cleanup ();
   return;
