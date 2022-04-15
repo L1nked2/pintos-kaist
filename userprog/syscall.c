@@ -134,12 +134,17 @@ bool validate_fd(int fd) {
 
 /* search the file with file discriptor */
 static struct file *search_file(int fd) {
+  struct list_elem *e;
+  struct list* fdt = &(thread_current()->fdt);
 	if (validate_fd(fd)) {
-		return (thread_current()->fdt)[fd];
+		for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
+      struct fd *fd = list_entry(e, struct fd, fd_elem);
+      if(fd->index == fd) {
+        return fd->fp;
+      }
+    }
 	}
-	else {
-		return NULL;
-	}
+	return NULL;
 }
 
 void sys_halt(void) {
@@ -193,23 +198,27 @@ bool sys_remove(const char *file) {
 int sys_open(const char *file) {
   validate_addr(file);
   struct file *open_file = filesys_open(file);
+  struct fd* fd;
   if(open_file == NULL) {
     return -1;
   }
   else {
-    for (int i=FD_NR_START_INDEX; i<FD_MAX_INDEX; i++) {
-      if (thread_current()->fdt[i] == NULL) {
-        thread_current()->fdt[i] = open_file;
-        // deny write to executable
-        if(!strcmp(thread_current() -> name, file)) {
-          file_deny_write(open_file);
-        }
-        return i;
-      }
+    fd = (struct fd*)malloc(sizeof(struct fd));
+    if(fd == NULL) {
+      // fd table is full
+      file_close(open_file);
+      return -1; 
+    }
+    fd->fp = open_file;
+    fd->index = thread_current()->fdt_index;
+    list_push_back(&thread_current()->fdt, fd);
+    // deny write to executable
+    if(!strcmp(thread_current() -> name, file)) {
+      file_deny_write(open_file);
     }
   }
-  file_close(open_file);
-	return -1; // fd table is full
+  thread_current()->fdt_index++;
+  return fd->index;
 }
 
 int sys_filesize(int fd) {
@@ -290,13 +299,21 @@ unsigned sys_tell(int fd) {
 
 void sys_close(int fd) {
   lock_acquire(&file_lock);
-  struct file* file = search_file(fd);
-  if(file == NULL) {
+  if(!validate_fd) {
     lock_release(&file_lock);
 		return;
   }
-  file_close(file);
-	thread_current()->fdt[fd] = NULL;
+	struct list_elem *e;
+  struct list* fdt = &(thread_current()->fdt);
+  for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
+    struct fd *fd = list_entry(e, struct fd, fd_elem);
+    if(fd->index == fd) {
+      file_close(fd->fp);
+      list_remove(e);
+      free(list_entry(e, struct fd, fd_elem));
+      break;
+    }
+  }
   lock_release(&file_lock);
 	return;
 }

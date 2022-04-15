@@ -29,6 +29,7 @@
     "console.h": "c",
     "exception.h": "c",
     "malloc.h": "c",
-    "inode.h": "c"
+    "inode.h": "c",
+    "palloc.h": "c"
   },
 }

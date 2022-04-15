@@ -81,7 +81,7 @@ initd (void *f_name) {
 /* Clones the current process as `name`. Returns the new process's thread id, or
  * TID_ERROR if the thread cannot be created. */
 tid_t
-process_fork (const char *name, struct intr_frame *if_ UNUSED) {
+process_fork (const char *name, struct intr_frame *if_) {
 	/* Clone current thread to new thread.*/
   struct thread *child;
   tid_t child_tid;
@@ -198,14 +198,21 @@ __do_fork (void *aux) {
 	 * TODO:       from the fork() until this function successfully duplicates
 	 * TODO:       the resources of parent.*/
   // duplicate file objects
-  for(int i=0; i<FD_MAX_INDEX; i++) {
-    struct file *file = parent->fdt[i];
-    struct file *duplicated_file;
-    if (file != NULL) {
-      duplicated_file = file_duplicate(file);
-      current->fdt[i] = duplicated_file;
+  struct list_elem *e;
+  struct list* parent_fdt = &(parent->fdt);
+  struct list* current_fdt = &(current->fdt);
+  for(e=list_begin(parent_fdt); e!=list_end(parent_fdt); e=list_next(e)) {
+    struct fd *src_fd = list_entry(e, struct fd, fd_elem);
+    struct fd *dst_fd;
+    dst_fd = (struct fd*)malloc(sizeof(struct fd));
+    if(dst_fd == NULL) {
+      goto error;
     }
+    dst_fd->fp = file_duplicate(src_fd->fp);
+    dst_fd->index = src_fd->index;
+    list_push_back(&current->fdt, &dst_fd->fd_elem);
   }
+  current->fdt_index = parent->fdt_index;
 	
 	process_init ();
 
@@ -348,7 +355,7 @@ struct thread* get_child_thread (tid_t tid) {
  * This function will be implemented in problem 2-2.  For now, it
  * does nothing. */
 int
-process_wait (tid_t child_tid UNUSED) {
+process_wait (tid_t child_tid) {
 	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
@@ -393,9 +400,12 @@ process_exit (void) {
     process_wait(t->tid);
   }
   // free fdt here? lets try
-  //palloc_free_page(curr->fdt);
-  for(int i=FD_NR_START_INDEX; i<FD_MAX_INDEX; i++) {
-    sys_close(i);
+  struct list* fdt = &(curr->fdt);
+  for (e=list_begin(fdt); e!=list_end(fdt);) {
+    struct fd *fd = list_entry(e, struct fd, fd_elem);
+    sys_close(fd->index);
+    list_remove(e);
+    free(fd);
   }
 	process_cleanup ();
   return;

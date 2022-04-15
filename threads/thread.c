@@ -105,9 +105,9 @@ thread_init (void) {
 	init_thread (initial_thread, "main", PRI_DEFAULT);
 	initial_thread->status = THREAD_RUNNING;
 	initial_thread->tid = allocate_tid ();
-  	initial_thread->nice = NICE_DEFAULT;
-  	initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
-  	initial_thread->prev_recent_cpu = RECENT_CPU_DEFAULT;
+	initial_thread->nice = NICE_DEFAULT;
+ 	initial_thread->recent_cpu = RECENT_CPU_DEFAULT;
+ 	initial_thread->prev_recent_cpu = RECENT_CPU_DEFAULT;
 
 	// initialize load_avg for mlfqs
 	load_avg = LOAD_AVG_DEFAULT;
@@ -443,9 +443,8 @@ init_thread (struct thread *t, const char *name, int priority) {
   // init part of project 2
   t->is_user_thread = false;
   list_init(&t->child_tids);
-  for (int i = 0; i < FD_MAX_INDEX; i++) {                                                         
-      t->fdt[i] = NULL;                                                                
-  }
+  list_init(&t->fdt);
+  t->fdt_index = FD_NR_START_INDEX;
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
