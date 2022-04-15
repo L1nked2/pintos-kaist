@@ -153,6 +153,7 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
     // identical to physical frame refered by newpage. 
 		/* 6. TODO: if fail to insert page, do error handling. */
       printf("Error: fork() failed while setting new page\n");
+      palloc_free_page(newpage);
       return false;
 	}
 	return true;
@@ -201,6 +202,7 @@ __do_fork (void *aux) {
   struct list_elem *e;
   struct list* parent_fdt = &(parent->fdt);
   struct list* current_fdt = &(current->fdt);
+  current->fdt_index = parent->fdt_index;
   for(e=list_begin(parent_fdt); e!=list_end(parent_fdt); e=list_next(e)) {
     struct fd *src_fd = list_entry(e, struct fd, fd_elem);
     struct fd *dst_fd;
@@ -212,7 +214,6 @@ __do_fork (void *aux) {
     dst_fd->index = src_fd->index;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
-  current->fdt_index = parent->fdt_index;
 	
 	process_init ();
 
