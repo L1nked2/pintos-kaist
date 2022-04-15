@@ -391,7 +391,7 @@ process_exit (void) {
   sema_up(&curr->wait_sema);
   // wait until parent get exit_status info
   sema_down(&curr->exit_sema);
-  printf("exit good until sema_down\n");
+  msg("exit good until sema_down\n");
   // let all child threads can exit
   struct list_elem *e;
   struct list* child_list = &(curr->child_tids);
@@ -400,12 +400,12 @@ process_exit (void) {
     //sema_up(&t->exit_sema);
     process_wait(t->tid);
   }
-  printf("all child threads exited\n");
+  msg("all child threads exited\n");
   // free fdt here? lets try
   struct list* fdt = &(curr->fdt);
   for (e=list_begin(fdt); e!=list_end(fdt);) {
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    printf("file descriptor freeing, index: %d\n",fd_entry->index);
+    msg("file descriptor freeing, index: %d\n",fd_entry->index);
     sys_close(fd_entry->index);
     list_remove(e);
     free(fd_entry);
