@@ -211,7 +211,7 @@ int sys_open(const char *file) {
     }
     fd->fp = open_file;
     fd->index = thread_current()->fdt_index;
-    list_push_back(&thread_current()->fdt, fd);
+    list_push_back(&thread_current()->fdt, &fd->fd_elem);
     thread_current()->fdt_index += 1;
     // deny write to executable
     if(!strcmp(thread_current() -> name, file)) {
