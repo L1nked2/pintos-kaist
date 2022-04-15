@@ -160,8 +160,7 @@ int sys_exec(const char *cmd_line) {
 }
 
 int sys_wait(tid_t pid) {
-  process_wait(pid);
-  return;
+  return process_wait(pid);
 }
 
 bool sys_create(const char *file, unsigned initial_size) {
@@ -200,6 +199,7 @@ int sys_open(const char *file) {
       }
     }
   }
+  file_close(open_file);
 	return -1; // fd table is full
 }
 
