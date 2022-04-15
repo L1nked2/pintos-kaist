@@ -106,7 +106,7 @@ syscall_handler (struct intr_frame *f) {
       (f->R).rax = sys_dup2((f->R).rdi, (f->R).rsi);
       break;
     default:
-      exit(-1);
+      sys_exit(-1);
       break;
 	}
   return;
@@ -138,9 +138,9 @@ static struct file *search_file(int fd) {
   struct list* fdt = &(thread_current()->fdt);
 	if (validate_fd(fd)) {
 		for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
-      struct fd *fd = list_entry(e, struct fd, fd_elem);
-      if(fd->index == fd) {
-        return fd->fp;
+      struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+      if(fd_entry->index == fd) {
+        return fd_entry->fp;
       }
     }
 	}
@@ -211,13 +211,13 @@ int sys_open(const char *file) {
     }
     fd->fp = open_file;
     fd->index = thread_current()->fdt_index;
-    list_push_back(&thread_current()->fdt, fd);
+    list_push_back(&thread_current()->fdt, &fd->fd_elem);
+    thread_current()->fdt_index += 1;
     // deny write to executable
     if(!strcmp(thread_current() -> name, file)) {
       file_deny_write(open_file);
     }
   }
-  thread_current()->fdt_index++;
   return fd->index;
 }
 
@@ -299,16 +299,16 @@ unsigned sys_tell(int fd) {
 
 void sys_close(int fd) {
   lock_acquire(&file_lock);
-  if(!validate_fd) {
+  if(!validate_fd(fd)) {
     lock_release(&file_lock);
 		return;
   }
 	struct list_elem *e;
   struct list* fdt = &(thread_current()->fdt);
   for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
-    struct fd *fd = list_entry(e, struct fd, fd_elem);
-    if(fd->index == fd) {
-      file_close(fd->fp);
+    struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+    if(fd_entry->index == fd) {
+      file_close(fd_entry->fp);
       list_remove(e);
       free(list_entry(e, struct fd, fd_elem));
       break;

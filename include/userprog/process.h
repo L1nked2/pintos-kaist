@@ -16,7 +16,9 @@ void process_activate (struct thread *next);
 int parse_args (char *raw_text, char**argv);
 void insert_args(int argc, char **argv, struct intr_frame *_if);
 struct thread* get_child_thread (tid_t tid);
-
+/* file descriptor object
+ * file* fp, int index, struct list_elem fd_elem exists
+ */
 struct fd{
   struct file* fp;            /* file pointer */
   int index;                  /* index of file descriptor */
