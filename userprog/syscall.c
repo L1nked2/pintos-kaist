@@ -206,14 +206,13 @@ int sys_open(const char *file) {
     fd = (struct fd*)malloc(sizeof(struct fd));
     if(fd == NULL) {
       // fd table is full
-      printf("open failed: malloc() returned NULL\n");
       file_close(open_file);
       return -1; 
     }
     fd->fp = open_file;
     fd->index = thread_current()->fdt_index;
     list_push_back(&thread_current()->fdt, fd);
-    thread_current()->fdt_index++;
+    thread_current()->fdt_index += 1;
     // deny write to executable
     if(!strcmp(thread_current() -> name, file)) {
       file_deny_write(open_file);

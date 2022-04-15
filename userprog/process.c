@@ -260,9 +260,9 @@ process_exec (void *f_name) {
   if(success) {
 	  insert_args(argc, argv, &_if);
   }
-
+  palloc_free_page (file_name);
+  
 	/* If load failed, quit. */
-	palloc_free_page (file_name);
 	if (!success)
 		return -1;
 
