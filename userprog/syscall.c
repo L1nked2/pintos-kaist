@@ -226,7 +226,7 @@ int sys_read(int fd, void *buffer, unsigned size) {
       }
     }
   }
-  else if (file == NULL) {
+  else if (file == NULL || fd == 1) {
 		result = -1;
 	}
   else {
@@ -245,7 +245,7 @@ int sys_write(int fd, const void *buffer, unsigned size) {
 		putbuf(buffer, size);
 		result = size;
 	}
-	else if (file == NULL) {
+	else if (file == NULL || fd == 0) {
 		result = -1;
 	}
   else {
