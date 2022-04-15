@@ -86,7 +86,7 @@ process_fork (const char *name, struct intr_frame *if_ UNUSED) {
   struct thread *child;
   tid_t child_tid;
 
-  memcpy(thread_current()->user_if, if_, sizeof(struct intr_frame));
+  thread_current()->user_if = if_;
   child_tid = thread_create (name, PRI_DEFAULT, __do_fork, thread_current ());
   if (child_tid == TID_ERROR) {
 		return TID_ERROR;
@@ -209,7 +209,7 @@ __do_fork (void *aux) {
 
   // copy is_user_thread flag
   current->is_user_thread = parent->is_user_thread;
-  
+
 	/* Finally, switch to the newly created process. */
 	if (succ)
 		do_iret (&if_);
