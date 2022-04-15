@@ -86,14 +86,16 @@ process_fork (const char *name, struct intr_frame *if_ UNUSED) {
   struct thread *child;
   tid_t child_tid;
 
-  thread_current()->user_if = if_;
-	child_tid = thread_create (name, PRI_DEFAULT, __do_fork, thread_current ());
+  memcpy(thread_current()->user_if, if_, sizeof(struct intr_frame));
+  child_tid = thread_create (name, PRI_DEFAULT, __do_fork, thread_current ());
   if (child_tid == TID_ERROR) {
 		return TID_ERROR;
 	}
   child = get_child_thread(child_tid);
   sema_down(&child->load_sema);
-
+  if (child->exit_status == -1) {
+	  return TID_ERROR;
+  }
   return child_tid;
 }
 
@@ -202,11 +204,13 @@ __do_fork (void *aux) {
       current->fdt[i] = duplicated_file;
     }
   }
-	process_init ();
+	
+	//process_init ();
 
   // copy is_user_thread flag
   current->is_user_thread = parent->is_user_thread;
-
+  
+  sema_up(&current->load_sema);
 	/* Finally, switch to the newly created process. */
 	if (succ)
 		do_iret (&if_);
