@@ -349,7 +349,7 @@ int sys_dup2(int oldfd, int newfd) {
     }
   }
   struct fd *fd;
-  fd->file = file;
+  fd->fp = file;
   fd->index = newfd;
   list_push_back(&cur_fdt, &(fd->fd_elem));
   return newfd;
