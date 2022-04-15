@@ -387,10 +387,14 @@ process_exit (void) {
   if(curr->is_user_thread) {
     printf("%s: exit(%d)\n", curr->name, curr->exit_status);
   }
-  // wakeup parent thread
-  sema_up(&curr->wait_sema);
-  // wait until parent get exit_status info
-  sema_down(&curr->exit_sema);
+  // free fdt here? lets try
+  struct list* fdt = &(curr->fdt);
+  for (int i=FD_NR_START_INDEX; i<curr->fdt_index; i++)
+  {
+    sys_close(i);
+  }
+  // process cleanup
+  process_cleanup ();
   // let all child threads can exit
   struct list_elem *e;
   struct list* child_list = &(curr->child_tids);
@@ -399,19 +403,10 @@ process_exit (void) {
     //sema_up(&t->exit_sema);
     process_wait(t->tid);
   }
-  // free fdt here? lets try
-  struct list* fdt = &(curr->fdt);
-  // for (e=list_begin(fdt); e!=list_end(fdt);) {
-  //   struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-  //   sys_close(fd_entry->index);
-  //   e = list_remove(e);
-  //   free(fd_entry);
-  // }
-  for (int i=FD_NR_START_INDEX; i<curr->fdt_index; i++)
-  {
-    sys_close(i);
-  }
-	process_cleanup ();
+  // wakeup parent thread
+  sema_up(&curr->wait_sema);
+  // wait until parent get exit_status info
+  sema_down(&curr->exit_sema);
   return;
 }
 
