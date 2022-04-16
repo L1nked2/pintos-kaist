@@ -132,7 +132,6 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
   // and it is page of user pool.
   // it is pointing to empty physical frame(zerofilled).
   if((newpage = palloc_get_page(PAL_USER | PAL_ZERO)) == NULL) {
-    printf("Error: fork() failed while allocating new page\n");
     return false;
   }
 
@@ -154,7 +153,6 @@ duplicate_pte (uint64_t *pte, void *va, void *aux) {
     // concating current->pml4 and va gives physical frame
     // identical to physical frame refered by newpage. 
 		/* 6. TODO: if fail to insert page, do error handling. */
-      printf("Error: fork() failed while setting new page\n");
       palloc_free_page(newpage);
       return false;
 	}
