@@ -148,13 +148,16 @@ void remove_file(int fd) {
   if (validate_fd(fd)) {
     struct list_elem *e;
     struct list *fdt = &(thread_current()->fdt);
-    for (e = list_begin(fdt); e != list_end(fd); e = list_next(e)) {
+    for (e = list_begin(fdt); e != list_end(fd);) {
       struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
       if (fd_entry->index == fd) {
         file_close(fd_entry->fp);
-        list_remove(e);
+        e = list_remove(e);
         free(fd_entry);
         break;
+      }
+      else {
+        e = list_next(e);
       }
     }
   }
