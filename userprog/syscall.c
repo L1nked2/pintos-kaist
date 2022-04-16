@@ -197,6 +197,10 @@ bool sys_remove(const char *file) {
 
 int sys_open(const char *file) {
   validate_addr(file);
+  if(!validate_fd(list_size(&thread_current()->fdt))) {
+    // fd table is too big
+		return;
+  }
   struct file *open_file = filesys_open(file);
   struct fd* fd;
   if(open_file == NULL) {
@@ -205,7 +209,7 @@ int sys_open(const char *file) {
   else {
     fd = (struct fd*)malloc(sizeof(struct fd));
     if(fd == NULL) {
-      // fd table is full
+      // cannot allocate more using malloc()
       file_close(open_file);
       return -1; 
     }
@@ -299,10 +303,10 @@ unsigned sys_tell(int fd) {
 
 void sys_close(int fd) {
   lock_acquire(&file_lock);
-  if(!validate_fd(fd)) {
-    lock_release(&file_lock);
-		return;
-  }
+  // if(!validate_fd(fd)) {
+  //   lock_release(&file_lock);
+	// 	return;
+  // }
 	struct list_elem *e;
   struct list* fdt = &(thread_current()->fdt);
   for(e=list_begin(fdt); e!=list_end(fdt);) {
