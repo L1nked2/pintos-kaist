@@ -12,6 +12,7 @@ void syscall_init (void);
 void validate_addr(const uint64_t *addr);
 bool validate_fd(int fd);
 static struct file *search_file(int fd);
+void remove_file(int fd);
 void sys_halt();
 void sys_exit(int status);
 tid_t sys_fork(const char *thread_name, struct intr_frame *if_);

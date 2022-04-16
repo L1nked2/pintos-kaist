@@ -13,9 +13,6 @@
 #include "filesys/file.h"		// for file system call.
 #include "threads/palloc.h" // for exec system call
 
-#define STDIN 0
-#define STDOUT 1
-
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 
@@ -147,6 +144,23 @@ static struct file *search_file(int fd) {
 	return NULL;
 }
 
+void remove_file(int fd) {
+  if (validate_fd(fd)) {
+    struct list_elem *e;
+    struct list *fdt = &(thread_current()->fdt);
+    for (e = list_begin(fdt); e != list_end(fd); e = list_next(e)) {
+      struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+      if (fd_entry->index == fd) {
+        file_close(fd_entry->fp);
+        list_remove(e);
+        free(fd_entry);
+        break;
+      }
+    }
+  }
+  return;
+}
+
 void sys_halt(void) {
 	power_off();
 }
@@ -240,7 +254,7 @@ int sys_read(int fd, void *buffer, unsigned size) {
   struct file* file = search_file(fd);
   if(fd == 0) {
     if (thread_current()->stdin_cnt == 0){
-      // file remove
+      remove_file(fd);
       result = -1;
     }
     else {
@@ -270,8 +284,14 @@ int sys_write(int fd, const void *buffer, unsigned size) {
 	lock_acquire(&file_lock);
 	struct file* file = search_file(fd);
   if (fd == 1) {
-		putbuf(buffer, size);
-		result = size;
+    if (thread_current()->stdout_cnt == 0) {
+      remove_file(fd);
+      result = -1;
+    }
+    else {
+		  putbuf(buffer, size);
+		  result = size;
+    }
 	}
 	else if (file == NULL || fd == 0) {
 		result = -1;
@@ -307,19 +327,21 @@ void sys_close(int fd) {
   //   lock_release(&file_lock);
 	// 	return;
   // }
-	struct list_elem *e;
-  struct list* fdt = &(thread_current()->fdt);
-  for(e=list_begin(fdt); e!=list_end(fdt);) {
-    struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    if(fd_entry->index == fd) {
-      file_close(fd_entry->fp);
-      e = list_remove(e);
-      free(fd_entry);
-      break;
-    }
-    else {
-       e = list_next(e);
-    }
+  struct file *file = search_file(fd);
+  if (fd == 0) {
+    thread_current()->stdin_cnt -= 1;
+    return;
+  }
+  else if (fd == 1) {
+    thread_current()->stdout_cnt -= 1;
+    return;
+  }
+	remove_file(fd);
+  if (file->dup_cnt == 0) {
+    file_close(file);
+  }
+  else {
+    file->dup_cnt -= 1;
   }
   lock_release(&file_lock);
 	return;
@@ -333,10 +355,10 @@ int sys_dup2(int oldfd, int newfd) {
   if (oldfd == newfd) {
     return newfd;
   }
-  if (oldfd == STDIN) {
+  if (oldfd == 0) {
     thread_current()->stdin_cnt += 1;
   }
-  else if (oldfd == STDOUT) {
+  else if (oldfd == 1) {
     thread_current()->stdout_cnt += 1;
   }
   else {
