@@ -333,10 +333,12 @@ void sys_close(int fd) {
   struct file *file = search_file(fd);
   if (fd == 0) {
     thread_current()->stdin_cnt -= 1;
+    remove_file(fd);
     return;
   }
   else if (fd == 1) {
     thread_current()->stdout_cnt -= 1;
+    remove_file(fd);
     return;
   }
 	remove_file(fd);
