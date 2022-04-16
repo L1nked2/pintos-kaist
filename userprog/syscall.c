@@ -148,7 +148,7 @@ void remove_file(int fd) {
   if (validate_fd(fd)) {
     struct list_elem *e;
     struct list *fdt = &(thread_current()->fdt);
-    for (e = list_begin(fdt); e != list_end(fd);) {
+    for (e = list_begin(fdt); e != list_end(fdt);) {
       struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
       if (fd_entry->index == fd) {
         file_close(fd_entry->fp);
