@@ -441,6 +441,7 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->recent_cpu = running_thread () -> recent_cpu;
 	t->magic = THREAD_MAGIC;
   // init part of project 2
+  t->exit_status = 0;
   t->is_user_thread = false;
   list_init(&t->child_tids);
   list_init(&t->fdt);
