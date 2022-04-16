@@ -395,11 +395,17 @@ process_exit (void) {
   }
   // free fdt here? lets try
   struct list* fdt = &(curr->fdt);
-  for (int i=FD_NR_START_INDEX; i<curr->fdt_index; i++)
+  // for (int i=FD_NR_START_INDEX; i<curr->fdt_index; i++)
+  // {
+  //   sys_close(i);
+  // }
+  while (!list_empty(fdt))
   {
-    sys_close(i);
+    struct list_elem *e = list_front (fdt);
+    struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+    sys_close(fd_entry->index);
   }
-  printf("fdt for %s is clean now?: %d", curr->name,list_empty(fdt));
+  printf("fdt for %s is clean now?: %d\n", curr->name,list_empty(fdt));
   // process cleanup
   process_cleanup ();
   // let all child threads can exit
