@@ -208,7 +208,6 @@ __do_fork (void *aux) {
     struct fd *dst_fd;
     dst_fd = (struct fd*)malloc(sizeof(struct fd));
     if(dst_fd == NULL) {
-	  free(dst_fd);
       goto error;
     }
     dst_fd->fp = file_duplicate(src_fd->fp);
@@ -366,10 +365,11 @@ process_wait (tid_t child_tid) {
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
   struct thread *child = get_child_thread(child_tid);
-  int exit_status;
+  int exit_status = -1;
   // return if thread not exists on child list
   if (child == NULL)
-		return -1;
+		return exit_status;
+  
   // parent thread waits for child
   sema_down(&child->wait_sema);
   exit_status = child->exit_status;
@@ -404,11 +404,11 @@ process_exit (void) {
   // let all child threads can exit
   struct list_elem *e;
   struct list* child_list = &(curr->child_tids);
-  // for (e=list_begin(child_list); e!=list_end(child_list); e=list_next(e)) {
-  //   struct thread *t = list_entry(e, struct thread, child_elem);
-  //   //sema_up(&t->exit_sema);
-  //   process_wait(t->tid);
-  // }
+  for (e=list_begin(child_list); e!=list_end(child_list); e=list_next(e)) {
+     struct thread *t = list_entry(e, struct thread, child_elem);
+     sema_up(&t->exit_sema);
+     //process_wait(t->tid);
+  }
   // wakeup parent thread
   sema_up(&curr->wait_sema);
   // wait until parent get exit_status info
