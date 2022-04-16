@@ -397,19 +397,19 @@ process_exit (void) {
   }
   // free fdt here? lets try
   struct list* fdt = &(curr->fdt);
-  // for (int i=FD_NR_START_INDEX; i<curr->fdt_index; i++)
-  // {
-  //   sys_close(i);
-  // }
-  lock_acquire(&file_lock);
-  while (!list_empty(fdt))
+  for (int i=FD_NR_START_INDEX; i<curr->fdt_index; i++)
   {
-    struct list_elem *e = list_pop_front (fdt);
-    struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    file_close(fd_entry->fp);
-    free(fd_entry);
+    sys_close(i);
   }
-  lock_release(&file_lock);
+  // lock_acquire(&file_lock);
+  // while (!list_empty(fdt))
+  // {
+  //   struct list_elem *e = list_pop_front (fdt);
+  //   struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+  //   file_close(fd_entry->fp);
+  //   free(fd_entry);
+  // }
+  // lock_release(&file_lock);
   printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
 
   // process cleanup
