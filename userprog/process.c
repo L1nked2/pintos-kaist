@@ -389,10 +389,7 @@ process_exit (void) {
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
 
-  // print termination message
-  if(curr->is_user_thread) {
-    printf("%s: exit(%d)\n", curr->name, curr->exit_status);
-  }
+  
   // free fdt here? lets try
   struct list* fdt = &(curr->fdt);
   for (int i=FD_NR_START_INDEX; i<curr->fdt_index; i++)
@@ -415,6 +412,10 @@ process_exit (void) {
   sema_up(&curr->wait_sema);
   // wait until parent get exit_status info
   sema_down(&curr->exit_sema);
+  // print termination message
+  if(curr->is_user_thread) {
+    printf("%s: exit(%d)\n", curr->name, curr->exit_status);
+  }
   return;
 }
 
