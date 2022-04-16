@@ -330,21 +330,21 @@ void sys_close(int fd) {
   //   lock_release(&file_lock);
 	// 	return;
   // }
-  struct file *file = search_file(fd);
-  if (fd == 0) {
-    thread_current()->stdin_cnt -= 1;
-    remove_file(fd);
-    return;
-  }
-  else if (fd == 1) {
-    thread_current()->stdout_cnt -= 1;
-    remove_file(fd);
-    return;
-  }
+  // struct file *file = search_file(fd);
+  // if (fd == 0) {
+  //   thread_current()->stdin_cnt -= 1;
+  //   remove_file(fd);
+  //   return;
+  // }
+  // else if (fd == 1) {
+  //   thread_current()->stdout_cnt -= 1;
+  //   remove_file(fd);
+  //   return;
+  // }
 	remove_file(fd);
-  if (file->dup_cnt != 0) {
-    file->dup_cnt -= 1;
-  }
+  // if (file->dup_cnt != 0) {
+  //   file->dup_cnt -= 1;
+  // }
   lock_release(&file_lock);
 	return;
 }
