@@ -208,6 +208,7 @@ __do_fork (void *aux) {
     struct fd *dst_fd;
     dst_fd = (struct fd*)malloc(sizeof(struct fd));
     if(dst_fd == NULL) {
+	  free(dst_fd);
       goto error;
     }
     dst_fd->fp = file_duplicate(src_fd->fp);
