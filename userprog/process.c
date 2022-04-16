@@ -410,7 +410,7 @@ process_exit (void) {
   //   free(fd_entry);
   // }
   // lock_release(&file_lock);
-  printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
+  //printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
 
   // process cleanup
   process_cleanup ();
