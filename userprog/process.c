@@ -22,6 +22,8 @@
 #include "vm/vm.h"
 #endif
 
+#include "userprog/syscall.h"
+
 static void process_cleanup (void);
 static bool load (const char *file_name, struct intr_frame *if_);
 static void initd (void *f_name);
@@ -399,6 +401,7 @@ process_exit (void) {
   // {
   //   sys_close(i);
   // }
+  lock_acquire(&file_lock);
   while (!list_empty(fdt))
   {
     struct list_elem *e = list_pop_front (fdt);
@@ -406,6 +409,7 @@ process_exit (void) {
     file_close(fd_entry->fp);
     free(fd_entry);
   }
+  lock_release(&file_lock);
   printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
 
   // process cleanup
