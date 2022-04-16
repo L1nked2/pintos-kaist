@@ -404,10 +404,12 @@ process_exit (void) {
   // let all child threads can exit
   struct list_elem *e;
   struct list* child_list = &(curr->child_tids);
-  for (e=list_begin(child_list); e!=list_end(child_list); e=list_next(e)) {
+  if(!list_empty(child_list)) {
+    for (e=list_begin(child_list); e!=list_end(child_list); e=list_next(e)) {
      struct thread *t = list_entry(e, struct thread, child_elem);
      //sema_up(&t->exit_sema);
      process_wait(t->tid);
+    }
   }
   // wakeup parent thread
   sema_up(&curr->wait_sema);
