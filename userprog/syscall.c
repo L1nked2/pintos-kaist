@@ -337,10 +337,7 @@ void sys_close(int fd) {
     return;
   }
 	remove_file(fd);
-  if (file->dup_cnt == 0) {
-    file_close(file);
-  }
-  else {
+  if (file->dup_cnt != 0) {
     file->dup_cnt -= 1;
   }
   lock_release(&file_lock);
