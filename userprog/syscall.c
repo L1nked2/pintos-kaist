@@ -370,6 +370,8 @@ int sys_dup2(int oldfd, int newfd) {
     file->dup_cnt += 1;
   }
   sys_close(newfd);
+  /* fdt of which index is newfd becomes file */
+  /* the case that we already has index of newfd */
   struct list_elem *e;
   struct list *cur_fdt = &(thread_current()->fdt);
   for (e = list_begin(cur_fdt); e != list_end(cur_fdt); e = list_next(e)) {
@@ -382,10 +384,11 @@ int sys_dup2(int oldfd, int newfd) {
       continue;
     }
   }
+  /* the case that we do not have index of newfd */
   struct fd *fd;
   fd->fp = file;
   fd->index = newfd;
-  list_push_back(&cur_fdt, &(fd->fd_elem));
+  list_push_back(cur_fdt, &fd->fd_elem);
   thread_current()->fdt_index += 1;
   return newfd;
 }
