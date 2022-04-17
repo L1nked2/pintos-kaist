@@ -189,11 +189,19 @@ thread_create (const char *name, int priority,
 	init_thread (t, name, priority);
 	tid = t->tid = allocate_tid ();
 	
-	/* for extra */
+	
+	t->fdt_index = 2;
+	struct fd *fd1;
+	struct fd *fd2;
+	fd1->fp = 1;
+	fd1->index = 0;
+	fd2->fp = 2;
+	fd2->index = 0;
+	list_push_back(&t->fdt, &fd1->fd_elem);
+	list_push_back(&t->fdt, &fd2->fd_elem);
 	t->stdin_cnt = 1;
 	t->stdout_cnt = 1;
-	/* for extra */
-	
+		
 	/* Call the kernel_thread if it scheduled.
 	 * Note) rdi is 1st argument, and rsi is 2nd argument. */
 	t->tf.rip = (uintptr_t) kernel_thread;
