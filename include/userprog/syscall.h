@@ -14,7 +14,6 @@ void syscall_init (void);
 /* codes for project 2 */
 void validate_addr(const uint64_t *addr);
 bool validate_fd(int fd);
-static struct file *search_file(int fd);
 struct fd *search_fd(int fd);
 void remove_file(int fd);
 void sys_halt();

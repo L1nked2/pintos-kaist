@@ -144,15 +144,6 @@ struct fd *search_fd(int fd) {
 	return NULL;
 }
 
-/* search the file with file discriptor */
-static struct file *search_file(int fd) {
-  struct fd *fd_entry;
-  if(fd_entry = search_fd(fd) != NULL) {
-    return fd_entry -> fp;
-  }
-  return NULL;
-}
-
 void remove_file(int fd) {
   if (validate_fd(fd)) {
     struct list_elem *e;
@@ -332,7 +323,7 @@ unsigned sys_tell(int fd) {
   unsigned result = 0;
   lock_acquire(&file_lock);
   if(fd >= FD_NR_START_INDEX) {
-	  result = file_tell(search_file(fd));
+	  result = file_tell(search_fd(fd)->fp);
   }
   lock_release(&file_lock);
   return result;
@@ -349,26 +340,22 @@ void sys_close(int fd) {
   // STDIN, STDOUT case
   else if (fd_entry->fp == STDIN) {
     thread_current()->stdin_cnt -= 1;
-    if(thread_current()->stdin_cnt == 0) {
-      list_remove(&fd_entry->fd_elem);
-      free(fd_entry);
-    }
+    list_remove(&fd_entry->fd_elem);
+    free(fd_entry);
   }
   else if (fd_entry->fp == STDOUT) {
     thread_current()->stdout_cnt -= 1;
-    if(thread_current()->stdout_cnt == 0) {
-      list_remove(&fd_entry->fd_elem);
-      free(fd_entry);
-    }
+    list_remove(&fd_entry->fd_elem);
+    free(fd_entry);
   }
   // normal fd case, reduce dup_cnt and close if zero
   else {
     fd_entry->fp->dup_cnt -= 1;
     if(fd_entry->fp->dup_cnt == 0) {
       file_close(fd_entry->fp);
-      list_remove(&fd_entry->fd_elem);
-      free(fd_entry);
     }
+    list_remove(&fd_entry->fd_elem);
+    free(fd_entry);
   } 
   lock_release(&file_lock);
 	return;
