@@ -383,7 +383,7 @@ process_wait (tid_t child_tid) {
 	 * XXX:       implementing the process_wait. */
   struct thread *child = get_child_thread(child_tid);
   int exit_status = -1;
-  
+
   // return if thread not exists on child list
   if (child == NULL)
 		return exit_status;
@@ -428,7 +428,7 @@ process_exit (void) {
   //   free(fd_entry);
   // }
   // lock_release(&file_lock);
-  //printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
+  printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
 
   // process cleanup
   process_cleanup ();
