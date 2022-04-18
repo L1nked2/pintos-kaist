@@ -246,6 +246,10 @@ __do_fork (void *aux) {
       // file_duplicate for first file
       struct file *old_file = fd_entry->fp;
       struct file *new_file = file_duplicate(fd_entry->fp);
+      if(new_file == NULL) {
+        // file_duplicate failed
+        goto error;
+      }
       // apply dup2() copy for rest of fd_entries
       for(e_t=e; e_t!=list_end(current_fdt); e_t=list_next(e_t)) {
         struct fd *fd_entry_t = list_entry(e_t, struct fd, fd_elem);
@@ -451,7 +455,7 @@ process_exit (void) {
   //   free(fd_entry);
   // }
   // lock_release(&file_lock);
-  printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
+  //printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
 
   // process cleanup
   process_cleanup ();
