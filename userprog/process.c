@@ -219,14 +219,20 @@ __do_fork (void *aux) {
     struct fd *dst_fd;
     dst_fd = (struct fd*)malloc(sizeof(struct fd));
     if(dst_fd == NULL) {
+      // malloc failed
       goto error;
     }
-    dst_fd->fp = file_duplicate(src_fd->fp);
+    if(src_fd->fp == STDIN || src_fd->fp == STDOUT) {
+      dst_fd->fp = src_fd->fp;
+    }
+    else {
+      dst_fd->fp = file_duplicate(src_fd->fp);
+    }
+    dst_fd->index = src_fd->index;
     if(dst_fd->fp == NULL) {
       free(dst_fd);
       goto error;
     }
-    dst_fd->index = src_fd->index;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
 	
