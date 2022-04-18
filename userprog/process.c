@@ -79,13 +79,22 @@ initd (void *f_name) {
 	struct fd *stdout_fd = (struct fd*)malloc(sizeof(struct fd));
 	stdin_fd->fp = STDIN;
 	stdin_fd->index = 0;
-  stdin_fd->dup_secure = true;
+  stdin_fd->fp_secure = false;
 	stdout_fd->fp = STDOUT;
 	stdout_fd->index = 1;
-  stdout_fd->dup_secure = true;
+  stdout_fd->fp_secure = false;
 	list_push_back(&thread_current()->fdt, &stdin_fd->fd_elem);
 	list_push_back(&thread_current()->fdt, &stdout_fd->fd_elem);
+  struct fd_dup *stdin_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
+	struct fd_dup *stdout_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
+  stdin_fd_dup->origin_index = 0;
+  stdin_fd_dup->index = 0;
+  stdout_fd_dup->origin_index = 1;
+  stdout_fd_dup->index = 1;
+  list_push_back(&thread_current()->fdt_dup, &stdin_fd_dup->fd_dup_elem);
+	list_push_back(&thread_current()->fdt_dup, &stdout_fd_dup->fd_dup_elem);
 
+  // load is done
   sema_up(&thread_current()->load_sema);
 
 	if (process_exec (f_name) < 0)
@@ -211,15 +220,19 @@ __do_fork (void *aux) {
 	 * TODO:       in include/filesys/file.h. Note that parent should not return
 	 * TODO:       from the fork() until this function successfully duplicates
 	 * TODO:       the resources of parent.*/
+
   // duplicate file objects
-  struct list_elem *e, *e_t;
+  struct list_elem *e;
   struct list* parent_fdt = &(parent->fdt);
+  struct list* parent_fdt_dup = &(parent->fdt_dup);
   struct list* current_fdt = &(current->fdt);
+  struct list* current_fdt_dup = &(current->fdt_dup);
   current->fdt_index = parent->fdt_index;
+  current->fdt_dup_index = parent->fdt_dup_index;
   current->stdin_cnt = parent->stdin_cnt;
   current->stdout_cnt = parent->stdout_cnt;
 
-  // deep-copy to current_fdt
+  // deep-copy parent fdt to current_fdt
   for(e=list_begin(parent_fdt); e!=list_end(parent_fdt); e=list_next(e)) {
     struct fd *src_fd = list_entry(e, struct fd, fd_elem);
     struct fd *dst_fd = (struct fd*)malloc(sizeof(struct fd));
@@ -227,40 +240,28 @@ __do_fork (void *aux) {
       // malloc failed
       goto error;
     }
-    dst_fd->fp = src_fd->fp;
+    dst_fd->fp = file_duplicate(src_fd->fp);
+    if(dst_fd->fp == NULL) {
+      // file_duplicate failed
+      dst_fd->fp_secure = false;
+      goto error;
+    }
+    dst_fd->fp_secure = true;
     dst_fd->index = src_fd->index;
-    dst_fd->dup_secure = false;
+    dst_fd->dup_cnt = src_fd->dup_cnt;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
 
-  // update fp and set dup_secure flag
-  for(e=list_begin(current_fdt); e!=list_end(current_fdt); e=list_next(e)) {
-    struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    if(fd_entry->fp == STDIN || fd_entry->fp == STDOUT) {
-      // cases for STDIN & STDOUT
-      // migrate without modifing
-      fd_entry->dup_secure = true;
+  // shallow-copy parent fdt_dup to current_fdt_dup
+  for(e=list_begin(parent_fdt_dup); e!=list_end(parent_fdt_dup); e=list_next(e)) {
+    struct fd_dup *src_fd_dup = list_entry(e, struct fd_dup, fd_dup_elem);
+    struct fd_dup *dst_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
+    if(dst_fd_dup == NULL) {
+      goto error;
     }
-    else if(fd_entry->dup_secure == false) {
-      // case for normal files that dup_secure is not set yet
-      // file_duplicate for first file
-      struct file *old_file = fd_entry->fp;
-      struct file *new_file = file_duplicate(fd_entry->fp);
-      if(new_file == NULL) {
-        // file_duplicate failed
-        goto error;
-      }
-      // apply dup2() copy for rest of fd_entries
-      for(e_t=e; e_t!=list_end(current_fdt); e_t=list_next(e_t)) {
-        struct fd *fd_entry_t = list_entry(e_t, struct fd, fd_elem);
-        if(fd_entry_t->fp == old_file) {
-          // update dup2() generated files
-          fd_entry_t->fp = new_file;
-          // set dup_secure flag
-          fd_entry_t->dup_secure = true;
-        }
-      }
-    }
+    dst_fd_dup->index = src_fd_dup->index;
+    dst_fd_dup->origin_index = src_fd_dup->origin_index;
+    list_push_back(current_fdt_dup, &(dst_fd_dup->fd_dup_elem));
   }
 
 	sema_up(&thread_current()->load_sema);
@@ -440,6 +441,7 @@ process_exit (void) {
   }
   // free fdt here? lets try
   struct list* fdt = &(curr->fdt);
+  struct list* fdt_dup = &(curr->fdt_dup);
   // for (int i=0; i<curr->fdt_index; i++)
   // {
   //   sys_close(i);
@@ -449,11 +451,16 @@ process_exit (void) {
   {
     struct list_elem *e = list_pop_front (fdt);
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    if(fd_entry->fp != NULL && fd_entry->fp != STDIN && fd_entry->fp != STDOUT && fd_entry->dup_secure == true) {
-      free(fd_entry->fp->inode);
+    if(fd_entry->fp_secure == true) {
       free(fd_entry->fp);
     }
     free(fd_entry);
+  }
+   while (!list_empty(fdt_dup))
+  {
+    struct list_elem *e = list_pop_front (fdt_dup);
+    struct fd_dup *fd_dup_entry = list_entry(e, struct fd_dup, fd_dup_elem);
+    free(fd_dup_entry);
   }
   lock_release(&file_lock);
   //printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);

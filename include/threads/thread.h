@@ -126,7 +126,9 @@ struct thread {
   struct list_elem child_elem;        /* list element of child threads */
   struct intr_frame *user_if;         /* intr_frame of userland */
   struct list fdt;                    /* file descriptor table. */
+  struct list fdt_dup;                /* file descriptor table for dup2 */
   int fdt_index;	                    /* index of current file descriptor (for open) */
+  int fdt_dup_index;	                    /* index of current file descriptor (for open) */
   bool is_user_thread;	              /* flag for user thread */
 
   int stdin_cnt;					  /* for dup2, count of stdin */

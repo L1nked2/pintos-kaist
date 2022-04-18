@@ -442,9 +442,11 @@ init_thread (struct thread *t, const char *name, int priority) {
   t->is_user_thread = false;
   list_init(&t->child_tids);
   list_init(&t->fdt);
+  list_init(&t->fdt_dup);
 	t->stdin_cnt = 1;
 	t->stdout_cnt = 1;
   t->fdt_index = FD_NR_START_INDEX;
+  t->fdt_dup_index = FD_NR_START_INDEX;
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should

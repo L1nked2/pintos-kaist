@@ -119,18 +119,34 @@ void validate_addr(const uint64_t *addr) {
   return;
 }
 
+// fd_dup search helper
+struct fd_dup *search_fd_dup(int fd) {
+  struct list_elem *e;
+	struct list* fdt_dup = &(thread_current()->fdt_dup);
+  for(e=list_begin(fdt_dup); e!=list_end(fdt_dup); e=list_next(e)) {
+    struct fd_dup *fd_dup_entry = list_entry(e, struct fd_dup, fd_dup_elem);
+    if(fd_dup_entry->index == fd) {
+      return fd_dup_entry;
+    }
+  }
+	return NULL;
+}
+
 // fd search helper
 struct fd *search_fd(int fd) {
   struct list_elem *e;
   struct list* fdt = &(thread_current()->fdt);
-	
+  int actual_index = -1;
+  struct fd_dup *fd_dup = search_fd_dup(fd);
+  if(fd_dup != NULL) {
+    actual_index = fd_dup->origin_index;
+  }
   for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    if(fd_entry->index == fd) {
+    if(fd_entry->index == actual_index) {
       return fd_entry;
     }
   }
-	
 	return NULL;
 }
 
@@ -184,33 +200,37 @@ bool sys_remove(const char *file) {
 
 int sys_open(const char *file) {
   validate_addr(file);
-  if(list_size(&thread_current()->fdt) > FD_MAX_INDEX) {
+  if(list_size(&thread_current()->fdt_dup) > FD_MAX_INDEX) {
     // fd table is too big
 		return -1;
   }
-
+  // allocate required fields
   struct fd* fd = (struct fd*)malloc(sizeof(struct fd));
-  if(fd == NULL) {
-      // cannot allocate more using malloc()
+  struct file *open_file = filesys_open(file);
+  struct fd_dup *fd_dup = (struct fd_dup *)malloc(sizeof(struct fd_dup));
+  if(fd == NULL || open_file == NULL || fd_dup == NULL) {
+      // cannot allocate more
+      free(fd);
+      file_close(open_file);
+      free(fd_dup);
       return -1; 
   }
-
-  struct file *open_file = filesys_open(file);
-  if(open_file == NULL) {
-    // cannot allocate more filesys_open()
-    free(fd);
-    return -1;
-  }
+  // add actual file to fdt
   fd->fp = open_file;
   fd->index = thread_current()->fdt_index;
-  fd->fp->dup_cnt = 1;
-  fd->dup_secure = true;
+  fd->dup_cnt = 1;
+  fd->fp_secure = true;
   list_push_back(&thread_current()->fdt, &fd->fd_elem);
   thread_current()->fdt_index += 1;
   // deny write to executable
   if(!strcmp(thread_current() -> name, file)) {
     file_deny_write(open_file);
   }
+  // add mapping to fdt_dup
+  fd_dup->index = thread_current()->fdt_dup_index;
+  fd_dup->origin_index = fd->index;
+  list_push_back(&thread_current()->fdt_dup, &fd_dup->fd_dup_elem);
+  thread_current()->fdt_dup_index += 1;
   return fd->index;
 }
 
@@ -302,37 +322,46 @@ unsigned sys_tell(int fd) {
 
 void sys_close(int fd) {
   lock_acquire(&file_lock);
+  struct fd_dup *fd_dup_entry = search_fd_dup(fd);
   struct fd *fd_entry = search_fd(fd);
-  // return if fd is not found
-  if(fd_entry == NULL) {
+  // return if fd_dup is not found
+  if(fd_dup_entry == NULL) {
     lock_release(&file_lock);
 	  return;
   }
   // STDIN, STDOUT case
   else if (fd_entry->fp == STDIN) {
     thread_current()->stdin_cnt -= 1;
-    list_remove(&fd_entry->fd_elem);
-    free(fd_entry);
+    list_remove(&fd_dup_entry->fd_dup_elem);
+    free(fd_dup_entry);
   }
   else if (fd_entry->fp == STDOUT) {
     thread_current()->stdout_cnt -= 1;
-    list_remove(&fd_entry->fd_elem);
-    free(fd_entry);
+    list_remove(&fd_dup_entry->fd_dup_elem);
+    free(fd_dup_entry);
   }
-  // normal fd case, reduce dup_cnt and close if zero
+  // normal fd_dup case
   else {
-    fd_entry->fp->dup_cnt -= 1;
-    if(fd_entry->fp->dup_cnt == 0) {
+    // reduce dup_cnt and close fd if zero
+    fd_entry->dup_cnt -= 1;
+    if(fd_entry->dup_cnt == 0) {
       file_close(fd_entry->fp);
+      list_remove(&fd_entry->fd_elem);
+      free(fd_entry);
     }
-    list_remove(&fd_entry->fd_elem);
-    free(fd_entry);
+    // delete fd_dup
+    list_remove(&fd_dup_entry->fd_dup_elem);
+    free(fd_dup_entry);
   } 
   lock_release(&file_lock);
 	return;
 }
 
 int sys_dup2(int oldfd, int newfd) {
+  if(list_size(&thread_current()->fdt_dup) > FD_MAX_INDEX) {
+    // fd table is too big
+		return -1;
+  }
   // check oldfd validity
   struct fd *old_fd = search_fd(oldfd);
   if (old_fd == NULL) {
@@ -344,27 +373,17 @@ int sys_dup2(int oldfd, int newfd) {
   }
   // check newfd is opened and close if true
   sys_close(newfd);
-  // make new_fd using old_fd and add to fdt
-  // update fdt_index to MAX(fdt_index, newfd)
-  struct list *cur_fdt = &(thread_current()->fdt);
-  struct fd *new_fd = (struct fd*)malloc(sizeof(struct fd));
-  new_fd->fp = old_fd->fp;
-  new_fd->index = newfd;
-  new_fd->dup_secure = true;
-  list_push_back(cur_fdt, &new_fd->fd_elem);
-  thread_current()->fdt_index = 
-    thread_current()->fdt_index > newfd ? thread_current()->fdt_index : newfd;
-  thread_current()->fdt_index += 1;
-  // add dup_cnt. for STDIN & STDOUT, add stdin&out cnt
-  if(new_fd->fp == STDIN) {
-    thread_current()->stdin_cnt += 1;
+  // make new_fd_dup using old_fd and add to fdt_dup
+  struct fd_dup *fd_dup = (struct fd_dup *)malloc(sizeof(struct fd_dup));
+  if(fd_dup == NULL) {
+    return -1;
   }
-  else if(new_fd->fp == STDOUT) {
-    thread_current()->stdout_cnt += 1;
-  }
-  else {
-    new_fd->fp->dup_cnt += 1;
-  }
+  fd_dup->index = thread_current()->fdt_dup_index;
+  fd_dup->origin_index = old_fd->index;
+  list_push_back(&thread_current()->fdt_dup, &fd_dup->fd_dup_elem);
+  thread_current()->fdt_dup_index += 1;
+  // increase dup_cnt of old_fd
+  old_fd->dup_cnt += 1;
   // return result
   return newfd;
 }
