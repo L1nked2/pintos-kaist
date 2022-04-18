@@ -221,6 +221,7 @@ __do_fork (void *aux) {
     if(dst_fd == NULL) {
       // malloc failed
       goto error;
+    }
     dst_fd->fp = src_fd->fp;
     dst_fd->index = src_fd->index;
     if(dst_fd->fp == NULL) {
