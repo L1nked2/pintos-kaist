@@ -240,13 +240,21 @@ __do_fork (void *aux) {
       // malloc failed
       goto error;
     }
-    dst_fd->fp = file_duplicate(src_fd->fp);
+    // handle stdin and stdout
+    if(src_fd->fp == STDIN || src_fd->fp == STDOUT) {
+      dst_fd->fp = src_fd->fp;
+      dst_fd->fp_secure = false;
+    }
+    // or just duplicate file
+    else {
+      dst_fd->fp = file_duplicate(src_fd->fp);
+      dst_fd->fp_secure = true;
+    }
+    // check if file_duplicate failed
     if(dst_fd->fp == NULL) {
-      // file_duplicate failed
       dst_fd->fp_secure = false;
       goto error;
     }
-    dst_fd->fp_secure = true;
     dst_fd->index = src_fd->index;
     dst_fd->dup_cnt = src_fd->dup_cnt;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
