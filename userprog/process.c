@@ -210,7 +210,7 @@ __do_fork (void *aux) {
 	 * TODO:       from the fork() until this function successfully duplicates
 	 * TODO:       the resources of parent.*/
   // duplicate file objects
-  struct list_elem *e;
+  struct list_elem *e, *e_t;
   struct list* parent_fdt = &(parent->fdt);
   struct list* current_fdt = &(current->fdt);
   current->fdt_index = parent->fdt_index;
@@ -221,19 +221,35 @@ __do_fork (void *aux) {
     if(dst_fd == NULL) {
       // malloc failed
       goto error;
-    }
-    if(src_fd->fp == STDIN || src_fd->fp == STDOUT) {
-      dst_fd->fp = src_fd->fp;
-    }
-    else {
-      dst_fd->fp = file_duplicate(src_fd->fp);
-    }
+    dst_fd->fp = src_fd->fp;
     dst_fd->index = src_fd->index;
     if(dst_fd->fp == NULL) {
       free(dst_fd);
       goto error;
     }
     list_push_back(current_fdt, &(dst_fd->fd_elem));
+  }
+
+  // alloc new file for fds that dup2() created
+  for(e=list_begin(current_fdt); e!=list_end(current_fdt); e=list_next(e)) {
+    struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+    if(fd_entry->fp > STDOUT) {
+      // duplicate file from sys_open()
+      struct file *file_dup = file_duplicate(fd_entry->fp);
+      // shallow copy via dup2()
+      int fd_dup_cnt = fd_entry->fp->dup_cnt;
+      for(e_t=e; e_t!=list_end(current_fdt); e_t=list_next(e_t)) {
+        if(fd_dup_cnt == 1) {
+          // no more duplicated file from dup2()
+          break;
+        }
+        struct fd *fd_entry_t = list_entry(e_t, struct fd, fd_elem);
+        if(fd_entry->fp == fd_entry_t->fp) {
+          fd_entry_t->fp = file_dup;
+          fd_dup_cnt -= 1;
+        }
+      }
+    }
   }
 	
 	sema_up(&thread_current()->load_sema);

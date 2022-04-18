@@ -119,16 +119,6 @@ void validate_addr(const uint64_t *addr) {
   return;
 }
 
-/* check whether file descriptor is valid or not*/
-bool validate_fd(int fd) {
-	if (fd < 0 || fd >= FD_MAX_INDEX) {
-		return false;
-	}
-	else {
-		return true;
-	}
-}
-
 // fd search helper
 struct fd *search_fd(int fd) {
   struct list_elem *e;
@@ -142,26 +132,6 @@ struct fd *search_fd(int fd) {
   }
 	
 	return NULL;
-}
-
-void remove_file(int fd) {
-  if (validate_fd(fd)) {
-    struct list_elem *e;
-    struct list *fdt = &(thread_current()->fdt);
-    for (e=list_begin(fdt); e!=list_end(fdt);) {
-      struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-      if (fd_entry->index == fd) {
-        file_close(fd_entry->fp);
-        e = list_remove(e);
-        free(fd_entry);
-        break;
-      }
-      else {
-        e = list_next(e);
-      }
-    }
-  }
-  return;
 }
 
 void sys_halt(void) {
@@ -216,29 +186,29 @@ int sys_open(const char *file) {
   validate_addr(file);
   if(list_size(&thread_current()->fdt) > FD_MAX_INDEX) {
     // fd table is too big
-		return;
+		return -1;
   }
+
+  struct fd* fd = (struct fd*)malloc(sizeof(struct fd));
+  if(fd == NULL) {
+      // cannot allocate more using malloc()
+      return -1; 
+  }
+
   struct file *open_file = filesys_open(file);
-  struct fd* fd;
   if(open_file == NULL) {
+    // cannot allocate more filesys_open()
+    free(fd);
     return -1;
   }
-  else {
-    fd = (struct fd*)malloc(sizeof(struct fd));
-    if(fd == NULL) {
-      // cannot allocate more using malloc()
-      file_close(open_file);
-      return -1; 
-    }
-    fd->fp = open_file;
-    fd->index = thread_current()->fdt_index;
-    fd->fp->dup_cnt = 1;
-    list_push_back(&thread_current()->fdt, &fd->fd_elem);
-    thread_current()->fdt_index += 1;
-    // deny write to executable
-    if(!strcmp(thread_current() -> name, file)) {
-      file_deny_write(open_file);
-    }
+  fd->fp = open_file;
+  fd->index = thread_current()->fdt_index;
+  fd->fp->dup_cnt = 1;
+  list_push_back(&thread_current()->fdt, &fd->fd_elem);
+  thread_current()->fdt_index += 1;
+  // deny write to executable
+  if(!strcmp(thread_current() -> name, file)) {
+    file_deny_write(open_file);
   }
   return fd->index;
 }
@@ -382,7 +352,7 @@ int sys_dup2(int oldfd, int newfd) {
   list_push_back(cur_fdt, &fd->fd_elem);
   thread_current()->fdt_index = 
     thread_current()->fdt_index > newfd ? thread_current()->fdt_index : newfd;
-   thread_current()->fdt_index += 1;
+  thread_current()->fdt_index += 1;
   // add dup_cnt. for STDIN & STDOUT, add stdin&out cnt
   if(fd->fp == STDIN) {
     thread_current()->stdin_cnt += 1;
