@@ -75,6 +75,16 @@ initd (void *f_name) {
   strlcpy(&thread_current()->name, name, strlen(name)+1);
   palloc_free_page(f_name_copy);
 
+  /* build up STDIN & STDOUT file descriptor*/
+  struct fd *stdin_fd = (struct fd*)malloc(sizeof(struct fd));
+	struct fd *stdout_fd = (struct fd*)malloc(sizeof(struct fd));
+	stdin_fd->fp = 1;
+	stdin_fd->index = 0;
+	stdout_fd->fp = 2;
+	stdout_fd->index = 1;
+	list_push_back(&thread_current()->fdt, &stdin_fd->fd_elem);
+	list_push_back(&thread_current()->fdt, &stdout_fd->fd_elem);
+  
 	if (process_exec (f_name) < 0)
 		PANIC("Fail to launch initd\n");
 	NOT_REACHED ();

@@ -442,14 +442,6 @@ init_thread (struct thread *t, const char *name, int priority) {
   t->is_user_thread = false;
   list_init(&t->child_tids);
   list_init(&t->fdt);
-	struct fd *stdin_fd = (struct fd*)malloc(sizeof(struct fd));
-	struct fd *stdout_fd = (struct fd*)malloc(sizeof(struct fd));
-	stdin_fd->fp = 1;
-	stdin_fd->index = 0;
-	stdout_fd->fp = 2;
-	stdout_fd->index = 1;
-	list_push_back(&t->fdt, &stdin_fd->fd_elem);
-	list_push_back(&t->fdt, &stdout_fd->fd_elem);
 	t->stdin_cnt = 1;
 	t->stdout_cnt = 1;
   t->fdt_index = FD_NR_START_INDEX;
