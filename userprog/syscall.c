@@ -265,7 +265,10 @@ int sys_read(int fd, void *buffer, unsigned size) {
   int result;
   lock_acquire(&file_lock);
   struct fd* fd_entry = search_fd(fd);
-  if(fd_entry->fp == STDIN) {
+  if(fd_entry == NULL) {
+    result = -1;
+  }
+  else if(fd_entry->fp == STDIN) {
     if (thread_current()->stdin_cnt == 0){
       result = -1;
     }
@@ -295,7 +298,10 @@ int sys_write(int fd, const void *buffer, unsigned size) {
   int result;
 	lock_acquire(&file_lock);
 	struct fd* fd_entry = search_fd(fd);
-  if (fd_entry->fp == STDOUT) {
+  if(fd_entry == NULL) {
+    result = -1;
+  }
+  else if (fd_entry->fp == STDOUT) {
     if (thread_current()->stdout_cnt == 0) {
       result = -1;
     }
