@@ -66,7 +66,6 @@ initd (void *f_name) {
 #ifdef VM
 	supplemental_page_table_init (&thread_current ()->spt);
 #endif
-	process_init ();
   /* save name for exit message */
   char *f_name_copy = palloc_get_page(PAL_ZERO);
   char *save_ptr;
@@ -84,7 +83,9 @@ initd (void *f_name) {
 	stdout_fd->index = 1;
 	list_push_back(&thread_current()->fdt, &stdin_fd->fd_elem);
 	list_push_back(&thread_current()->fdt, &stdout_fd->fd_elem);
-  
+
+  sema_up(&thread_current()->load_sema);
+
 	if (process_exec (f_name) < 0)
 		PANIC("Fail to launch initd\n");
 	NOT_REACHED ();
@@ -229,7 +230,7 @@ __do_fork (void *aux) {
     list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
 	
-	process_init ();
+	sema_up(&thread_current()->load_sema);
 
   // copy is_user_thread flag
   current->is_user_thread = parent->is_user_thread;
@@ -405,7 +406,7 @@ process_exit (void) {
   }
   // free fdt here? lets try
   struct list* fdt = &(curr->fdt);
-  for (int i=FD_NR_START_INDEX; i<curr->fdt_index; i++)
+  for (int i=0; i<curr->fdt_index; i++)
   {
     sys_close(i);
   }
