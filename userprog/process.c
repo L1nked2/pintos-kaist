@@ -224,6 +224,9 @@ __do_fork (void *aux) {
     }
     dst_fd->fp = src_fd->fp;
     dst_fd->index = src_fd->index;
+    if(dst_fd->fp > STDOUT) {
+      dst_fd->fp->dup_cnt = -1;
+    }
     if(dst_fd->fp == NULL) {
       free(dst_fd);
       goto error;
@@ -234,23 +237,19 @@ __do_fork (void *aux) {
   // alloc new file for fds that dup2() created
   for(e=list_begin(current_fdt); e!=list_end(current_fdt); e=list_next(e)) {
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    if(fd_entry->fp > STDOUT) {
+    if(fd_entry->fp > STDOUT && fd_entry->fp->dup_cnt < 0) {
       // duplicate file from sys_open()
       struct file *file_dup = file_duplicate(fd_entry->fp);
-      file_dup->dup_cnt = fd_entry->fp->dup_cnt;
-      // shallow copy via dup2()
-      int fd_dup_cnt = fd_entry->fp->dup_cnt;
+      // shallow copy via dup2(), re-count dup_cnt
+      int fd_dup_cnt = 0;
       for(e_t=e; e_t!=list_end(current_fdt); e_t=list_next(e_t)) {
-        if(fd_dup_cnt == 1) {
-          // no more duplicated file from dup2()
-          break;
-        }
         struct fd *fd_entry_t = list_entry(e_t, struct fd, fd_elem);
         if(fd_entry->fp == fd_entry_t->fp) {
           fd_entry_t->fp = file_dup;
-          fd_dup_cnt -= 1;
+          fd_dup_cnt +=1;
         }
       }
+      file_dup->dup_cnt = fd_dup_cnt;
     }
   }
 	
