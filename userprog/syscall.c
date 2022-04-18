@@ -325,7 +325,7 @@ void sys_close(int fd) {
   struct fd_dup *fd_dup_entry = search_fd_dup(fd);
   struct fd *fd_entry = search_fd(fd);
   // return if fd_dup is not found
-  if(fd_dup_entry == NULL) {
+  if(fd_dup_entry == NULL || fd_entry == NULL) {
     lock_release(&file_lock);
 	  return;
   }
@@ -344,7 +344,7 @@ void sys_close(int fd) {
   else {
     // reduce dup_cnt and close fd if zero
     fd_entry->dup_cnt -= 1;
-    if(fd_entry->dup_cnt == 0) {
+    if(fd_entry->dup_cnt <= 0) {
       file_close(fd_entry->fp);
       list_remove(&fd_entry->fd_elem);
       free(fd_entry);
