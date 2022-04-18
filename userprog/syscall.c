@@ -223,7 +223,7 @@ bool sys_remove(const char *file) {
 
 int sys_open(const char *file) {
   validate_addr(file);
-  if(!validate_fd(list_size(&thread_current()->fdt))) {
+  if(list_size(&thread_current()->fdt) > FD_MAX_INDEX) {
     // fd table is too big
 		return;
   }
