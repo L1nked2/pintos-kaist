@@ -460,7 +460,7 @@ process_exit (void) {
     struct list_elem *e = list_pop_front (fdt);
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
     if(fd_entry->fp_secure == true) {
-      free(fd_entry->fp);
+      file_close(fd_entry->fp);
     }
     free(fd_entry);
   }
