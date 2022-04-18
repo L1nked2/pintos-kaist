@@ -404,7 +404,9 @@ process_exit (void) {
   // {
   //   struct list_elem *e = list_pop_front (fdt);
   //   struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-  //   file_close(fd_entry->fp);
+  //   if(fd_entry->fp != NULL && fd_entry->fp != STDIN && fd_entry->fp != STDOUT) {
+  //     file_close(fd_entry->fp);
+  //   }
   //   free(fd_entry);
   // }
   // lock_release(&file_lock);

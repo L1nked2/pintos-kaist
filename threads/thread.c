@@ -188,19 +188,6 @@ thread_create (const char *name, int priority,
 	/* Initialize thread. */
 	init_thread (t, name, priority);
 	tid = t->tid = allocate_tid ();
-	
-	
-	t->fdt_index = 2;
-	struct fd *fd1;
-	struct fd *fd2;
-	fd1->fp = 1;
-	fd1->index = 0;
-	fd2->fp = 2;
-	fd2->index = 0;
-	list_push_back(&t->fdt, &fd1->fd_elem);
-	list_push_back(&t->fdt, &fd2->fd_elem);
-	t->stdin_cnt = 1;
-	t->stdout_cnt = 1;
 		
 	/* Call the kernel_thread if it scheduled.
 	 * Note) rdi is 1st argument, and rsi is 2nd argument. */
@@ -455,6 +442,16 @@ init_thread (struct thread *t, const char *name, int priority) {
   t->is_user_thread = false;
   list_init(&t->child_tids);
   list_init(&t->fdt);
+	struct fd *stdin_fd = (struct fd*)malloc(sizeof(struct fd));
+	struct fd *stdout_fd = (struct fd*)malloc(sizeof(struct fd));
+	stdin_fd->fp = 1;
+	stdin_fd->index = 0;
+	stdout_fd->fp = 2;
+	stdout_fd->index = 1;
+	list_push_back(&t->fdt, &stdin_fd->fd_elem);
+	list_push_back(&t->fdt, &stdout_fd->fd_elem);
+	t->stdin_cnt = 1;
+	t->stdout_cnt = 1;
   t->fdt_index = FD_NR_START_INDEX;
 }
 

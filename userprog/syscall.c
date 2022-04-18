@@ -13,9 +13,6 @@
 #include "filesys/file.h"		// for file system call.
 #include "threads/palloc.h" // for exec system call
 
-#define STDIN 1
-#define STDOUT 2
-
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 
@@ -132,26 +129,35 @@ bool validate_fd(int fd) {
 	}
 }
 
-/* search the file with file discriptor */
-static struct file *search_file(int fd) {
+// fd search helper
+struct fd *search_fd(int fd) {
   struct list_elem *e;
   struct list* fdt = &(thread_current()->fdt);
-	if (validate_fd(fd)) {
-		for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
-      struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-      if(fd_entry->index == fd) {
-        return fd_entry->fp;
-      }
+	
+  for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
+    struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
+    if(fd_entry->index == fd) {
+      return fd_entry;
     }
-	}
+  }
+	
 	return NULL;
+}
+
+/* search the file with file discriptor */
+static struct file *search_file(int fd) {
+  struct fd *fd_entry;
+  if(fd_entry = search_fd(fd) != NULL) {
+    return fd_entry -> fp;
+  }
+  return NULL;
 }
 
 void remove_file(int fd) {
   if (validate_fd(fd)) {
     struct list_elem *e;
     struct list *fdt = &(thread_current()->fdt);
-    for (e = list_begin(fdt); e != list_end(fdt);) {
+    for (e=list_begin(fdt); e!=list_end(fdt);) {
       struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
       if (fd_entry->index == fd) {
         file_close(fd_entry->fp);
@@ -235,6 +241,7 @@ int sys_open(const char *file) {
     }
     fd->fp = open_file;
     fd->index = thread_current()->fdt_index;
+    fd->fp->dup_cnt = 1;
     list_push_back(&thread_current()->fdt, &fd->fd_elem);
     thread_current()->fdt_index += 1;
     // deny write to executable
@@ -257,10 +264,9 @@ int sys_read(int fd, void *buffer, unsigned size) {
   validate_addr(buffer);
   int result;
   lock_acquire(&file_lock);
-  struct file* file = search_file(fd);
-  if(file == STDIN) {
+  struct fd* fd_entry = search_fd(fd);
+  if(fd_entry->fp == STDIN) {
     if (thread_current()->stdin_cnt == 0){
-      remove_file(fd);
       result = -1;
     }
     else {
@@ -274,11 +280,11 @@ int sys_read(int fd, void *buffer, unsigned size) {
       }
     }
   }
-  else if (file == NULL || fd == STDOUT) {
+  else if (fd_entry->fp == NULL || fd_entry->fp == STDOUT) {
 		result = -1;
 	}
   else {
-    result = file_read(search_file(fd), buffer, size);
+    result = file_read(fd_entry->fp, buffer, size);
   }
   lock_release(&file_lock);
 	return result;
@@ -288,10 +294,9 @@ int sys_write(int fd, const void *buffer, unsigned size) {
   validate_addr(buffer);
   int result;
 	lock_acquire(&file_lock);
-	struct file* file = search_file(fd);
-  if (file == STDOUT) {
+	struct fd* fd_entry = search_fd(fd);
+  if (fd_entry->fp == STDOUT) {
     if (thread_current()->stdout_cnt == 0) {
-      remove_file(fd);
       result = -1;
     }
     else {
@@ -299,11 +304,11 @@ int sys_write(int fd, const void *buffer, unsigned size) {
 		  result = size;
     }
 	}
-	else if (file == NULL || file == STDIN) {
+	else if (fd_entry->fp == NULL || fd_entry->fp == STDIN) {
 		result = -1;
 	}
   else {
-		result = file_write(file, buffer, size);
+		result = file_write(fd_entry->fp, buffer, size);
 	}
   lock_release(&file_lock);
 	return result;
@@ -329,66 +334,71 @@ unsigned sys_tell(int fd) {
 
 void sys_close(int fd) {
   lock_acquire(&file_lock);
-  // if(!validate_fd(fd)) {
-  //   lock_release(&file_lock);
-	// 	return;
-  // }
-  struct file *file = search_file(fd);
-  if (fd == 0 || file == STDIN) {
+  struct fd *fd_entry = search_fd(fd);
+  // return if fd is not found
+  if(fd_entry == NULL) {
+    lock_release(&file_lock);
+	  return;
+  }
+  // STDIN, STDOUT case
+  else if (fd_entry->fp == STDIN) {
     thread_current()->stdin_cnt -= 1;
-    remove_file(fd);
-    return;
+    if(thread_current()->stdin_cnt == 0) {
+      list_remove(&fd_entry->fd_elem);
+      free(fd_entry);
+    }
   }
-  else if (fd == 1 || file == STDOUT) {
+  else if (fd_entry->fp == STDOUT) {
     thread_current()->stdout_cnt -= 1;
-    remove_file(fd);
-    return;
+    if(thread_current()->stdout_cnt == 0) {
+      list_remove(&fd_entry->fd_elem);
+      free(fd_entry);
+    }
   }
-	remove_file(fd);
-  if (file->dup_cnt != 0) {
-    file->dup_cnt -= 1;
-  }
+  // normal fd case, reduce dup_cnt and close if zero
+  else {
+    fd_entry->fp->dup_cnt -= 1;
+    if(fd_entry->fp->dup_cnt == 0) {
+      file_close(fd_entry->fp);
+      list_remove(&fd_entry->fd_elem);
+      free(fd_entry);
+    }
+  } 
   lock_release(&file_lock);
 	return;
 }
 
 int sys_dup2(int oldfd, int newfd) {
-  struct file *file = search_file(oldfd);
-  if (file == NULL) {
-    return -1;                              /* newfd is not closed */
+  // check oldfd validity
+  struct fd *old_fd = search_fd(oldfd);
+  if (old_fd == NULL) {
+    return -1;
   }
+  // check if newfd is identical to oldfd
   if (oldfd == newfd) {
     return newfd;
   }
-  if (file == STDIN) {
+  // check newfd is opened and close if exists
+  sys_close(newfd);
+  // make new_fd using old_fd and add to fdt
+  // update fdt_index to MAX(fdt_index, newfd)
+  struct list *cur_fdt = &(thread_current()->fdt);
+  struct fd *fd = (struct fd*)malloc(sizeof(struct fd));
+  fd->fp = old_fd->fp;
+  fd->index = newfd;
+  list_push_back(cur_fdt, &fd->fd_elem);
+  thread_current()->fdt_index = 
+    thread_current()->fdt_index > newfd ? thread_current()->fdt_index : newfd;
+  // add dup_cnt. for STDIN & STDOUT, add stdin&out cnt
+  if(fd->fp == STDIN) {
     thread_current()->stdin_cnt += 1;
   }
-  else if (file == STDOUT) {
+  else if(fd->fp == STDOUT) {
     thread_current()->stdout_cnt += 1;
   }
   else {
-    file->dup_cnt += 1;
+    fd->fp->dup_cnt += 1;
   }
-  sys_close(newfd);
-  /* fdt of which index is newfd becomes file */
-  /* the case that we already has index of newfd */
-  struct list_elem *e;
-  struct list *cur_fdt = &(thread_current()->fdt);
-  for (e = list_begin(cur_fdt); e != list_end(cur_fdt); e = list_next(e)) {
-    struct fd *fd = list_entry(e, struct fd, fd_elem);
-    if (fd->index == newfd) {
-      fd->fp = file;
-      return newfd;
-    }
-    else {
-      continue;
-    }
-  }
-  /* the case that we do not have index of newfd */
-  struct fd *fd;
-  fd->fp = file;
-  fd->index = newfd;
-  list_push_back(cur_fdt, &fd->fd_elem);
-  thread_current()->fdt_index += 1;
+  // return result
   return newfd;
 }
