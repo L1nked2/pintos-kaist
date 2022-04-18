@@ -253,6 +253,7 @@ int sys_open(const char *file) {
 }
 
 int sys_filesize(int fd) {
+  printf("syscall_filsize : fd = %d\n", fd);
   int result;
   lock_acquire(&file_lock);
 	result = file_length(search_file(fd));
