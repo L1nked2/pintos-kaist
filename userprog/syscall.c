@@ -323,7 +323,7 @@ int sys_write(int fd, const void *buffer, unsigned size) {
 void sys_seek(int fd, unsigned position) {
   lock_acquire(&file_lock);
   if(fd >= FD_NR_START_INDEX) {
-	  search_file(fd)->pos = position;
+	  search_fd(fd)->fp->pos = position;
   }
   lock_release(&file_lock);
 }
