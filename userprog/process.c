@@ -237,6 +237,7 @@ __do_fork (void *aux) {
     if(fd_entry->fp > STDOUT) {
       // duplicate file from sys_open()
       struct file *file_dup = file_duplicate(fd_entry->fp);
+      file_dup->dup_cnt = fd_entry->fp->dup_cnt;
       // shallow copy via dup2()
       int fd_dup_cnt = fd_entry->fp->dup_cnt;
       for(e_t=e; e_t!=list_end(current_fdt); e_t=list_next(e_t)) {
