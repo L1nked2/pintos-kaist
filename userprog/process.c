@@ -232,7 +232,7 @@ __do_fork (void *aux) {
     dst_fd->dup_secure = false;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
-  printf("good until fork part1\n");
+  
   // update fp and set dup_secure flag
   for(e=list_begin(current_fdt); e!=list_end(current_fdt); e=list_next(e)) {
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
@@ -258,13 +258,12 @@ __do_fork (void *aux) {
       }
     }
   }
-  printf("good until fork part2\n");
-	
+
 	sema_up(&thread_current()->load_sema);
 
   // copy is_user_thread flag
   current->is_user_thread = parent->is_user_thread;
-printf("good until fork part3\n");
+
 	/* Finally, switch to the newly created process. */
 	if (succ)
 		do_iret (&if_);
