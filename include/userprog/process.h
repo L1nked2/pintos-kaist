@@ -23,6 +23,7 @@ struct fd{
   struct file* fp;            /* file pointer */
   int index;                  /* index of file descriptor */
   struct list_elem fd_elem;   /* file descriptor table list element */
+  bool dup_secure;
 };
 
 #endif /* userprog/process.h */

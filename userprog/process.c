@@ -213,13 +213,11 @@ __do_fork (void *aux) {
   struct list_elem *e, *e_t;
   struct list* parent_fdt = &(parent->fdt);
   struct list* current_fdt = &(current->fdt);
-  struct list temp_fdt;
-  list_init (&temp_fdt);
   current->fdt_index = parent->fdt_index;
   current->stdin_cnt = parent->stdin_cnt;
   current->stdout_cnt = parent->stdout_cnt;
 
-  // deep-copy to temp_fdt
+  // deep-copy to current_fdt
   for(e=list_begin(parent_fdt); e!=list_end(parent_fdt); e=list_next(e)) {
     struct fd *src_fd = list_entry(e, struct fd, fd_elem);
     struct fd *dst_fd;
@@ -230,35 +228,32 @@ __do_fork (void *aux) {
     }
     dst_fd->fp = src_fd->fp;
     dst_fd->index = src_fd->index;
-    list_push_back(&temp_fdt, &(dst_fd->fd_elem));
+    dst_fd->dup_secure = false;
+    list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
-  // update fp and migrate to current_fdt
-  // do until fully migrated
-  while(!list_empty(&temp_fdt)) {
-    // pick one fd_entry from front
-    e = list_begin(&temp_fdt);
+  // update fp and set dup_secure flag
+  for(e=list_begin(current_fdt); e!=list_end(current_fdt); e=list_next(e)) {
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    if(fd_entry->fp != NULL && fd_entry->fp != STDIN && fd_entry->fp != STDOUT) {
-      // case for normal files
-      // file_duplicate for first file
-      struct file *file_dup = file_duplicate(fd_entry->fp);
-      // apply dup2() copy for rest of fd_entries
-      for(e_t=e; e_t!=list_end(&temp_fdt); ) {
-        struct list_elem *next_t = list_next(e_t);
-        struct fd *fd_entry_t = list_entry(e_t, struct fd, fd_elem);
-        if(fd_entry->fp == fd_entry_t->fp) {
-          // update dup2() generated files
-          fd_entry_t->fp = file_dup;
-          // push_front updated elements
-          list_push_front(current_fdt, e_t);
-        }
-        e_t=next_t;
-      }
-    }
-    else {
+    if(fd_entry->fp == STDIN || fd_entry->fp == STDOUT) {
       // cases for STDIN & STDOUT
       // migrate without modifing
-      list_push_front(current_fdt, e);
+      fd_entry->dup_secure = true;
+    }
+    else if(fd_entry->dup_secure == false) {
+      // case for normal files that dup_secure is not set yet
+      // file_duplicate for first file
+      struct file *old_file = fd_entry->fp;
+      struct file *new_file = file_duplicate(fd_entry->fp);
+      // apply dup2() copy for rest of fd_entries
+      for(e_t=e; e_t!=list_end(current_fdt); e_t=list_next(e_t)) {
+        struct fd *fd_entry_t = list_entry(e_t, struct fd, fd_elem);
+        if(fd_entry_t->fp == old_file) {
+          // update dup2() generated files
+          fd_entry_t->fp = new_file;
+          // set dup_secure flag
+          fd_entry_t->dup_secure = true;
+        }
+      }
     }
   }
 	

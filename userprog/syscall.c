@@ -204,6 +204,7 @@ int sys_open(const char *file) {
   fd->fp = open_file;
   fd->index = thread_current()->fdt_index;
   fd->fp->dup_cnt = 1;
+  fd->dup_secure = true;
   list_push_back(&thread_current()->fdt, &fd->fd_elem);
   thread_current()->fdt_index += 1;
   // deny write to executable
@@ -349,6 +350,7 @@ int sys_dup2(int oldfd, int newfd) {
   struct fd *new_fd = (struct fd*)malloc(sizeof(struct fd));
   new_fd->fp = old_fd->fp;
   new_fd->index = newfd;
+  new_fd->dup_secure = true;
   list_push_back(cur_fdt, &new_fd->fd_elem);
   thread_current()->fdt_index = 
     thread_current()->fdt_index > newfd ? thread_current()->fdt_index : newfd;
