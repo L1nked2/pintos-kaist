@@ -378,10 +378,11 @@ int sys_dup2(int oldfd, int newfd) {
   if(fd_dup == NULL) {
     return -1;
   }
-  fd_dup->index = thread_current()->fdt_dup_index;
+  //fd_dup->index = thread_current()->fdt_dup_index;
+  fd_dup->index = newfd;
   fd_dup->origin_index = old_fd->index;
   list_push_back(&thread_current()->fdt_dup, &fd_dup->fd_dup_elem);
-  thread_current()->fdt_dup_index += 1;
+  //thread_current()->fdt_dup_index += 1;
   // increase dup_cnt of old_fd
   old_fd->dup_cnt += 1;
   // return result
