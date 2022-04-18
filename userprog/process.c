@@ -240,6 +240,9 @@ __do_fork (void *aux) {
     if(fd_entry->fp > STDOUT && fd_entry->fp->dup_cnt < 0) {
       // duplicate file from sys_open()
       struct file *file_dup = file_duplicate(fd_entry->fp);
+      if(file_dup == NULL) {
+        goto error;
+      }
       // shallow copy via dup2(), re-count dup_cnt
       int fd_dup_cnt = 0;
       for(e_t=e; e_t!=list_end(current_fdt); e_t=list_next(e_t)) {
@@ -445,7 +448,7 @@ process_exit (void) {
   //   free(fd_entry);
   // }
   // lock_release(&file_lock);
-  printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
+  //printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
 
   // process cleanup
   process_cleanup ();
