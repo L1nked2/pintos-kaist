@@ -395,6 +395,7 @@ int sys_dup2(int oldfd, int newfd) {
   list_push_back(cur_fdt, &fd->fd_elem);
   thread_current()->fdt_index = 
     thread_current()->fdt_index > newfd ? thread_current()->fdt_index : newfd;
+   thread_current()->fdt_index += 1;
   // add dup_cnt. for STDIN & STDOUT, add stdin&out cnt
   if(fd->fp == STDIN) {
     thread_current()->stdin_cnt += 1;

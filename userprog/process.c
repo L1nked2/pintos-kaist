@@ -240,7 +240,7 @@ __do_fork (void *aux) {
 
   // copy is_user_thread flag
   current->is_user_thread = parent->is_user_thread;
-  printf("__do_fork done\n");
+
 	/* Finally, switch to the newly created process. */
 	if (succ)
 		do_iret (&if_);
@@ -383,7 +383,7 @@ process_wait (tid_t child_tid) {
 	 * XXX:       implementing the process_wait. */
   struct thread *child = get_child_thread(child_tid);
   int exit_status = -1;
-  printf("waiting for %d\n", child_tid);
+  
   // return if thread not exists on child list
   if (child == NULL)
 		return exit_status;
