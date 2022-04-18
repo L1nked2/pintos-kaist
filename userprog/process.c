@@ -77,9 +77,9 @@ initd (void *f_name) {
   /* build up STDIN & STDOUT file descriptor*/
   struct fd *stdin_fd = (struct fd*)malloc(sizeof(struct fd));
 	struct fd *stdout_fd = (struct fd*)malloc(sizeof(struct fd));
-	stdin_fd->fp = 1;
+	stdin_fd->fp = STDIN;
 	stdin_fd->index = 0;
-	stdout_fd->fp = 2;
+	stdout_fd->fp = STDOUT;
 	stdout_fd->index = 1;
 	list_push_back(&thread_current()->fdt, &stdin_fd->fd_elem);
 	list_push_back(&thread_current()->fdt, &stdout_fd->fd_elem);
@@ -214,6 +214,10 @@ __do_fork (void *aux) {
   struct list* parent_fdt = &(parent->fdt);
   struct list* current_fdt = &(current->fdt);
   current->fdt_index = parent->fdt_index;
+  current->stdin_cnt = parent->stdin_cnt;
+  current->stdout_cnt = parent->stdout_cnt;
+
+  // deep-copy to current_fdt
   for(e=list_begin(parent_fdt); e!=list_end(parent_fdt); e=list_next(e)) {
     struct fd *src_fd = list_entry(e, struct fd, fd_elem);
     struct fd *dst_fd;
@@ -224,36 +228,33 @@ __do_fork (void *aux) {
     }
     dst_fd->fp = src_fd->fp;
     dst_fd->index = src_fd->index;
-    if(dst_fd->fp > STDOUT) {
-      dst_fd->fp->dup_cnt = -1;
-    }
-    if(dst_fd->fp == NULL) {
-      free(dst_fd);
-      goto error;
-    }
-    list_push_back(current_fdt, &(dst_fd->fd_elem));
+    list_push_back(&current, &(dst_fd->fd_elem));
   }
-
-  // alloc new file for fds that dup2() created
-  for(e=list_begin(current_fdt); e!=list_end(current_fdt); e=list_next(e)) {
+  // update fp of current_fdt
+  for(e=list_begin(current_fdt); e!=list_end(current_fdt); ) {
+    struct list_elem *next = list_next(e);
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    if(fd_entry->fp > STDOUT && fd_entry->fp->dup_cnt < 0) {
-      // duplicate file from sys_open()
+    if(fd_entry->fp != NULL && fd_entry->fp != STDIN && fd_entry->fp != STDOUT) {
+      // case for normal files
+      // file_duplicate for first file
       struct file *file_dup = file_duplicate(fd_entry->fp);
-      if(file_dup == NULL) {
-        goto error;
-      }
-      // shallow copy via dup2(), re-count dup_cnt
-      int fd_dup_cnt = 0;
-      for(e_t=e; e_t!=list_end(current_fdt); e_t=list_next(e_t)) {
+      for(e_t=e; e_t!=list_end(current_fdt); ) {
+        struct list_elem *next_t = list_next(e_t);
         struct fd *fd_entry_t = list_entry(e_t, struct fd, fd_elem);
         if(fd_entry->fp == fd_entry_t->fp) {
+          // update dup2() generated files
           fd_entry_t->fp = file_dup;
-          fd_dup_cnt +=1;
+          // push_front updated elements
+          list_push_front(current_fdt, e_t);
         }
+        e_t=next_t;
       }
-      file_dup->dup_cnt = fd_dup_cnt;
+      // update first element too
+      fd_entry->fp = file_dup;
     }
+    // push_front element that is updated
+    list_push_front(current_fdt, e);
+    e = next;
   }
 	
 	sema_up(&thread_current()->load_sema);

@@ -230,7 +230,7 @@ int sys_read(int fd, void *buffer, unsigned size) {
     result = -1;
   }
   else if(fd_entry->fp == STDIN) {
-    if (thread_current()->stdin_cnt == 0){
+    if (thread_current()->stdin_cnt <= 0){
       result = -1;
     }
     else {
@@ -263,7 +263,7 @@ int sys_write(int fd, const void *buffer, unsigned size) {
     result = -1;
   }
   else if (fd_entry->fp == STDOUT) {
-    if (thread_current()->stdout_cnt == 0) {
+    if (thread_current()->stdout_cnt <= 0) {
       result = -1;
     }
     else {
@@ -346,22 +346,22 @@ int sys_dup2(int oldfd, int newfd) {
   // make new_fd using old_fd and add to fdt
   // update fdt_index to MAX(fdt_index, newfd)
   struct list *cur_fdt = &(thread_current()->fdt);
-  struct fd *fd = (struct fd*)malloc(sizeof(struct fd));
-  fd->fp = old_fd->fp;
-  fd->index = newfd;
-  list_push_back(cur_fdt, &fd->fd_elem);
+  struct fd *new_fd = (struct fd*)malloc(sizeof(struct fd));
+  new_fd->fp = old_fd->fp;
+  new_fd->index = newfd;
+  list_push_back(cur_fdt, &new_fd->fd_elem);
   thread_current()->fdt_index = 
     thread_current()->fdt_index > newfd ? thread_current()->fdt_index : newfd;
   thread_current()->fdt_index += 1;
   // add dup_cnt. for STDIN & STDOUT, add stdin&out cnt
-  if(fd->fp == STDIN) {
+  if(new_fd->fp == STDIN) {
     thread_current()->stdin_cnt += 1;
   }
-  else if(fd->fp == STDOUT) {
+  else if(new_fd->fp == STDOUT) {
     thread_current()->stdout_cnt += 1;
   }
   else {
-    fd->fp->dup_cnt += 1;
+    new_fd->fp->dup_cnt += 1;
   }
   // return result
   return newfd;
