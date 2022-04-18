@@ -232,7 +232,7 @@ __do_fork (void *aux) {
     dst_fd->dup_secure = false;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
-  
+
   // update fp and set dup_secure flag
   for(e=list_begin(current_fdt); e!=list_end(current_fdt); e=list_next(e)) {
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
@@ -451,7 +451,7 @@ process_exit (void) {
   //   free(fd_entry);
   // }
   // lock_release(&file_lock);
-  //printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
+  printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
 
   // process cleanup
   process_cleanup ();
