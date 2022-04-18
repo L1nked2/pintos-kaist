@@ -79,8 +79,10 @@ initd (void *f_name) {
 	struct fd *stdout_fd = (struct fd*)malloc(sizeof(struct fd));
 	stdin_fd->fp = STDIN;
 	stdin_fd->index = 0;
+  stdin_fd->dup_secure = true;
 	stdout_fd->fp = STDOUT;
 	stdout_fd->index = 1;
+  stdout_fd->dup_secure = true;
 	list_push_back(&thread_current()->fdt, &stdin_fd->fd_elem);
 	list_push_back(&thread_current()->fdt, &stdout_fd->fd_elem);
 
@@ -220,8 +222,7 @@ __do_fork (void *aux) {
   // deep-copy to current_fdt
   for(e=list_begin(parent_fdt); e!=list_end(parent_fdt); e=list_next(e)) {
     struct fd *src_fd = list_entry(e, struct fd, fd_elem);
-    struct fd *dst_fd;
-    dst_fd = (struct fd*)malloc(sizeof(struct fd));
+    struct fd *dst_fd = (struct fd*)malloc(sizeof(struct fd));
     if(dst_fd == NULL) {
       // malloc failed
       goto error;
@@ -231,6 +232,7 @@ __do_fork (void *aux) {
     dst_fd->dup_secure = false;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
+  printf("good until fork part1\n");
   // update fp and set dup_secure flag
   for(e=list_begin(current_fdt); e!=list_end(current_fdt); e=list_next(e)) {
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
@@ -256,12 +258,13 @@ __do_fork (void *aux) {
       }
     }
   }
+  printf("good until fork part2\n");
 	
 	sema_up(&thread_current()->load_sema);
 
   // copy is_user_thread flag
   current->is_user_thread = parent->is_user_thread;
-
+printf("good until fork part3\n");
 	/* Finally, switch to the newly created process. */
 	if (succ)
 		do_iret (&if_);

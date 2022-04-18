@@ -342,7 +342,7 @@ int sys_dup2(int oldfd, int newfd) {
   if (oldfd == newfd) {
     return newfd;
   }
-  // check newfd is opened and close if exists
+  // check newfd is opened and close if true
   sys_close(newfd);
   // make new_fd using old_fd and add to fdt
   // update fdt_index to MAX(fdt_index, newfd)
