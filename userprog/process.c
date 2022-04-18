@@ -214,6 +214,8 @@ __do_fork (void *aux) {
   struct list* parent_fdt = &(parent->fdt);
   struct list* current_fdt = &(current->fdt);
   current->fdt_index = parent->fdt_index;
+  sys_close(0);
+  sys_close(1);
   for(e=list_begin(parent_fdt); e!=list_end(parent_fdt); e=list_next(e)) {
     struct fd *src_fd = list_entry(e, struct fd, fd_elem);
     struct fd *dst_fd;
