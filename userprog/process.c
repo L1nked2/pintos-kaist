@@ -194,6 +194,7 @@ __do_fork (void *aux) {
 	/* TODO: somehow pass the parent_if. (i.e. process_fork()'s if_) */
   struct intr_frame *parent_if = parent->user_if;
 	bool succ = true;
+  bool debug = true;
 
 	/* 1. Read the cpu context to local stack. */
 	memcpy (&if_, parent_if, sizeof (struct intr_frame));
@@ -203,6 +204,8 @@ __do_fork (void *aux) {
 	/* 2. Duplicate PT */
 	current->pml4 = pml4_create();
 	if (current->pml4 == NULL)
+    if(debug)
+      printf("error on pml4_create\n");
 		goto error;
 
 	process_activate (current);
@@ -212,6 +215,8 @@ __do_fork (void *aux) {
 		goto error;
 #else
 	if (!pml4_for_each (parent->pml4, duplicate_pte, parent))
+    if(debug)
+      printf("error on pml4_for_each\n");
 		goto error;
 #endif
 
@@ -238,6 +243,8 @@ __do_fork (void *aux) {
     struct fd *dst_fd = (struct fd*)malloc(sizeof(struct fd));
     if(dst_fd == NULL) {
       // malloc failed
+      if(debug)
+        printf("error on malloc 1\n");
       goto error;
     }
     // handle stdin and stdout
@@ -252,13 +259,14 @@ __do_fork (void *aux) {
       // check if file_duplicate failed
       if(dst_fd->fp == NULL) {
         free(dst_fd);
+        if(debug)
+          printf("error on file_duplicate\n");
         goto error;
       }
     }
     dst_fd->index = src_fd->index;
     dst_fd->dup_cnt = src_fd->dup_cnt;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
-    //printf("fd duplicated: index= %d, fp= %p, dup_cnt= %d\n", dst_fd->index, dst_fd->fp,dst_fd->dup_cnt);
   }
 
   // shallow-copy parent fdt_dup to current_fdt_dup
@@ -266,12 +274,13 @@ __do_fork (void *aux) {
     struct fd_dup *src_fd_dup = list_entry(e, struct fd_dup, fd_dup_elem);
     struct fd_dup *dst_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
     if(dst_fd_dup == NULL) {
+      if(debug)
+        printf("error on malloc 2\n");
       goto error;
     }
     dst_fd_dup->index = src_fd_dup->index;
     dst_fd_dup->origin_index = src_fd_dup->origin_index;
     list_push_back(current_fdt_dup, &(dst_fd_dup->fd_dup_elem));
-    //printf("fd_dup duplicated: index: %d, origin: %d\n", dst_fd_dup->index, dst_fd_dup->origin_index);
   }
 
 	sema_up(&thread_current()->load_sema);
@@ -452,10 +461,6 @@ process_exit (void) {
   // free fdt here? lets try
   struct list* fdt = &(curr->fdt);
   struct list* fdt_dup = &(curr->fdt_dup);
-  // for (int i=0; i<curr->fdt_index; i++)
-  // {
-  //   sys_close(i);
-  // }
   lock_acquire(&file_lock);
   while (!list_empty(fdt))
   {
