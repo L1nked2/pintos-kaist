@@ -136,14 +136,13 @@ struct fd_dup *search_fd_dup(int fd) {
 struct fd *search_fd(int fd) {
   struct list_elem *e;
   struct list* fdt = &(thread_current()->fdt);
-  int actual_index = -1;
   struct fd_dup *fd_dup = search_fd_dup(fd);
-  if(fd_dup != NULL) {
-    actual_index = fd_dup->origin_index;
+  if(fd_dup == NULL) {
+    return NULL;
   }
   for(e=list_begin(fdt); e!=list_end(fdt); e=list_next(e)) {
     struct fd *fd_entry = list_entry(e, struct fd, fd_elem);
-    if(fd_entry->index == actual_index) {
+    if(fd_entry->index == fd_dup->origin_index) {
       return fd_entry;
     }
   }
@@ -231,7 +230,7 @@ int sys_open(const char *file) {
   fd_dup->origin_index = fd->index;
   list_push_back(&thread_current()->fdt_dup, &fd_dup->fd_dup_elem);
   thread_current()->fdt_dup_index += 1;
-  return fd->index;
+  return fd_dup->index;
 }
 
 int sys_filesize(int fd) {
@@ -321,7 +320,6 @@ unsigned sys_tell(int fd) {
 }
 
 void sys_close(int fd) {
-  printf("close start for %d\n", fd);
   lock_acquire(&file_lock);
   struct fd_dup *fd_dup_entry = search_fd_dup(fd);
   struct fd *fd_entry = search_fd(fd);
@@ -345,7 +343,7 @@ void sys_close(int fd) {
   else {
     // reduce dup_cnt and close fd if zero
     fd_entry->dup_cnt -= 1;
-    if(fd_entry->dup_cnt <= 0) {
+    if(fd_entry->dup_cnt == 0) {
       file_close(fd_entry->fp);
       list_remove(&fd_entry->fd_elem);
       free(fd_entry);
@@ -355,7 +353,6 @@ void sys_close(int fd) {
     free(fd_dup_entry);
   } 
   lock_release(&file_lock);
-  printf("close done for %d\n", fd);
 	return;
 }
 
