@@ -249,11 +249,11 @@ __do_fork (void *aux) {
     else {
       dst_fd->fp = file_duplicate(src_fd->fp);
       dst_fd->fp_secure = true;
-    }
-    // check if file_duplicate failed
-    if(dst_fd->fp == NULL) {
-      dst_fd->fp_secure = false;
-      goto error;
+      // check if file_duplicate failed
+      if(dst_fd->fp == NULL) {
+        dst_fd->fp_secure = false;
+        goto error;
+      }
     }
     dst_fd->index = src_fd->index;
     dst_fd->dup_cnt = src_fd->dup_cnt;
@@ -454,7 +454,7 @@ process_exit (void) {
   // {
   //   sys_close(i);
   // }
-  lock_acquire(&file_lock);
+  //lock_acquire(&file_lock);
   while (!list_empty(fdt))
   {
     struct list_elem *e = list_pop_front (fdt);
@@ -470,7 +470,7 @@ process_exit (void) {
     struct fd_dup *fd_dup_entry = list_entry(e, struct fd_dup, fd_dup_elem);
     free(fd_dup_entry);
   }
-  lock_release(&file_lock);
+  //lock_release(&file_lock);
   //printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
 
   // process cleanup
