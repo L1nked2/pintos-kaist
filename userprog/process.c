@@ -203,10 +203,11 @@ __do_fork (void *aux) {
 
 	/* 2. Duplicate PT */
 	current->pml4 = pml4_create();
-	if (current->pml4 == NULL)
+	if (current->pml4 == NULL) {
     if(debug)
       printf("error on pml4_create\n");
 		goto error;
+  }
 
 	process_activate (current);
 #ifdef VM
@@ -214,10 +215,11 @@ __do_fork (void *aux) {
 	if (!supplemental_page_table_copy (&current->spt, &parent->spt))
 		goto error;
 #else
-	if (!pml4_for_each (parent->pml4, duplicate_pte, parent))
+	if (!pml4_for_each (parent->pml4, duplicate_pte, parent)) {
     if(debug)
       printf("error on pml4_for_each\n");
 		goto error;
+  }
 #endif
 
 	/* TODO: Your code goes here.
