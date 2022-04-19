@@ -211,9 +211,11 @@ int sys_open(const char *file) {
   struct fd_dup *fd_dup = (struct fd_dup *)palloc_get_page(PAL_ZERO);
   if(fd == NULL || open_file == NULL || fd_dup == NULL) {
       // cannot allocate more
-      free(fd);
       file_close(open_file);
-      free(fd_dup);
+      //free(fd);
+      //free(fd_dup);
+      palloc_free_page(fd);
+      palloc_free_page(fd_dup);
       return -1; 
   }
   // add actual file to fdt
@@ -336,12 +338,14 @@ void sys_close(int fd) {
   else if (fd_entry->fp == STDIN) {
     thread_current()->stdin_cnt -= 1;
     list_remove(&fd_dup_entry->fd_dup_elem);
-    free(fd_dup_entry);
+    //free(fd_dup_entry);
+    palloc_free_page(fd_dup_entry);
   }
   else if (fd_entry->fp == STDOUT) {
     thread_current()->stdout_cnt -= 1;
     list_remove(&fd_dup_entry->fd_dup_elem);
-    free(fd_dup_entry);
+    //free(fd_dup_entry);
+    palloc_free_page(fd_dup_entry);
   }
   // normal fd_dup case
   else {
@@ -350,11 +354,13 @@ void sys_close(int fd) {
     if(fd_entry->dup_cnt == 0) {
       file_close(fd_entry->fp);
       list_remove(&fd_entry->fd_elem);
-      free(fd_entry);
+      //free(fd_entry);
+      palloc_free_page(fd_entry);
     }
     // delete fd_dup
     list_remove(&fd_dup_entry->fd_dup_elem);
-    free(fd_dup_entry);
+    //free(fd_dup_entry);
+    palloc_free_page(fd_dup_entry);
   } 
   lock_release(&file_lock);
 	return;
