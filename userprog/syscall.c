@@ -386,8 +386,17 @@ int sys_dup2(int oldfd, int newfd) {
   thread_current()->fdt_dup_index =
    thread_current()->fdt_dup_index > newfd ? thread_current()->fdt_dup_index : newfd;
   thread_current()->fdt_dup_index += 1;
+  // increase stdin_cnt or stdout_cnt is it is the case that
+  if(old_fd->fp == STDIN) {
+    thread_current()->stdin_cnt += 1;
+  }
+  else if(old_fd->fp == STDOUT) {
+    thread_current()->stdout_cnt += 1;
+  }
   // increase dup_cnt of old_fd
-  old_fd->dup_cnt += 1;
+  else {
+    old_fd->dup_cnt += 1;
+  }
   // return result
   return newfd;
 }
