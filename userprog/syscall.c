@@ -304,7 +304,7 @@ int sys_write(int fd, const void *buffer, unsigned size) {
 void sys_seek(int fd, unsigned position) {
   lock_acquire(&file_lock);
   struct fd* fd_entry = search_fd(fd);
-  if(fd_entry->fp_secure == true) {
+  if(fd_entry != NULL && fd_entry->fp_secure == true) {
 	  fd_entry->fp->pos = position;
   }
   lock_release(&file_lock);
@@ -314,7 +314,7 @@ unsigned sys_tell(int fd) {
   unsigned result = 0;
   lock_acquire(&file_lock);
   struct fd* fd_entry = search_fd(fd);
-  if(fd_entry->fp_secure == true) {
+  if(fd_entry != NULL && fd_entry->fp_secure == true) {
 	  result = file_tell(fd_entry->fp);
   }
   lock_release(&file_lock);
