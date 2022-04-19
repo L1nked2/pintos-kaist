@@ -322,7 +322,6 @@ unsigned sys_tell(int fd) {
 }
 
 void sys_close(int fd) {
-  printf("close start for %d\n", fd);
   lock_acquire(&file_lock);
   struct fd_dup *fd_dup_entry = search_fd_dup(fd);
   struct fd *fd_entry = search_fd(fd);
@@ -356,7 +355,6 @@ void sys_close(int fd) {
     free(fd_dup_entry);
   } 
   lock_release(&file_lock);
-  printf("close done for %d\n", fd);
 	return;
 }
 

@@ -258,7 +258,7 @@ __do_fork (void *aux) {
     dst_fd->index = src_fd->index;
     dst_fd->dup_cnt = src_fd->dup_cnt;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
-    printf("fd duplicated: index= %d, fp= %p, dup_cnt= %d\n", dst_fd->index, dst_fd->fp,dst_fd->dup_cnt);
+    //printf("fd duplicated: index= %d, fp= %p, dup_cnt= %d\n", dst_fd->index, dst_fd->fp,dst_fd->dup_cnt);
   }
 
   // shallow-copy parent fdt_dup to current_fdt_dup
@@ -271,7 +271,7 @@ __do_fork (void *aux) {
     dst_fd_dup->index = src_fd_dup->index;
     dst_fd_dup->origin_index = src_fd_dup->origin_index;
     list_push_back(current_fdt_dup, &(dst_fd_dup->fd_dup_elem));
-    printf("fd_dup duplicated: index: %d, origin: %d\n", dst_fd_dup->index, dst_fd_dup->origin_index);
+    //printf("fd_dup duplicated: index: %d, origin: %d\n", dst_fd_dup->index, dst_fd_dup->origin_index);
   }
 
 	sema_up(&thread_current()->load_sema);
