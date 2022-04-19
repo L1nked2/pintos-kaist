@@ -258,7 +258,7 @@ __do_fork (void *aux) {
     dst_fd->index = src_fd->index;
     dst_fd->dup_cnt = src_fd->dup_cnt;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
-    printf("fd duplicated: index: %d, fp: %p\n", dst_fd->index, dst_fd->fp);
+    printf("fd duplicated: index= %d, fp= %p, dup_cnt= %d\n", dst_fd->index, dst_fd->fp,dst_fd->dup_cnt);
   }
 
   // shallow-copy parent fdt_dup to current_fdt_dup
