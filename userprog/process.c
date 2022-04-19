@@ -258,6 +258,7 @@ __do_fork (void *aux) {
     dst_fd->index = src_fd->index;
     dst_fd->dup_cnt = src_fd->dup_cnt;
     list_push_back(current_fdt, &(dst_fd->fd_elem));
+    printf("fd duplicated: index: %d, fp: %p\n", dst_fd->index, dst_fd->fp);
   }
 
   // shallow-copy parent fdt_dup to current_fdt_dup
@@ -270,6 +271,7 @@ __do_fork (void *aux) {
     dst_fd_dup->index = src_fd_dup->index;
     dst_fd_dup->origin_index = src_fd_dup->origin_index;
     list_push_back(current_fdt_dup, &(dst_fd_dup->fd_dup_elem));
+    printf("fd_dup duplicated: index: %d, origin: %d\n", dst_fd_dup->index, dst_fd_dup->origin_index);
   }
 
 	sema_up(&thread_current()->load_sema);
@@ -454,7 +456,7 @@ process_exit (void) {
   // {
   //   sys_close(i);
   // }
-  //lock_acquire(&file_lock);
+  lock_acquire(&file_lock);
   while (!list_empty(fdt))
   {
     struct list_elem *e = list_pop_front (fdt);
@@ -470,7 +472,7 @@ process_exit (void) {
     struct fd_dup *fd_dup_entry = list_entry(e, struct fd_dup, fd_dup_elem);
     free(fd_dup_entry);
   }
-  //lock_release(&file_lock);
+  lock_release(&file_lock);
   //printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);
 
   // process cleanup
