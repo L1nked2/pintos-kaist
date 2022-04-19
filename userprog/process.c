@@ -75,8 +75,15 @@ initd (void *f_name) {
   palloc_free_page(f_name_copy);
 
   /* build up STDIN & STDOUT file descriptor*/
-  struct fd *stdin_fd = (struct fd*)malloc(sizeof(struct fd));
-	struct fd *stdout_fd = (struct fd*)malloc(sizeof(struct fd));
+  //struct fd *stdin_fd = (struct fd*)malloc(sizeof(struct fd));
+	//struct fd *stdout_fd = (struct fd*)malloc(sizeof(struct fd));
+  //struct fd_dup *stdin_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
+	//struct fd_dup *stdout_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
+  struct fd *stdin_fd = (struct fd*)palloc_get_page(PAL_ZERO);
+  struct fd *stdout_fd = (struct fd*)palloc_get_page(PAL_ZERO);
+  struct fd_dup *stdin_fd_dup = (struct fd_dup*)palloc_get_page(PAL_ZERO);
+	struct fd_dup *stdout_fd_dup = (struct fd_dup*)palloc_get_page(PAL_ZERO);
+
 	stdin_fd->fp = STDIN;
 	stdin_fd->index = 0;
   stdin_fd->fp_secure = false;
@@ -85,8 +92,7 @@ initd (void *f_name) {
   stdout_fd->fp_secure = false;
 	list_push_back(&thread_current()->fdt, &stdin_fd->fd_elem);
 	list_push_back(&thread_current()->fdt, &stdout_fd->fd_elem);
-  struct fd_dup *stdin_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
-	struct fd_dup *stdout_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
+  
   stdin_fd_dup->origin_index = 0;
   stdin_fd_dup->index = 0;
   stdout_fd_dup->origin_index = 1;
@@ -242,7 +248,8 @@ __do_fork (void *aux) {
   // deep-copy parent fdt to current_fdt
   for(e=list_begin(parent_fdt); e!=list_end(parent_fdt); e=list_next(e)) {
     struct fd *src_fd = list_entry(e, struct fd, fd_elem);
-    struct fd *dst_fd = (struct fd*)malloc(sizeof(struct fd));
+    ///struct fd *dst_fd = (struct fd*)malloc(sizeof(struct fd));
+    struct fd *dst_fd = (struct fd*)palloc_get_page(PAL_ZERO);
     if(dst_fd == NULL) {
       // malloc failed
       if(debug)
@@ -260,7 +267,8 @@ __do_fork (void *aux) {
       dst_fd->fp_secure = true;
       // check if file_duplicate failed
       if(dst_fd->fp == NULL) {
-        free(dst_fd);
+        //free(dst_fd);
+        palloc_free_page(dst_fd);
         if(debug)
           printf("error on file_duplicate\n");
         goto error;
@@ -274,7 +282,8 @@ __do_fork (void *aux) {
   // shallow-copy parent fdt_dup to current_fdt_dup
   for(e=list_begin(parent_fdt_dup); e!=list_end(parent_fdt_dup); e=list_next(e)) {
     struct fd_dup *src_fd_dup = list_entry(e, struct fd_dup, fd_dup_elem);
-    struct fd_dup *dst_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
+    //struct fd_dup *dst_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
+    struct fd_dup *dst_fd_dup = (struct fd_dup*)palloc_get_page(PAL_ZERO);
     if(dst_fd_dup == NULL) {
       if(debug)
         printf("error on malloc 2\n");
@@ -471,13 +480,15 @@ process_exit (void) {
     if(fd_entry->fp != STDIN && fd_entry->fp != STDOUT) {
       file_close(fd_entry->fp);
     }
-    free(fd_entry);
+    //free(fd_entry);
+    palloc_free_page(fd_entry);
   }
    while (!list_empty(fdt_dup))
   {
     struct list_elem *e = list_pop_front (fdt_dup);
     struct fd_dup *fd_dup_entry = list_entry(e, struct fd_dup, fd_dup_elem);
-    free(fd_dup_entry);
+    //free(fd_dup_entry);
+    palloc_free_page(fd_dup_entry);
   }
   lock_release(&file_lock);
   //printf("fdt for %s is clean now?: %d, fdt_index = %d\n", curr->name,list_size(fdt),curr->fdt_index);

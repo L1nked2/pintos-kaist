@@ -30,6 +30,7 @@
     "exception.h": "c",
     "malloc.h": "c",
     "inode.h": "c",
-    "palloc.h": "c"
+    "palloc.h": "c",
+    "vaddr.h": "c"
   },
 }

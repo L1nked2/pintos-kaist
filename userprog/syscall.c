@@ -204,9 +204,11 @@ int sys_open(const char *file) {
 		return -1;
   }
   // allocate required fields
-  struct fd* fd = (struct fd*)malloc(sizeof(struct fd));
+  //struct fd* fd = (struct fd*)malloc(sizeof(struct fd));
+  //struct fd_dup *fd_dup = (struct fd_dup *)malloc(sizeof(struct fd_dup));
   struct file *open_file = filesys_open(file);
-  struct fd_dup *fd_dup = (struct fd_dup *)malloc(sizeof(struct fd_dup));
+  struct fd* fd = (struct fd*)palloc_get_page(PAL_ZERO);
+  struct fd_dup *fd_dup = (struct fd_dup *)palloc_get_page(PAL_ZERO);
   if(fd == NULL || open_file == NULL || fd_dup == NULL) {
       // cannot allocate more
       free(fd);
@@ -373,13 +375,14 @@ int sys_dup2(int oldfd, int newfd) {
     return newfd;
   }
   // make new_fd_dup using old_fd and add to fdt_dup
-  struct fd_dup *fd_dup = (struct fd_dup *)malloc(sizeof(struct fd_dup));
+  //struct fd_dup *fd_dup = (struct fd_dup *)malloc(sizeof(struct fd_dup));
+  struct fd_dup *fd_dup = (struct fd_dup *)palloc_get_page(PAL_ZERO);
   if(fd_dup == NULL) {
     return -1;
   }
   // check newfd is opened and close if true
   sys_close(newfd);
-  
+
   //fd_dup->index = thread_current()->fdt_dup_index;
   fd_dup->index = newfd;
   fd_dup->origin_index = old_fd->index;
