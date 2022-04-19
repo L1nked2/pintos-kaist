@@ -251,7 +251,7 @@ __do_fork (void *aux) {
       dst_fd->fp_secure = true;
       // check if file_duplicate failed
       if(dst_fd->fp == NULL) {
-        dst_fd->fp_secure = false;
+        free(dst_fd);
         goto error;
       }
     }
