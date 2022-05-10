@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "threads/palloc.h"
 
+
 enum vm_type {
 	/* page not initialized */
 	VM_UNINIT = 0,
@@ -46,6 +47,7 @@ struct page {
 	struct frame *frame;   /* Back reference for frame */
 
 	/* Your implementation */
+	struct hash_elem hash_elem;
 
 	/* Per-type data are binded into the union.
 	 * Each function automatically detects the current union */
@@ -85,9 +87,16 @@ struct page_operations {
  * We don't want to force you to obey any specific design for this struct.
  * All designs up to you for this. */
 struct supplemental_page_table {
+	struct hash pages;
 };
 
 #include "threads/thread.h"
+#include <hash.h>
+#include "threads/vaddr.h"
+uint64_t page_hash_func(const struct hash_elem *h_e, void *aux UNUSED);
+bool page_less_func(const struct hase_elem *h_e1, const struct hash_elem *h_e2,
+		void *aux UNUSED);
+
 void supplemental_page_table_init (struct supplemental_page_table *spt);
 bool supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct supplemental_page_table *src);

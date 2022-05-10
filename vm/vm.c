@@ -4,6 +4,7 @@
 #include "vm/vm.h"
 #include "vm/inspect.h"
 
+
 /* Initializes the virtual memory subsystem by invoking each subsystem's
  * intialize codes. */
 void
@@ -62,11 +63,19 @@ err:
 
 /* Find VA from spt and return page. On error, return NULL. */
 struct page *
-spt_find_page (struct supplemental_page_table *spt UNUSED, void *va UNUSED) {
-	struct page *page = NULL;
+spt_find_page (struct supplemental_page_table *spt, void *va) {
+	// struct page *page = NULL;
 	/* TODO: Fill this function. */
-
-	return page;
+	struct page *p = (struct page *)malloc(sizeof(struct page));
+	struct hash_elem *h_e;
+	p->va = pg_round_down(va);
+	h_e = hash_find(&spt->pages, &p->hash_elem);
+	free(p);
+	if (h_e == NULL) {
+		return NULL;
+	} else {
+		return hash_entry(h_e, struct page, hash_elem);
+	}
 }
 
 /* Insert PAGE into spt with validation. */
@@ -171,9 +180,26 @@ vm_do_claim_page (struct page *page) {
 	return swap_in (page, frame->kva);
 }
 
+/* For hash table */
+uint64_t page_hash_func(const struct hash_elem *h_e, void *aux UNUSED) {
+	const struct page *p = hash_entry(h_e, struct page, hash_elem);
+	return hash_bytes(&p->va, sizeof(p->va));
+}
+
+/* For hash table*/
+bool page_less_func(const struct hase_elem *h_e1, const struct hash_elem *h_e2,
+		void *aux UNUSED) {
+	const struct page *p1 = hash_entry(h_e1, struct page, hash_elem);
+	const struct page *p2 = hash_entry(h_e2, struct page, hash_elem);
+	return p1->va < p2->va; 
+}
+
 /* Initialize new supplemental page table */
+/* This function is called when a new process starts (in initd of userprog/process.c) */
+/* and when a process is being forked (in __do_fork of userprog/process.c). */
 void
 supplemental_page_table_init (struct supplemental_page_table *spt UNUSED) {
+	hash_init(&spt->pages, page_hash_func, page_less_func, NULL);
 }
 
 /* Copy supplemental page table from src to dst */

@@ -31,6 +31,8 @@
     "malloc.h": "c",
     "inode.h": "c",
     "palloc.h": "c",
-    "vaddr.h": "c"
+    "vaddr.h": "c",
+    "inspect.h": "c",
+    "hash.h": "c"
   },
 }
