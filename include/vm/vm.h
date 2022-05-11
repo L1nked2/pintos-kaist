@@ -2,7 +2,7 @@
 #define VM_VM_H
 #include <stdbool.h>
 #include "threads/palloc.h"
-
+#include "hash.h"
 
 enum vm_type {
 	/* page not initialized */
@@ -63,8 +63,9 @@ struct page {
 
 /* The representation of "frame" */
 struct frame {
-	void *kva;
+	void *kva;	// kernel virtual address.
 	struct page *page;
+	struct list_elem frame_elem;
 };
 
 /* The function table for page operations.
@@ -91,7 +92,6 @@ struct supplemental_page_table {
 };
 
 #include "threads/thread.h"
-#include <hash.h>
 #include "threads/vaddr.h"
 uint64_t page_hash_func(const struct hash_elem *h_e, void *aux UNUSED);
 bool page_less_func(const struct hase_elem *h_e1, const struct hash_elem *h_e2,

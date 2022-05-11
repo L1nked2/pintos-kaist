@@ -4,6 +4,7 @@
 #include "vm/vm.h"
 #include "vm/inspect.h"
 
+struct list frame_table;
 
 /* Initializes the virtual memory subsystem by invoking each subsystem's
  * intialize codes. */
@@ -71,11 +72,7 @@ spt_find_page (struct supplemental_page_table *spt, void *va) {
 	p->va = pg_round_down(va);
 	h_e = hash_find(&spt->pages, &p->hash_elem);
 	free(p);
-	if (h_e == NULL) {
-		return NULL;
-	} else {
-		return hash_entry(h_e, struct page, hash_elem);
-	}
+	return (h_e == NULL) ? NULL : hash_entry(h_e, struct page, hash_elem);
 }
 
 /* Insert PAGE into spt with validation. */
@@ -84,25 +81,26 @@ spt_insert_page (struct supplemental_page_table *spt,
 		struct page *page) {
 	// int succ = false;
 	/* TODO: Fill this function. */
-	if (!hash_insert(&spt->pages, &page->hash_elem)) {
+	struct hash_elem *h_e = hash_find(&spt->pages, &page->hash_elem);
+	if (h_e == NULL) {
+		hash_insert(&spt->pages, &page->hash_elem, page);
 		return true;
 	} else {
-		return false;
+		return false; // already exists.
 	}
-}
 
 void
 spt_remove_page (struct supplemental_page_table *spt, struct page *page) {
 	vm_dealloc_page (page);
-	return true;
+	return true; 
 }
 
 /* Get the struct frame, that will be evicted. */
 static struct frame *
 vm_get_victim (void) {
-	struct frame *victim = NULL;
-	 /* TODO: The policy for eviction is up to you. */
-
+	// struct frame *victim = NULL;
+	/* TODO: The policy for eviction is up to you. */
+	struct frame *victim = list_entry(list_pop_front(&frame_table), struct frame, frame_elem);
 	return victim;
 }
 
@@ -112,8 +110,8 @@ static struct frame *
 vm_evict_frame (void) {
 	struct frame *victim UNUSED = vm_get_victim ();
 	/* TODO: swap out the victim and return the evicted frame. */
-
-	return NULL;
+	swap_out(victim->pages);
+	return victim;
 }
 
 /* palloc() and get frame. If there is no available page, evict the page
@@ -122,11 +120,17 @@ vm_evict_frame (void) {
  * space.*/
 static struct frame *
 vm_get_frame (void) {
-	struct frame *frame = NULL;
+	// struct frame *frame = NULL;
 	/* TODO: Fill this function. */
-
+	struct frame *frame = (struct frame *)malloc(sizeof(struct frame));
 	ASSERT (frame != NULL);
 	ASSERT (frame->page == NULL);
+	frame->kva = palloc_get_page(PAL_USER); // palloc.
+	if (frame->kva == NULL) {
+		frame = vm_evict_frame(); // if there is no available page, evict the page.
+		frame->page = NULL;
+		return frame;
+	}
 	return frame;
 }
 
