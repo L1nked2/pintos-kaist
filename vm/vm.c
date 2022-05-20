@@ -280,21 +280,27 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
   while (hash_next (&i))
   {
     struct page *src_page = hash_entry(hash_cur(&i), struct page, hash_elem);
-    struct page *dst_page = (struct page *)malloc(sizeof(struct page));
+    enum vm_type type = page_get_type(src_page);
+    void *upage = src_page->va;
+    bool writable = src_page->writable;
+    vm_initializer *init = src_page->uninit.init;
+    void* aux = src_page->uninit.aux;
     // TODO: need to allocate uninit page and claim them immediately.
-    memcpy(dst_page, src_page, sizeof(struct page));
+    if(!vm_alloc_page(type, upage, writable))
+      return false;
+    if(!vm_claim_page(upage))
+      return false;
+    struct page* dst_page = spt_find_page(dst, upage);
+    memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
   }
-  return;
+  return true;
 }
 
 /* Helper function for supplemental_page_table_kill */
 void
 page_destructor (struct hash_elem *e, void* aux UNUSED) {
   const struct page *p = hash_entry(e, struct page, hash_elem);
-  // destroy page depending on type
-  destroy(p);
-  // free page
-  free(p);
+  vm_dealloc_page(p);
   return;
 }
 
@@ -304,6 +310,10 @@ supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
   // writeback will be implemented in each page type
-  hash_destroy(&spt->pages, page_destructor);
+  if(hash_empty(&spt->pages)) {
+    hash_destroy(&spt->pages< NULL);
+  } else {
+    hash_destroy(&spt->pages, page_destructor);
+  }
   return;
 }
