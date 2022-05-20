@@ -60,8 +60,18 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 		/* TODO: Create the page, fetch the initialier according to the VM type,
 		 * TODO: and then create "uninit" page struct by calling uninit_new. You
 		 * TODO: should modify the field after calling the uninit_new. */
-
+    struct page *page = (struct page *)malloc(sizeof(struct page));
+    switch(VM_TYPE(type)) { 
+      case VM_ANON: 
+        uninit_new(page, upage, init, type, aux, anon_initializer);
+        break;
+      case VM_FILE:
+        uninit_new(page, upage, init, type, aux, file_backed_initializer);
+        break;
+    }
+    page->writable = writable;
 		/* TODO: Insert the page into the spt. */
+    return spt_insert_page(spt, page);
 	}
 err:
 	return false;
@@ -160,10 +170,8 @@ vm_get_frame (void) {
 		frame = vm_evict_frame();
     return frame;
 	}
-
   // add frame to frame_table
   list_push_back (&frame_table, &frame->frame_elem);
-
 	return frame;
 }
 
@@ -216,7 +224,7 @@ vm_claim_page (void *va UNUSED) {
 /* Claim the PAGE and set up the mmu. */
 static bool
 vm_do_claim_page (struct page *page) {
-	struct frame *frame = vm_get_frame ();
+  struct frame *frame = vm_get_frame ();
   bool page_table_inserted = false;
 	/* Set links, doubly linked */
 	frame->page = page;
@@ -233,7 +241,6 @@ vm_do_claim_page (struct page *page) {
 
 /* Implementation of supplemental_page_table,
  * based on hash table */
-
 // Hash function for hash_table.
 // get page from hash element, convert page->va to hash value and return it.
 uint64_t page_hash_func(const struct hash_elem *h_e, void *aux UNUSED) {
