@@ -917,7 +917,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   struct segment_info *segment_info;
   segment_info = malloc(sizeof(struct segment_info));
 
-  file_seek(file, offset);
+  file_seek(file, ofs);
 	while (read_bytes > 0 || zero_bytes > 0) {
 		/* Do calculate how to fill this page.
 		 * We will read PAGE_READ_BYTES bytes from FILE
