@@ -264,7 +264,28 @@ supplemental_page_table_init (struct supplemental_page_table *spt) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct supplemental_page_table *src) {
-  PANIC("todo");
+  
+  // Iterate src and copy the contents to dst
+  struct hash_iterator i;
+  hash_first (&i, src);
+  while (hash_next (&i))
+  {
+    struct page *src_page = hash_entry(hash_cur(&i), struct page, hash_elem);
+    struct page *dst_page = (struct page *)malloc(sizeof(struct page));
+    // TODO: need to allocate uninit page and claim them immediately.
+    memcpy(dst_page, src_page, sizeof(struct page));
+  }
+  return;
+}
+
+/* Helper function for supplemental_page_table_kill */
+void
+page_destructor (struct hash_elem *e, void* aux UNUSED) {
+  const struct page *p = hash_entry(e, struct page, hash_elem);
+  // destroy page depending on type
+  destroy(p);
+  // free page
+  free(p);
   return;
 }
 
@@ -273,6 +294,7 @@ void
 supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
-  PANIC("todo");
+  // writeback will be implemented in each page type
+  hash_destroy(&spt->pages, page_destructor);
   return;
 }
