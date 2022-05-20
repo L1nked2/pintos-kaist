@@ -72,31 +72,47 @@ struct page *
 spt_find_page (struct supplemental_page_table *spt, void *va) {
 	// struct page *page = NULL;
 	/* TODO: Fill this function. */
+  // malloc dummy page for hash_find(), because it takes page as argument.
 	struct page *p = (struct page *)malloc(sizeof(struct page));
 	struct hash_elem *h_e;
+  // Alignment to get proper page address.
 	p->va = pg_round_down(va);
+  // find page from spt
 	h_e = hash_find(&spt->pages, &p->hash_elem);
+  // free dummy page
 	free(p);
-	return (h_e == NULL) ? NULL : hash_entry(h_e, struct page, hash_elem);
+  // return result
+  if (h_e == NULL) {
+    return NULL;
+  }
+  else {
+    return hash_entry(h_e, struct page, hash_elem);
+  }
 }
 
 /* Insert PAGE into spt with validation. */
 bool
 spt_insert_page (struct supplemental_page_table *spt,
 		struct page *page) {
-	// int succ = false;
+	int succ = false;
 	/* TODO: Fill this function. */
-	struct hash_elem *h_e = hash_find(&spt->pages, &page->hash_elem);
-	if (h_e == NULL) {
-		hash_insert(&spt->pages, &page->hash_elem, page);
-		return true;
-	} else {
-		return false; // already exists.
+  // insert page into spt
+	struct hash_elem *h_e = hash_insert(&spt->pages, &page->hash_elem, page);
+  // succ is true when hash_insert is not NULL
+	if (h_e != NULL) {
+		succ = true;
 	}
+  return succ;
 }
 
+/* Remove PAGE from spt and deallocate it. */
 void
 spt_remove_page (struct supplemental_page_table *spt, struct page *page) {
+  // remove page from spt, return false if page is not exists in spt
+  if (hash_delete(&spt->pages, &page->hash_elem) == NULL) {
+    return false; 
+  }
+  // deallocate page
 	vm_dealloc_page (page);
 	return true; 
 }
@@ -217,14 +233,19 @@ vm_do_claim_page (struct page *page) {
 	return swap_in (page, frame->kva);
 }
 
-/* For hash table */
+/* Implementation of supplemental_page_table,
+ * based on hash table */
+
+// Hash function for hash_table.
+// get page from hash element, convert page->va to hash value and return it.
 uint64_t page_hash_func(const struct hash_elem *h_e, void *aux UNUSED) {
 	const struct page *p = hash_entry(h_e, struct page, hash_elem);
 	return hash_bytes(&p->va, sizeof(p->va));
 }
 
-/* For hash table*/
-bool page_less_func(const struct hase_elem *h_e1, const struct hash_elem *h_e2,
+// Less funtion for hash_table
+// compare function for find element, h1==h2 if h1>h2 and h1<h2 both false.
+bool page_less_func(const struct hash_elem *h_e1, const struct hash_elem *h_e2,
 		void *aux UNUSED) {
 	const struct page *p1 = hash_entry(h_e1, struct page, hash_elem);
 	const struct page *p2 = hash_entry(h_e2, struct page, hash_elem);
@@ -235,14 +256,16 @@ bool page_less_func(const struct hase_elem *h_e1, const struct hash_elem *h_e2,
 /* This function is called when a new process starts (in initd of userprog/process.c) */
 /* and when a process is being forked (in __do_fork of userprog/process.c). */
 void
-supplemental_page_table_init (struct supplemental_page_table *spt UNUSED) {
+supplemental_page_table_init (struct supplemental_page_table *spt) {
 	hash_init(&spt->pages, page_hash_func, page_less_func, NULL);
 }
 
 /* Copy supplemental page table from src to dst */
 bool
-supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
-		struct supplemental_page_table *src UNUSED) {
+supplemental_page_table_copy (struct supplemental_page_table *dst,
+		struct supplemental_page_table *src) {
+  PANIC("todo");
+  return;
 }
 
 /* Free the resource hold by the supplemental page table */
@@ -250,4 +273,6 @@ void
 supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
+  PANIC("todo");
+  return;
 }

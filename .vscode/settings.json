@@ -33,6 +33,8 @@
     "palloc.h": "c",
     "vaddr.h": "c",
     "inspect.h": "c",
-    "hash.h": "c"
+    "hash.h": "c",
+    "intr-stubs.h": "c",
+    "flags.h": "c"
   },
 }

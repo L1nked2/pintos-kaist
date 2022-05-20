@@ -47,8 +47,8 @@ struct page {
 	struct frame *frame;   /* Back reference for frame */
 
 	/* Your implementation */
-	struct hash_elem hash_elem;
-	bool writable;
+	struct hash_elem hash_elem; /* Hash element for supplemental_page_table */
+	bool writable;              /* Flag for writable pages (not read-only) */
 	/* Per-type data are binded into the union.
 	 * Each function automatically detects the current union */
 	union {
@@ -92,12 +92,18 @@ struct supplemental_page_table {
 	struct hash pages;
 };
 
+/* Implementation of supplemental_page_table,
+ * based on hash table */
+#include "threads/mmu.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+
+// Helper function for hash table
 uint64_t page_hash_func(const struct hash_elem *h_e, void *aux UNUSED);
-bool page_less_func(const struct hase_elem *h_e1, const struct hash_elem *h_e2,
+bool page_less_func(const struct hash_elem *h_e1, const struct hash_elem *h_e2,
 		void *aux UNUSED);
 
+// Implementation of supplemental page table
 void supplemental_page_table_init (struct supplemental_page_table *spt);
 bool supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct supplemental_page_table *src);
@@ -107,6 +113,7 @@ struct page *spt_find_page (struct supplemental_page_table *spt,
 bool spt_insert_page (struct supplemental_page_table *spt, struct page *page);
 void spt_remove_page (struct supplemental_page_table *spt, struct page *page);
 
+// APIs for vm subsystem
 void vm_init (void);
 bool vm_try_handle_fault (struct intr_frame *f, void *addr, bool user,
 		bool write, bool not_present);
