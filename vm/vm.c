@@ -311,7 +311,7 @@ supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	 * TODO: writeback all the modified contents to the storage. */
   // writeback will be implemented in each page type
   if(hash_empty(&spt->pages)) {
-    hash_destroy(&spt->pages< NULL);
+    hash_destroy(&spt->pages, NULL);
   } else {
     hash_destroy(&spt->pages, page_destructor);
   }
