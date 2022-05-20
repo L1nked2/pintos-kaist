@@ -18,6 +18,11 @@ vm_init (void) {
 	register_inspect_intr ();
 	/* DO NOT MODIFY UPPER LINES. */
 	/* TODO: Your code goes here. */
+
+  // initialize frame_table
+  list_init (&frame_table);
+
+  return;
 }
 
 /* Get the type of the page. This function is useful if you want to know the
@@ -88,6 +93,7 @@ spt_insert_page (struct supplemental_page_table *spt,
 	} else {
 		return false; // already exists.
 	}
+}
 
 void
 spt_remove_page (struct supplemental_page_table *spt, struct page *page) {
@@ -100,7 +106,12 @@ static struct frame *
 vm_get_victim (void) {
 	// struct frame *victim = NULL;
 	/* TODO: The policy for eviction is up to you. */
+
+
 	struct frame *victim = list_entry(list_pop_front(&frame_table), struct frame, frame_elem);
+  // TODO: is pop_front is okay? need some LRU things
+
+
 	return victim;
 }
 
@@ -108,9 +119,9 @@ vm_get_victim (void) {
  * Return NULL on error.*/
 static struct frame *
 vm_evict_frame (void) {
-	struct frame *victim UNUSED = vm_get_victim ();
+	struct frame *victim = vm_get_victim();
 	/* TODO: swap out the victim and return the evicted frame. */
-	swap_out(victim->pages);
+	swap_out(victim->page);
 	return victim;
 }
 
@@ -125,12 +136,20 @@ vm_get_frame (void) {
 	struct frame *frame = (struct frame *)malloc(sizeof(struct frame));
 	ASSERT (frame != NULL);
 	ASSERT (frame->page == NULL);
-	frame->kva = palloc_get_page(PAL_USER); // palloc.
+
+  // get new physical page by palloc(PAL_USER)
+	frame->kva = palloc_get_page(PAL_USER);
+
+  // if palloc fails(no available page), evict frame
+  // and return empty frame.
 	if (frame->kva == NULL) {
-		frame = vm_evict_frame(); // if there is no available page, evict the page.
-		frame->page = NULL;
-		return frame;
+		frame = vm_evict_frame();
+    return frame;
 	}
+
+  // add frame to frame_table
+  list_push_back (&frame_table, &frame->frame_elem);
+
 	return frame;
 }
 
@@ -164,12 +183,19 @@ vm_dealloc_page (struct page *page) {
 	free (page);
 }
 
-/* Claim the page that allocate on VA. */
+/* Claim the page that allocated on VA. */
 bool
 vm_claim_page (void *va UNUSED) {
 	struct page *page = NULL;
 	/* TODO: Fill this function */
-
+  // Find page on supplemental_page_table and call
+  // do_claim_page. If page is not found, return false.
+  page = spt_find_page(&thread_current()->spt, va);
+  // If page is not found on supplemental_page_table, return false.
+	if (page == NULL) {
+		return false;
+	}
+  // call do_claim_page to do rest job.
 	return vm_do_claim_page (page);
 }
 
@@ -177,13 +203,17 @@ vm_claim_page (void *va UNUSED) {
 static bool
 vm_do_claim_page (struct page *page) {
 	struct frame *frame = vm_get_frame ();
-
-	/* Set links */
+  bool page_table_inserted = false;
+	/* Set links, doubly linked */
 	frame->page = page;
 	page->frame = frame;
-
 	/* TODO: Insert page table entry to map page's VA to frame's PA. */
-	pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable);
+  // if failed to insert, return false.
+	page_table_inserted = pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable);
+  if (page_table_inserted == false) {
+    return false;
+  }
+  // swap_in page and return result
 	return swap_in (page, frame->kva);
 }
 
