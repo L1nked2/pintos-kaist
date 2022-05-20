@@ -151,11 +151,9 @@ vm_get_frame (void) {
 	/* TODO: Fill this function. */
 	struct frame *frame = (struct frame *)malloc(sizeof(struct frame));
 	ASSERT (frame != NULL);
-	ASSERT (frame->page == NULL);
-
   // get new physical page by palloc(PAL_USER)
 	frame->kva = palloc_get_page(PAL_USER);
-
+  frame->page = NULL;
   // if palloc fails(no available page), evict frame
   // and return empty frame.
 	if (frame->kva == NULL) {
