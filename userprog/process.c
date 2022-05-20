@@ -869,7 +869,6 @@ install_page (void *upage, void *kpage, bool writable) {
 struct segment_info {
   struct file *file;
   size_t page_read_bytes;
-  off_t offset;
 };
 
 static bool
@@ -881,11 +880,9 @@ lazy_load_segment (struct page *page, void *aux) {
   struct file *file = segment_info->file;
   size_t page_read_bytes = segment_info->page_read_bytes;
   size_t page_zero_bytes = PGSIZE - page_read_bytes;
-  off_t offset = segment_info->offset;
   
   struct frame *frame = page->frame;
 
-  file_seek(file, offset);
   /* Load this page. */
   if (file_read (file, frame->kva, page_read_bytes) != (int) page_read_bytes) {
     palloc_free_page(page->frame->kva);
@@ -920,6 +917,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   struct segment_info *segment_info;
   segment_info = malloc(sizeof(struct segment_info));
 
+  file_seek(file, offset);
 	while (read_bytes > 0 || zero_bytes > 0) {
 		/* Do calculate how to fill this page.
 		 * We will read PAGE_READ_BYTES bytes from FILE
@@ -930,7 +928,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
     segment_info->file = file;
     segment_info->page_read_bytes = page_read_bytes;
-    segment_info->offset = ofs;
     
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
 					writable, lazy_load_segment, segment_info)) {

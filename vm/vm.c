@@ -187,14 +187,18 @@ vm_handle_wp (struct page *page UNUSED) {
 
 /* Return true on success */
 bool
-vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
+vm_try_handle_fault (struct intr_frame *f, void *addr,
 		bool user UNUSED, bool write UNUSED, bool not_present UNUSED) {
-	struct supplemental_page_table *spt UNUSED = &thread_current ()->spt;
-	struct page *page = NULL;
+	struct supplemental_page_table *spt= &thread_current ()->spt;
 	/* TODO: Validate the fault */
+  if (is_kernel_vaddr(addr)) {
+        return false;
+	}
 	/* TODO: Your code goes here */
+  void *uvaddr = pg_round_down(addr);
+  struct page *fault_page = spt_find_page(spt, uvaddr);
 
-	return vm_do_claim_page (page);
+	return vm_do_claim_page (fault_page);
 }
 
 /* Free the page.
