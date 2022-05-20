@@ -97,7 +97,7 @@ spt_insert_page (struct supplemental_page_table *spt,
 	int succ = false;
 	/* TODO: Fill this function. */
   // insert page into spt
-	struct hash_elem *h_e = hash_insert(&spt->pages, &page->hash_elem, page);
+	struct hash_elem *h_e = hash_insert(&spt->pages, &page->hash_elem);
   // succ is true when hash_insert is not NULL
 	if (h_e != NULL) {
 		succ = true;
