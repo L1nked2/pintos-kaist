@@ -942,7 +942,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
     	ofs += page_read_bytes;
 		upage += PGSIZE;
 	}
-  free(segment_info);
+//   free(segment_info);
 	return true;
 }
 
@@ -959,10 +959,10 @@ setup_stack (struct intr_frame *if_) {
   if (vm_alloc_page(VM_ANON | VM_MARKER_0, stack_bottom, true)) {
 		success = vm_claim_page(stack_bottom);
 		if (success) {
-      if_->rsp = USER_STACK;
-      thread_current()->stack_bottom = stack_bottom;
+      		if_->rsp = USER_STACK;
+      		thread_current()->stack_bottom = stack_bottom;
 		}
-  }
+  	}
 	return success;
 }
 #endif /* VM */
