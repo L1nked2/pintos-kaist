@@ -332,6 +332,8 @@ process_exec (void *f_name) {
 	   be the program */
 	argc = parse_args(file_name, argv);
   
+	struct thread *cur = thread_current();
+	supplemental_page_table_init(&cur->spt);
 	/* And then load the binary */
   // need to add file_lock inside of precess_exec
 	success = load(file_name, &_if);
@@ -347,7 +349,7 @@ process_exec (void *f_name) {
 		return -1;
 
   /* user_thread flag set to true */
-  thread_current()->is_user_thread = true;
+  cur->is_user_thread = true;
 
 	/* Start switched process. */
 	do_iret (&_if);
