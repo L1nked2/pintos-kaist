@@ -190,7 +190,7 @@ vm_handle_wp (struct page *page UNUSED) {
 /* Return true on success */
 bool
 vm_try_handle_fault (struct intr_frame *f, void *addr,
-		bool user UNUSED, bool write UNUSED, bool not_present UNUSED) {
+		bool user, bool write, bool not_present UNUSED) {
 	struct supplemental_page_table *spt= &thread_current ()->spt;
 	/* TODO: Validate the fault */
   if (is_kernel_vaddr(addr)) {
@@ -200,10 +200,10 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
   void *uvaddr = pg_round_down(addr);
   struct page *fault_page = spt_find_page(spt, uvaddr);
   void *rsp;
-  if (is_kernel_vaddr(f->rsp)) {
-    rsp = thread_current()->rsp_stack;
-  } else {
+  if (user) {
     rsp = f->rsp;
+  } else {
+    rsp = thread_current()->stack_ptr;
   }
   if (fault_page == NULL) {
     if ((addr <= USER_STACK)&&(addr > USER_STACK - (1<<20)&&(addr > rsp - (1<<5)))) {
