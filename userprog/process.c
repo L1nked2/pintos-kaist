@@ -889,10 +889,12 @@ lazy_load_segment (struct page *page, void *aux) {
   file_seek(file, ofs);
   /* Load this page. */
   if (file_read (file, frame->kva, page_read_bytes) != (int) page_read_bytes) {
-    palloc_free_page(frame->kva);
+    // palloc_free_page(frame->kva);
+	vm_dealloc_page(page);
     return false;
   }
   memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
+  free(segment_info); // this is no longer needed.
   return true;
 }
 

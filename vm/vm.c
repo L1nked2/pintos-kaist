@@ -4,7 +4,7 @@
 #include "vm/vm.h"
 #include "vm/inspect.h"
 
-struct list frame_table;
+static struct list frame_table;
 
 /* Initializes the virtual memory subsystem by invoking each subsystem's
  * intialize codes. */
@@ -108,7 +108,7 @@ spt_insert_page (struct supplemental_page_table *spt,
   // insert page into spt
 	struct hash_elem *h_e = hash_insert(&spt->pages, &page->hash_elem);
   // succ is true when hash_insert is not NULL
-	if (h_e != NULL) {
+	if (!h_e) {
 		succ = true;
 	}
   return succ;
@@ -129,12 +129,11 @@ spt_remove_page (struct supplemental_page_table *spt, struct page *page) {
 /* Get the struct frame, that will be evicted. */
 static struct frame *
 vm_get_victim (void) {
-	// struct frame *victim = NULL;
+	struct frame *victim = NULL;
 	/* TODO: The policy for eviction is up to you. */
 
 
-	struct frame *victim = list_entry(list_pop_front(&frame_table), struct frame, frame_elem);
-  // TODO: is pop_front is okay? need some LRU things
+	// clock algorithm is recommended
 
 
 	return victim;
