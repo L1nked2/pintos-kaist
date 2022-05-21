@@ -942,7 +942,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
     	ofs += page_read_bytes;
 		upage += PGSIZE;
 	}
-//   free(segment_info);
+    free(segment_info);
 	return true;
 }
 
