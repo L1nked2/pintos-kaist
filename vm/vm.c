@@ -196,7 +196,21 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
 	/* TODO: Your code goes here */
   void *uvaddr = pg_round_down(addr);
   struct page *fault_page = spt_find_page(spt, uvaddr);
-
+  void *rsp;
+  if (is_kernel_vaddr(f->rsp)) {
+    rsp = thread_current()->rsp_stack;
+  } else {
+    rsp = f->rsp;
+  }
+  if (fault_page == NULL) {
+    if ((addr <= USER_STACK)&&(addr > USER_STACK - (1<<20)&&(addr > rsp - (1<<5)))) {
+      vm_stack_growth(uvaddr);
+      fault_page = spt_find_page(spt, uvaddr);
+    } else {
+      return false;
+    }
+  }
+  
 	return vm_do_claim_page (fault_page);
 }
 

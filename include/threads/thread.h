@@ -148,6 +148,7 @@ struct thread {
 	struct supplemental_page_table spt;
   /* Stack bottom for project 3 */
   void *stack_bottom;
+  void *rsp_stack;
 #endif
 
 	/* Owned by thread.c. */
