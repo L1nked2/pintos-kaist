@@ -917,7 +917,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 
   // segment information for lazy_load_segment
   struct segment_info *segment_info;
-  segment_info = malloc(sizeof(struct segment_info));
+  segment_info = (struct segment_info *)malloc(sizeof(struct segment_info));
 
 	while (read_bytes > 0 || zero_bytes > 0) {
 		/* Do calculate how to fill this page.
@@ -927,18 +927,19 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
-    segment_info->file = file;
-    segment_info->page_read_bytes = page_read_bytes;
-    
+    	segment_info->file = file;
+    	segment_info->page_read_bytes = page_read_bytes;
+    	segment_info->offset = ofs;
+
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
 					writable, lazy_load_segment, segment_info)) {
-      free(segment_info);
-      return false;
-    }
+      		free(segment_info);
+      		return false;
+    	}
 		/* Advance. */
 		read_bytes -= page_read_bytes;
 		zero_bytes -= page_zero_bytes;
-    ofs += page_read_bytes;
+    	ofs += page_read_bytes;
 		upage += PGSIZE;
 	}
   free(segment_info);
