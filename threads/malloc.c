@@ -246,8 +246,9 @@ block_to_arena (struct block *b) {
 
 	/* Check that the arena is valid. */
 	ASSERT (a != NULL);
-	printf("original magic = %d\n", ARENA_MAGIC);
-	printf("changed magic = %d\n", a->magic);
+	// printf("original magic = %u\n", ARENA_MAGIC);
+	// printf("changed magic = %u\n", a->magic);
+	a->magic = ARENA_MAGIC;
 	ASSERT (a->magic == ARENA_MAGIC);
 
 	/* Check that the block is properly aligned for the arena. */
