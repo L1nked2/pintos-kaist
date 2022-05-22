@@ -892,7 +892,7 @@ lazy_load_segment (struct page *page, void *aux) {
     // palloc_free_page(frame->kva);
     vm_dealloc_page(page);
     printf("file_read failed, file: %d, kva: %d, page_read_bytes: %d\n",file, frame->kva, page_read_bytes);///test
-    printf("actually read: %d\n",file_read (file, frame->kva, page_read_bytes));///tests
+    //printf("actually read: %d\n",file_read (file, frame->kva, page_read_bytes));///tests
     printf("file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);
     return false;
   }
