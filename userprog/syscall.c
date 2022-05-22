@@ -117,8 +117,8 @@ syscall_handler (struct intr_frame *f) {
 void validate_addr(const uint64_t *addr) {
 	if ((addr == NULL)
   || !(is_user_vaddr(addr))
-	|| spt_find_page(&thread_current()->spt, addr) == NULL) 
-  || (is_kernel_vaddr(addr)) {
+	|| (spt_find_page(&thread_current()->spt, addr) == NULL) 
+  || (is_kernel_vaddr(addr))) {
 		sys_exit(-1);
 	}
   return NULL;
