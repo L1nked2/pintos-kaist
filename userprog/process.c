@@ -892,7 +892,7 @@ lazy_load_segment (struct page *page, void *aux) {
   // int file_read_count = file_read(file, frame->kva, page_read_bytes);
   int file_read_count = file_read_at(file, page->va, page_read_bytes, ofs);
   if (file_read_count != (int) page_read_bytes) {
-    palloc_free_page(page->va);
+    palloc_free_page(page);
     // vm_dealloc_page(page);
     // printf("file_read failed, file: %d, kva: %d, page_read_bytes: %d\n",file, frame->kva, page_read_bytes);///test
     // printf("actually read: %d\n",file_read_count);///tests
