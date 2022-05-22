@@ -879,27 +879,27 @@ lazy_load_segment (struct page *page, void *aux) {
 	/* TODO: Load the segment from the file */
 	/* TODO: This called when the first page fault occurs on address VA. */
 	/* TODO: VA is available when calling this function. */
-//   struct segment_info *info = (struct segment_info *) aux;
-//   struct file *file = info->file;
-//   size_t page_read_bytes = info->page_read_bytes;
-//   size_t page_zero_bytes = PGSIZE - page_read_bytes;
-//   off_t ofs = info->ofs;
+  struct segment_info *info = (struct segment_info *) aux;
+  struct file *file = info->file;
+  size_t page_read_bytes = info->page_read_bytes;
+  size_t page_zero_bytes = PGSIZE - page_read_bytes;
+  off_t ofs = info->ofs;
   
-//   struct frame *frame = page->frame;
-//   /* Load this page. */
-//   file_seek (file, ofs);
-//   int file_read_count = file_read (file, frame->kva, page_read_bytes);
-//   if (file_read_count != (int) page_read_bytes) {
-//     // palloc_free_page(frame->kva);
-//     vm_dealloc_page(page);
-//     printf("file_read failed, file: %d, kva: %d, page_read_bytes: %d\n",file, frame->kva, page_read_bytes);///test
-//     printf("actually read: %d\n",file_read_count);///tests
-//     printf("file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);
-//     return false;
-//   }
-//   memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
-//   free(info);
-//   return true;
+  struct frame *frame = page->frame;
+  /* Load this page. */
+  file_seek (file, ofs);
+  int file_read_count = file_read(file, frame->kva, page_read_bytes);
+  if (file_read_count != (int) page_read_bytes) {
+    palloc_free_page(frame->kva);
+    // vm_dealloc_page(page);
+    // printf("file_read failed, file: %d, kva: %d, page_read_bytes: %d\n",file, frame->kva, page_read_bytes);///test
+    // printf("actually read: %d\n",file_read_count);///tests
+    // printf("file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);
+    return false;
+  }
+  memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
+
+  return true;
 }
 
 /* Loads a segment starting at offset OFS in FILE at address
