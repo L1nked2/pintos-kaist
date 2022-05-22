@@ -888,7 +888,7 @@ lazy_load_segment (struct page *page, void *aux) {
   struct frame *frame = page->frame;
   /* Load this page. */
   file_seek (file, ofs);
-  int file_read_count = file_read (file, frame->kva, page_read_bytes)
+  int file_read_count = file_read (file, frame->kva, page_read_bytes);
   if (file_read_count != (int) page_read_bytes) {
     // palloc_free_page(frame->kva);
     vm_dealloc_page(page);
