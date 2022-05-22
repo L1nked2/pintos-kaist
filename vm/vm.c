@@ -261,10 +261,10 @@ vm_do_claim_page (struct page *page) {
   // if failed to insert, return false.
 	page_table_inserted = pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable);
   if (page_table_inserted == false) {
-    printf("pml4_set_page failed\n");///test
     return false;
   }
   // swap_in page and return result
+  printf("going to swap_in on page %d, frame %d\n", page->va, frame->kva);///test
 	return swap_in (page, frame->kva);
 }
 
