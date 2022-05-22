@@ -199,12 +199,13 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
 	}
 	/* TODO: Your code goes here */
   void *rsp = user ? f->rsp : thread_current ()->stack_ptr;
-  
+
   if (not_present){
     if (!vm_claim_page(addr)) {
       // vm_claim_page failed,
       // check if stack growth can solve the problem
       if (rsp - 8 <= addr && USER_STACK - 0x100000 <= addr && addr <= USER_STACK) {
+        printf("stack_growth\n");
         vm_stack_growth(thread_current()->stack_bottom - PGSIZE);
         return true;
       }
@@ -304,12 +305,27 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
     vm_initializer *init = src_page->uninit.init;
     void* aux = src_page->uninit.aux;
     // TODO: need to allocate uninit page and claim them immediately.
-    if(!vm_alloc_page(type, upage, writable))
-      return false;
-    if(!vm_claim_page(upage))
-      return false;
-    struct page* dst_page = spt_find_page(dst, upage);
-    memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
+
+    // if page is stack page
+    if (src_page->uninit.type & VM_MARKER_0) {
+      setup_stack(&thread_current()->tf);
+    }
+    // if page is UNINIT page
+    else if(src_page->operations->type == VM_UNINIT) {
+      if(!vm_alloc_page_with_initializer(type, upage, writable, init, aux))
+        return false;
+    }
+    // if page is anon or file
+    else {
+      if(!vm_alloc_page(type, upage, writable))
+        return false;
+      if(!vm_claim_page(upage))
+        return false;
+    }
+    if (src_page->operations->type != VM_UNINIT) {
+      struct page* dst_page = spt_find_page(dst, upage);
+      memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
+    }
   }
   return true;
 }
@@ -317,8 +333,12 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
 /* Helper function for supplemental_page_table_kill */
 void
 page_destructor (struct hash_elem *e, void* aux UNUSED) {
-  const struct page *p = hash_entry(e, struct page, hash_elem);
-  vm_dealloc_page(p);
+  const struct page *page = hash_entry(e, struct page, hash_elem);
+  pml4_clear_page(thread_current()->pml4, page->va);
+  if (page->frame != NULL){
+    page->frame->page = NULL;
+	}
+  vm_dealloc_page(page);
   return;
 }
 
