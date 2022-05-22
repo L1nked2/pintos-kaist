@@ -199,14 +199,14 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
 	}
 	/* TODO: Your code goes here */
   void *rsp = user ? f->rsp : thread_current ()->stack_ptr;
-  printf("user: %d, write: %d, not_present: %d\n", user, write, not_present);
+  printf("user: %d, write: %d, not_present: %d\n", user, write, not_present);///test
   //user: 1, write: 0, not_present: 1
   if (not_present){
     if (!vm_claim_page(addr)) {
       // vm_claim_page failed,
       // check if stack growth can solve the problem
       if (rsp - 8 <= addr && USER_STACK - 0x100000 <= addr && addr <= USER_STACK) {
-        printf("stack_growth\n");
+        printf("stack_growth\n");///test
         vm_stack_growth(thread_current()->stack_bottom - PGSIZE);
         return true;
       }
@@ -214,7 +214,7 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
     }
     else {
       // page is properly claimed
-      printf("vm_claim success\n");
+      printf("vm_claim success\n");///test
       return true;
     }
   }
@@ -240,6 +240,7 @@ vm_claim_page (void *va UNUSED) {
   page = spt_find_page(&thread_current()->spt, va);
   // If page is not found on supplemental_page_table, return false.
 	if (page == NULL) {
+    printf("page not found on supplemental table\n");///test
 		return false;
 	}
   // call do_claim_page to do rest job.
