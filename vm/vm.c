@@ -250,6 +250,7 @@ vm_claim_page (void *va UNUSED) {
 /* Claim the PAGE and set up the mmu. */
 static bool
 vm_do_claim_page (struct page *page) {
+  printf("do_claim_page\n");
   struct frame *frame = vm_get_frame ();
   bool page_table_inserted = false;
 	/* Set links, doubly linked */
