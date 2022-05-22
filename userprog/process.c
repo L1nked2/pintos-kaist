@@ -899,8 +899,8 @@ lazy_load_segment (struct page *page, void *aux) {
     // printf("file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);
     return false;
   } else {
-    // memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
-    memset(page->va + page_read_bytes, 0, page_zero_bytes);
+    memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
+    // memset(page->va + page_read_bytes, 0, page_zero_bytes);
   }
   return true;
 }
