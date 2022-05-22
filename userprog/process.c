@@ -921,10 +921,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 	ASSERT (pg_ofs (upage) == 0);
 	ASSERT (ofs % PGSIZE == 0);
 
-  // segment information for lazy_load_segment
-  struct segment_info *segment_info;
-  segment_info = (struct segment_info *)malloc(sizeof(struct segment_info));
-
 	while (read_bytes > 0 || zero_bytes > 0) {
 		/* Do calculate how to fill this page.
 		 * We will read PAGE_READ_BYTES bytes from FILE
@@ -933,6 +929,9 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
+    // segment information for lazy_load_segment
+    struct segment_info *segment_info;
+    segment_info = (struct segment_info *)malloc(sizeof(struct segment_info));
     segment_info->file = file;
     segment_info->page_read_bytes = page_read_bytes;
     segment_info->ofs = ofs;

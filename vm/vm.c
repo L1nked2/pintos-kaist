@@ -211,7 +211,6 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
         return true;
       }
       printf("page_fault handling failed_1\n");///test
-      PANIC("debug");
       return false;
     }
     else {
