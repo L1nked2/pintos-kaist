@@ -869,7 +869,7 @@ install_page (void *upage, void *kpage, bool writable) {
  * upper block. */
 
 struct segment_info {
-  struct file file;
+  struct file *file;
   size_t page_read_bytes;
   off_t ofs;
 };
@@ -880,7 +880,7 @@ lazy_load_segment (struct page *page, void *aux) {
 	/* TODO: This called when the first page fault occurs on address VA. */
 	/* TODO: VA is available when calling this function. */
   struct segment_info *segment_info = (struct segment_info *) aux;
-  struct file *file = &segment_info->file;
+  struct file *file = segment_info->file;
   size_t page_read_bytes = segment_info->page_read_bytes;
   size_t page_zero_bytes = PGSIZE - page_read_bytes;
   off_t ofs = segment_info->ofs;
@@ -934,7 +934,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
     // segment information for lazy_load_segment
     struct segment_info *segment_info;
     segment_info = (struct segment_info *)malloc(sizeof(struct segment_info));
-    memcpy(&segment_info->file, &file, sizeof(struct file));
+    segment_info->file = file;
     segment_info->page_read_bytes = page_read_bytes;
     segment_info->ofs = ofs;
     printf("reserved_file_info: {inode: %d, ofs: %d} @ %d\n",file->inode, ofs, file);///test
