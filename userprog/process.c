@@ -871,7 +871,6 @@ install_page (void *upage, void *kpage, bool writable) {
 struct segment_info {
   struct file *file;
   size_t page_read_bytes;
-  size_t offset;
 };
 
 static bool
@@ -883,10 +882,8 @@ lazy_load_segment (struct page *page, void *aux) {
   struct file *file = segment_info->file;
   size_t page_read_bytes = segment_info->page_read_bytes;
   size_t page_zero_bytes = PGSIZE - page_read_bytes;
-  size_t ofs = segment_info->offset;
   
   struct frame *frame = page->frame;
-  file_seek(file, ofs);
   /* Load this page. */
   if (file_read (file, frame->kva, page_read_bytes) != (int) page_read_bytes) {
     // palloc_free_page(frame->kva);
@@ -918,6 +915,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 	ASSERT (pg_ofs (upage) == 0);
 	ASSERT (ofs % PGSIZE == 0);
 
+  file_seek (file, ofs);
   // segment information for lazy_load_segment
   struct segment_info *segment_info;
   segment_info = (struct segment_info *)malloc(sizeof(struct segment_info));
@@ -932,7 +930,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
     segment_info->file = file;
     segment_info->page_read_bytes = page_read_bytes;
-    segment_info->offset = ofs;
 
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
       writable, lazy_load_segment, segment_info)) {
@@ -942,7 +939,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		/* Advance. */
 		read_bytes -= page_read_bytes;
 		zero_bytes -= page_zero_bytes;
-    ofs += page_read_bytes;
 		upage += PGSIZE;
 	}
   free(segment_info);
@@ -962,9 +958,9 @@ setup_stack (struct intr_frame *if_) {
   if (vm_alloc_page(VM_ANON | VM_MARKER_0, stack_bottom, true)) {
 		success = vm_claim_page(stack_bottom);
 		if (success) {
-      		if_->rsp = USER_STACK;
-      		thread_current()->stack_bottom = stack_bottom;
-		}
+        if_->rsp = USER_STACK;
+        thread_current()->stack_bottom = stack_bottom;
+		  }
   	}
 	return success;
 }

@@ -27,7 +27,7 @@ vm_anon_init (void) {
 /* Initialize the file mapping */
 bool
 anon_initializer (struct page *page, enum vm_type type, void *kva) {
-  // Cleanup page-specific information
+  // Cleanup page-type-specific information
 	struct uninit_page *uninit = &page->uninit;
   memset(uninit, 0, sizeof(struct uninit_page));
   /* Set up the handler */

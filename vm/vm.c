@@ -105,7 +105,7 @@ spt_insert_page (struct supplemental_page_table *spt,
 		struct page *page) {
 	// int succ = false;
 	/* TODO: Fill this function. */
-  // fimd page from spt
+  // find page from spt
 	struct hash_elem *h_e = hash_find(&spt->pages, &page->hash_elem);
   if (h_e != NULL) { // spt has the page already
 		return false;
@@ -166,8 +166,8 @@ vm_get_frame (void) {
   // if palloc fails(no available page), evict frame
   // and return empty frame.
 	if (frame->kva == NULL) {
+    PANIC("todo: swap_in and out");
 		frame = vm_evict_frame();
-    return frame;
 	}
   // add frame to frame_table
   list_push_back (&frame_table, &frame->frame_elem);
@@ -198,24 +198,25 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
         return false;
 	}
 	/* TODO: Your code goes here */
-  void *uvaddr = pg_round_down(addr);
-  struct page *fault_page = spt_find_page(spt, uvaddr);
-  void *rsp;
-  if (user) {
-    rsp = f->rsp;
-  } else {
-    rsp = thread_current()->stack_ptr;
-  }
-  if (fault_page == NULL) {
-    if ((addr <= USER_STACK)&&(addr > USER_STACK - (1<<20)&&(addr > rsp - (1<<5)))) {
-      vm_stack_growth(uvaddr);
-      fault_page = spt_find_page(spt, uvaddr);
-    } else {
+  void *rsp = user ? f->rsp : thread_current ()->stack_ptr;
+  
+  if (not_present){
+    if (!vm_claim_page(addr)) {
+      // vm_claim_page failed,
+      // check if stack growth can solve the problem
+      if (rsp - 8 <= addr && USER_STACK - 0x100000 <= addr && addr <= USER_STACK) {
+        vm_stack_growth(thread_current()->stack_bottom - PGSIZE);
+        return true;
+      }
       return false;
     }
+    else {
+      // page is properly claimed
+      return true;
+    }
   }
-  
-	return vm_do_claim_page (fault_page);
+  // cannot handle page_fault (writing to r/o, etc,.)
+  return false;
 }
 
 /* Free the page.

@@ -447,6 +447,8 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->stdout_cnt = 1;
   t->fdt_index = FD_NR_START_INDEX;
   t->fdt_dup_index = FD_NR_START_INDEX;
+  // init part of project 3
+  t->stack_ptr = USER_STACK;
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
