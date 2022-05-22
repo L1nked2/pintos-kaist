@@ -888,6 +888,7 @@ lazy_load_segment (struct page *page, void *aux) {
   if (file_read (file, frame->kva, page_read_bytes) != (int) page_read_bytes) {
     // palloc_free_page(frame->kva);
     vm_dealloc_page(page);
+    printf("file_read failed\n");///test
     return false;
   }
   memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
