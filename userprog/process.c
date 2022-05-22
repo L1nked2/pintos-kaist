@@ -890,12 +890,10 @@ lazy_load_segment (struct page *page, void *aux) {
   /* Load this page. */
   if (file_read (file, frame->kva, page_read_bytes) != (int) page_read_bytes) {
     // palloc_free_page(frame->kva);
-	vm_dealloc_page(page);
-	free(segment_info);
+    vm_dealloc_page(page);
     return false;
   }
   memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
-  free(segment_info); // this is no longer needed.
   return true;
 }
 
@@ -932,22 +930,22 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
-    	segment_info->file = file;
-    	segment_info->page_read_bytes = page_read_bytes;
-    	segment_info->offset = ofs;
+    segment_info->file = file;
+    segment_info->page_read_bytes = page_read_bytes;
+    segment_info->offset = ofs;
 
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
-					writable, lazy_load_segment, segment_info)) {
-      		free(segment_info);
-      		return false;
-    	}
+      writable, lazy_load_segment, segment_info)) {
+      free(segment_info);
+      return false;
+    }
 		/* Advance. */
 		read_bytes -= page_read_bytes;
 		zero_bytes -= page_zero_bytes;
-    	ofs += page_read_bytes;
+    ofs += page_read_bytes;
 		upage += PGSIZE;
 	}
-    free(segment_info);
+  free(segment_info);
 	return true;
 }
 

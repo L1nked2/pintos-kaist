@@ -283,7 +283,7 @@ bool page_less_func(const struct hash_elem *h_e1, const struct hash_elem *h_e2,
 /* and when a process is being forked (in __do_fork of userprog/process.c). */
 void
 supplemental_page_table_init (struct supplemental_page_table *spt) {
-	hash_init(&spt->pages, page_hash_func, page_less_func, NULL);
+  hash_init(&spt->pages, page_hash_func, page_less_func, NULL);
 }
 
 /* Copy supplemental page table from src to dst */
