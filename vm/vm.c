@@ -200,6 +200,7 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
 	/* TODO: Your code goes here */
   void *rsp = user ? f->rsp : thread_current ()->stack_ptr;
   printf("user: %d, write: %d, not_present: %d\n", user, write, not_present);
+  //user: 1, write: 0, not_present: 1
   if (not_present){
     if (!vm_claim_page(addr)) {
       // vm_claim_page failed,
@@ -213,6 +214,7 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
     }
     else {
       // page is properly claimed
+      printf("vm_claim success\n");
       return true;
     }
   }
