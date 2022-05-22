@@ -71,7 +71,8 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
     }
     page->writable = writable;
 		/* TODO: Insert the page into the spt. */
-    return spt_insert_page(spt, page);
+    spt_insert_page(spt, page);
+    return true;
 	}
 err:
 	return false;
