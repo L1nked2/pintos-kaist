@@ -12,8 +12,8 @@ struct lock file_lock;
 void syscall_init (void);
 
 /* codes for project 2 */
-// void validate_addr(const uint64_t *addr);
-struct page *validate_addr(void *addr);
+void validate_addr(const uint64_t *addr);
+//struct page *validate_addr(void *addr);
 struct fd_dup *search_fd_dup(int fd);
 struct fd *search_fd(int fd);
 void sys_halt();
