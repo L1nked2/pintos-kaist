@@ -250,7 +250,6 @@ vm_claim_page (void *va UNUSED) {
 /* Claim the PAGE and set up the mmu. */
 static bool
 vm_do_claim_page (struct page *page) {
-  printf("do_claim_page\n");
   struct frame *frame = vm_get_frame ();
   bool page_table_inserted = false;
 	/* Set links, doubly linked */
@@ -296,7 +295,7 @@ supplemental_page_table_init (struct supplemental_page_table *spt) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct supplemental_page_table *src) {
-  
+  return true;
   // Iterate src and copy the contents to dst
   struct hash_iterator i;
   hash_first (&i, src);
