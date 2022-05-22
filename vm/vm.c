@@ -307,11 +307,11 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
     // TODO: need to allocate uninit page and claim them immediately.
 
     // if page is stack page
-    if (src_page->uninit.type & VM_MARKER_0) {
-      setup_stack(&thread_current()->tf);
-    }
+    // if (src_page->uninit.type & VM_MARKER_0) {
+    //   setup_stack(&thread_current()->tf);
+    // }
     // if page is UNINIT page
-    else if(src_page->operations->type == VM_UNINIT) {
+    if(src_page->operations->type == VM_UNINIT) {
       if(!vm_alloc_page_with_initializer(type, upage, writable, init, aux))
         return false;
     }

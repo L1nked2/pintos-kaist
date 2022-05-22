@@ -37,7 +37,8 @@
     "intr-stubs.h": "c",
     "flags.h": "c",
     "random.h": "c",
-    "stddef.h": "c"
+    "stddef.h": "c",
+    "vm.h": "c"
   },
   "C_Cpp.dimInactiveRegions": false,
 }
