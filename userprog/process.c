@@ -889,8 +889,8 @@ lazy_load_segment (struct page *page, void *aux) {
   struct frame *frame = page->frame;
   /* Load this page. */
   file_seek (file, ofs);
-  // int file_read_count = file_read(file, frame->kva, page_read_bytes);
-  int file_read_count = file_read_at(file, page->va, page_read_bytes, ofs);
+  int file_read_count = file_read_at(file, frame->kva, page_read_bytes, ofs);
+  // int file_read_count = file_read_at(file, page->va, page_read_bytes, ofs);
   if (file_read_count != (int) page_read_bytes) {
     // palloc_free_page(page);
     vm_dealloc_page(page);
@@ -899,8 +899,8 @@ lazy_load_segment (struct page *page, void *aux) {
     // printf("file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);
     return false;
   } else {
-    // memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
-    memset(page->va + page_read_bytes, 0, page_zero_bytes);
+    memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
+    // memset(page->va + page_read_bytes, 0, page_zero_bytes);
   }
   return true;
 }
