@@ -295,7 +295,7 @@ supplemental_page_table_init (struct supplemental_page_table *spt) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct supplemental_page_table *src) {
-  return true;//test
+  
   // Iterate src and copy the contents to dst
   struct hash_iterator i;
   hash_first (&i, src);
@@ -351,6 +351,7 @@ supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
   // writeback will be implemented in each page type
+  return;///test
   if(hash_empty(&spt->pages)) {
     hash_destroy(&spt->pages, NULL);
   } else {
