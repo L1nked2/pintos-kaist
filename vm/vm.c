@@ -295,7 +295,7 @@ supplemental_page_table_init (struct supplemental_page_table *spt) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct supplemental_page_table *src) {
-  return true;
+  return true;///test
   // Iterate src and copy the contents to dst
   struct hash_iterator i;
   hash_first (&i, src);
