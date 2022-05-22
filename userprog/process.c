@@ -890,7 +890,7 @@ lazy_load_segment (struct page *page, void *aux) {
     vm_dealloc_page(page);
     printf("file_read failed, file: %d, kva: %d, page_read_bytes: %d\n",file, frame->kva, page_read_bytes);///test
     printf("actually read: %d\n",file_read (file, frame->kva, page_read_bytes));///tests
-    printf("file_info: {inode: %d, pos: %d}\n",file->inode, file->pos);
+    printf("file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);
     return false;
   }
   memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
@@ -933,7 +933,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
     segment_info->file = file;
     segment_info->page_read_bytes = page_read_bytes;
-    printf("reserved_file_info: {inode: %d, pos: %d}\n",file->inode, file->pos);///test
+    printf("reserved_file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);///test
 
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
       writable, lazy_load_segment, segment_info)) {
