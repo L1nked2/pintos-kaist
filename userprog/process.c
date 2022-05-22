@@ -879,11 +879,11 @@ lazy_load_segment (struct page *page, void *aux) {
 	/* TODO: Load the segment from the file */
 	/* TODO: This called when the first page fault occurs on address VA. */
 	/* TODO: VA is available when calling this function. */
-  struct segment_info *segment_info = (struct segment_info *) aux;
-  struct file *file = segment_info->file;
-  size_t page_read_bytes = segment_info->page_read_bytes;
+  struct segment_info *info = (struct segment_info *) aux;
+  struct file *file = info->file;
+  size_t page_read_bytes = info->page_read_bytes;
   size_t page_zero_bytes = PGSIZE - page_read_bytes;
-  off_t ofs = segment_info->ofs;
+  off_t ofs = info->ofs;
   
   struct frame *frame = page->frame;
   /* Load this page. */
