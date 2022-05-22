@@ -142,6 +142,9 @@ page_fault (struct intr_frame *f) {
 
 #ifdef VM
 	/* For project 3 and later. */
+	if (user) {
+		thread_current()->stack_ptr = f->rsp;
+	}
 	if (vm_try_handle_fault (f, fault_addr, user, write, not_present))
 		return;
 #endif
@@ -150,7 +153,9 @@ page_fault (struct intr_frame *f) {
 	page_fault_cnt++;
 
   /* For project 2, page faults are handeled with exit(-1) */
-  //sys_exit(-1);
+  if (user) {
+    sys_exit(-1);
+  }
 
 	/* If the fault is true fault, show info and exit. */
 	printf ("Page fault at %p: %s error %s page in %s context.\n",
