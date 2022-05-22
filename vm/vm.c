@@ -167,8 +167,9 @@ vm_get_frame (void) {
   // if palloc fails(no available page), evict frame
   // and return empty frame.
 	if (frame->kva == NULL) {
-    PANIC("todo: swap_in and out");
+    // PANIC("todo: swap_in and out");
 		frame = vm_evict_frame();
+    return frame;
 	}
   // add frame to frame_table
   list_push_back (&frame_table, &frame->frame_elem);
@@ -299,6 +300,7 @@ supplemental_page_table_init (struct supplemental_page_table *spt) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct supplemental_page_table *src) {
+  return true;///test
   // Iterate src and copy the contents to dst
   struct hash_iterator i;
   hash_first (&i, src);
@@ -311,7 +313,7 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
     vm_initializer *init = src_page->uninit.init;
     void* aux = src_page->uninit.aux;
     // TODO: need to allocate uninit page and claim them immediately.
-    
+
     // if page is stack page
     // if (src_page->uninit.type & VM_MARKER_0) {
     //   setup_stack(&thread_current()->tf);
