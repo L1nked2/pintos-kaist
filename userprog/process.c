@@ -935,7 +935,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
     segment_info->file = file;
     segment_info->page_read_bytes = page_read_bytes;
     segment_info->ofs = ofs;
-    printf("reserved_file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);///test
+    printf("reserved_file_info: {inode: %d, ofs: %d} @ %d\n",file->inode, ofs, file);///test
 
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
       writable, lazy_load_segment, segment_info)) {
