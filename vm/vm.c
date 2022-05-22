@@ -210,6 +210,7 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
         vm_stack_growth(thread_current()->stack_bottom - PGSIZE);
         return true;
       }
+      printf("page_fault handling failed_1\n");///test
       return false;
     }
     else {
@@ -219,7 +220,7 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
     }
   }
   // cannot handle page_fault (writing to r/o, etc,.)
-  printf("page_fault handling failed\n");///test
+  printf("page_fault handling failed (not claim case)\n");///test
   return false;
 }
 
