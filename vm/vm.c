@@ -354,7 +354,6 @@ supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
   // writeback will be implemented in each page type
-  return;///test
   if(hash_empty(&spt->pages)) {
     hash_destroy(&spt->pages, NULL);
   } else {
