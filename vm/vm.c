@@ -62,7 +62,7 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 		 * TODO: should modify the field after calling the uninit_new. */
     struct page *page = (struct page *)malloc(sizeof(struct page));
     if (page == NULL) {
-      goto err;
+      goto err; // malloc failed
     }
     switch(VM_TYPE(type)) { 
       case VM_ANON: 
@@ -136,11 +136,8 @@ static struct frame *
 vm_get_victim (void) {
 	struct frame *victim = NULL;
 	/* TODO: The policy for eviction is up to you. */
-
-
-	// clock algorithm is recommended
-
-
+	// clock algorithm is recommended, but FIFO temporarily
+  victim = list_entry(list_pop_front(&frame_table), struct frame, frame_elem);
 	return victim;
 }
 
@@ -150,7 +147,9 @@ static struct frame *
 vm_evict_frame (void) {
 	struct frame *victim = vm_get_victim();
 	/* TODO: swap out the victim and return the evicted frame. */
-	swap_out(victim->page);
+  if (victim->page != NULL) {
+	  swap_out(victim->page);
+  }
 	return victim;
 }
 
@@ -196,7 +195,7 @@ vm_handle_wp (struct page *page UNUSED) {
 /* Return true on success */
 bool
 vm_try_handle_fault (struct intr_frame *f, void *addr,
-		bool user, bool write, bool not_present UNUSED) {
+		bool user, bool write, bool not_present) {
 	struct supplemental_page_table *spt= &thread_current ()->spt;
 	/* TODO: Validate the fault */
   if (is_kernel_vaddr(addr)) {
@@ -247,7 +246,7 @@ vm_claim_page (void *va UNUSED) {
   page = spt_find_page(&thread_current()->spt, va);
   // If page is not found on supplemental_page_table, return false.
 	if (page == NULL) {
-    printf("page not found on supplemental table\n");///test
+    // printf("page not found on supplemental table\n");///test
 		return false;
 	}
   // call do_claim_page to do rest job.
@@ -269,7 +268,7 @@ vm_do_claim_page (struct page *page) {
     return false;
   }
   // swap_in page and return result
-  printf("going to swap_in on page %d, frame %d\n", page->va, frame->kva);///test
+  // printf("going to swap_in on page %d, frame %d\n", page->va, frame->kva);/// test
 	return swap_in (page, frame->kva);
 }
 

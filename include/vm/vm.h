@@ -32,6 +32,12 @@ enum vm_type {
 #include "filesys/page_cache.h"
 #endif
 
+struct segment_info {
+  struct file *file;
+  size_t page_read_bytes;
+  off_t ofs;
+};
+
 struct page_operations;
 struct thread;
 

@@ -868,11 +868,12 @@ install_page (void *upage, void *kpage, bool writable) {
  * If you want to implement the function for only project 2, implement it on the
  * upper block. */
 
-struct segment_info {
-  struct file *file;
-  size_t page_read_bytes;
-  off_t ofs;
-};
+// struct segment_info {
+//   struct file *file;
+//   size_t page_read_bytes;
+//   off_t ofs;
+// };
+// move to vm.h
 
 static bool
 lazy_load_segment (struct page *page, void *aux) {
@@ -888,16 +889,18 @@ lazy_load_segment (struct page *page, void *aux) {
   struct frame *frame = page->frame;
   /* Load this page. */
   file_seek (file, ofs);
-  int file_read_count = file_read(file, frame->kva, page_read_bytes);
+  // int file_read_count = file_read(file, frame->kva, page_read_bytes);
+  int file_read_count = file_read_at(file, page->va, page_read_bytes, ofs);
   if (file_read_count != (int) page_read_bytes) {
-    palloc_free_page(frame->kva);
-    // vm_dealloc_page(page);
+    // palloc_free_page(frame->kva);
+    vm_dealloc_page(page);
     // printf("file_read failed, file: %d, kva: %d, page_read_bytes: %d\n",file, frame->kva, page_read_bytes);///test
     // printf("actually read: %d\n",file_read_count);///tests
     // printf("file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);
     return false;
   }
-  memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
+  // memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
+  memset(page->va + page_read_bytes, 0, page_zero_bytes);
 
   return true;
 }
