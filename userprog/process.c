@@ -326,14 +326,14 @@ process_exec (void *f_name) {
 	_if.eflags = FLAG_IF | FLAG_MBS;
 
 	/* We first kill the current context */
+  struct thread *cur = thread_current();
 	process_cleanup ();
+	supplemental_page_table_init(&cur->spt);
 
 	/* Parse the given command, and let file name
 	   be the program */
 	argc = parse_args(file_name, argv);
-  
-	struct thread *cur = thread_current();
-	supplemental_page_table_init(&cur->spt);
+
 	/* And then load the binary */
   // need to add file_lock inside of precess_exec
 	success = load(file_name, &_if);
