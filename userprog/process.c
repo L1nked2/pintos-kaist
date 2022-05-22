@@ -871,6 +871,7 @@ install_page (void *upage, void *kpage, bool writable) {
 struct segment_info {
   struct file *file;
   size_t page_read_bytes;
+  off_t ofs;
 };
 
 static bool
@@ -882,9 +883,11 @@ lazy_load_segment (struct page *page, void *aux) {
   struct file *file = segment_info->file;
   size_t page_read_bytes = segment_info->page_read_bytes;
   size_t page_zero_bytes = PGSIZE - page_read_bytes;
+  off_t ofs = segment_info->ofs;
   
   struct frame *frame = page->frame;
   /* Load this page. */
+  file_seek (file, ofs);
   if (file_read (file, frame->kva, page_read_bytes) != (int) page_read_bytes) {
     // palloc_free_page(frame->kva);
     vm_dealloc_page(page);
@@ -918,7 +921,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 	ASSERT (pg_ofs (upage) == 0);
 	ASSERT (ofs % PGSIZE == 0);
 
-  file_seek (file, ofs);
   // segment information for lazy_load_segment
   struct segment_info *segment_info;
   segment_info = (struct segment_info *)malloc(sizeof(struct segment_info));
@@ -933,6 +935,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		/* TODO: Set up aux to pass information to the lazy_load_segment. */
     segment_info->file = file;
     segment_info->page_read_bytes = page_read_bytes;
+    segment_info->ofs = ofs;
     printf("reserved_file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);///test
 
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
