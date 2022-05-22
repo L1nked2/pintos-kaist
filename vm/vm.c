@@ -340,7 +340,6 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
 void
 page_destructor (struct hash_elem *e, void* aux UNUSED) {
   const struct page *page = hash_entry(e, struct page, hash_elem);
-  pml4_clear_page(thread_current()->pml4, page->va);
   if (page->frame != NULL){
     page->frame->page = NULL;
 	}
