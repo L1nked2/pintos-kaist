@@ -49,6 +49,18 @@ file_backed_swap_in (struct page *page, void *kva) {
 static bool
 file_backed_swap_out (struct page *page) {
 	struct file_page *file_page UNUSED = &page->file;
+  struct segment_info *info = file_page->segment_info;
+  struct thread* cur = thread_current ();
+  // check if page is dirty
+	if (pml4_is_dirty (cur->pml4, page->va)) {
+		file_seek (info->file, info->ofs);
+		file_write(info->file, page->va, info->page_read_bytes);
+		pml4_set_dirty (cur->pml4, page->va, false);
+	}
+	// make "not present" for given page
+	pml4_clear_page (cur->pml4, page->va);
+	page->frame = NULL;
+	return true;
 }
 
 /* Destory the file backed page. PAGE will be freed by the caller. */
