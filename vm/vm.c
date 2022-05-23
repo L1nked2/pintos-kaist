@@ -331,8 +331,8 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
         return false;
       printf("Alloc page done\n");///test
       // claim page immediately
-      struct page* dst_page = spt_find_page(&thread_current ()->spt, upage);
-      if(!vm_claim_page(dst_page))
+      struct page* dst_page = spt_find_page(dst, upage);
+      if(!vm_claim_page(upage))
         return false;
       printf("claim page done\n");///test
       // copy contents of memory -> CoW will change this
