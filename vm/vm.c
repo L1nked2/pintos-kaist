@@ -340,7 +340,6 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
         break;
     }
   }
-  printf("spt copy done\n");///test
   return true;
 }
 
