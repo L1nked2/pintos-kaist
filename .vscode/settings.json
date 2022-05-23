@@ -39,7 +39,8 @@
     "random.h": "c",
     "stddef.h": "c",
     "vm.h": "c",
-    "stdbool.h": "c"
+    "stdbool.h": "c",
+    "main.h": "c"
   },
   "C_Cpp.dimInactiveRegions": false,
 }
