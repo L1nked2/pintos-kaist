@@ -466,7 +466,6 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
-  PANIC("exit called\n");
   // print termination message
   if(curr->is_user_thread) {
     printf("%s: exit(%d)\n", curr->name, curr->exit_status);
@@ -519,6 +518,7 @@ static void
 process_cleanup (void) {
 	struct thread *curr = thread_current ();
 #ifdef VM
+  printf("spt_kill in precess_cleanup\n");///test
 	supplemental_page_table_kill (&curr->spt);
 #endif
 	uint64_t *pml4;
@@ -537,6 +537,7 @@ process_cleanup (void) {
 		pml4_activate (NULL);
 		pml4_destroy (pml4);
 	}
+  printf("pml4 cleanup in precess_cleanup\n");///test
 }
 
 /* Sets up the CPU for running user code in the nest thread.
