@@ -311,9 +311,9 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
     enum vm_type type = page_get_type(src_page);
 
     // if page is stack page
-    // if (src_page->uninit.type & VM_MARKER_0) {
-    //   setup_stack(&thread_current()->tf);
-    // }
+    if (src_page->uninit.type & VM_MARKER_0) {
+      setup_stack(&thread_current()->tf);
+    }
     // if page is UNINIT page
     if(type == VM_UNINIT) {
       vm_initializer *init = src_page->uninit.init;
