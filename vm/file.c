@@ -47,9 +47,39 @@ file_backed_destroy (struct page *page) {
 }
 
 /* Do the mmap */
+/* similar with load_segment */
 void *
 do_mmap (void *addr, size_t length, int writable,
 		struct file *file, off_t offset) {
+	void *ret_addr = addr;
+	off_t file_len = file_length(file);
+	size_t read_bytes = length < file_len ? length : file_len;
+	size_t zero_bytes = PGSIZE - read_bytes%PGSIZE;
+
+	while ((read_bytes > 0)||(zero_bytes >0)) {
+		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
+		size_t page_zero_bytes = PGSIZE - page_read_bytes;
+		struct file *reopen_file = file_reopen(file);
+
+		struct segment_info *info = (struct segment_info *)malloc(sizeof(struct segment_info));
+		info->file = reopen_file;
+		info->page_read_bytes;
+		info->ofs = offset;
+
+		if (!vm_alloc_page_with_initializer(VM_FILE, addr,
+				writable, lazy_load_segment, info)) {
+			free(info);
+			file_close(reopen_file);
+			return NULL;
+		}
+		read_bytes -= page_read_bytes;
+		zero_bytes -= page_zero_bytes;
+		offset += page_read_bytes;
+		uint8_t *tmp_addr = (uint8_t *)addr; // for void pointer calculating
+		tmp_addr += PGSIZE;
+		addr = (void *)tmp_addr;
+	}
+	return ret_addr;
 }
 
 /* Do the munmap */
