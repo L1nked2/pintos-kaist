@@ -131,11 +131,14 @@ void validate_addr(const uint64_t *addr) {
 }
 
 /* addr must be in user space. */
-void validate_buffer(const uint64_t *addr, unsigned size) {
+void validate_buffer(const uint64_t *addr, unsigned size, bool to_write) {
   for(unsigned i=0; i<size; i++) {
     validate_addr(addr+i);
     struct page* page = spt_find_page(&thread_current()->spt, addr+i);
-    if(page == NULL || page->writable == false) {
+    if(page == NULL) {
+      sys_exit(-1);
+    }
+    if(to_write == true && page->writable == false) {
       sys_exit(-1);
     }
   }
@@ -269,7 +272,7 @@ int sys_filesize(int fd) {
 }
 
 int sys_read(int fd, void *buffer, unsigned size) {
-  validate_buffer(buffer, size);
+  validate_buffer(buffer, size, false);
   int result;
   lock_acquire(&file_lock);
   struct fd* fd_entry = search_fd(fd);
@@ -302,7 +305,7 @@ int sys_read(int fd, void *buffer, unsigned size) {
 }
 
 int sys_write(int fd, const void *buffer, unsigned size) {
-  validate_addr(buffer);
+  validate_buffer(buffer, size, true);
   int result;
 	lock_acquire(&file_lock);
 	struct fd* fd_entry = search_fd(fd);
