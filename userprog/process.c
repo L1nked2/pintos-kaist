@@ -895,7 +895,7 @@ lazy_load_segment (struct page *page, void *aux) {
     // palloc_free_page(page);
     
 	// vm_dealloc_page(page);
-	spt_remove_page(page);
+	spt_remove_page(&thread_current()->spt, page);
 
     //printf("file_read failed, file: %d, kva: %d, page_read_bytes: %d\n",file, frame->kva, page_read_bytes);///test
     //printf("actually read: %d\n",file_read_count);///tests
