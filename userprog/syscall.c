@@ -132,8 +132,8 @@ void validate_addr(const uint64_t *addr) {
 
 /* addr must be in user space. */
 void validate_buffer(const uint64_t *addr, unsigned size) {
-	validate_addr(addr);
   for(unsigned i=0; i<size; i++) {
+    validate_addr(addr+i);
     struct page* page = spt_find_page(&thread_current()->spt, addr+i);
     if(page == NULL || page->writable == false) {
       sys_exit(-1);
