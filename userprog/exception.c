@@ -154,6 +154,7 @@ page_fault (struct intr_frame *f) {
 	page_fault_cnt++;
 
   /* For project 2, page faults are handeled with exit(-1) */
+  printf("handling failed\n");///test
   sys_exit(-1);
 
 
