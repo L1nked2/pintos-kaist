@@ -1,7 +1,6 @@
 /* file.c: Implementation of memory backed file object (mmaped object). */
 
 #include "vm/vm.h"
-#include "userprog/syscall.h" // for file lock
 
 static bool file_backed_swap_in (struct page *page, void *kva);
 static bool file_backed_swap_out (struct page *page);
@@ -35,10 +34,15 @@ static bool
 file_backed_swap_in (struct page *page, void *kva) {
 	struct file_page *file_page = &page->file;
   struct segment_info *info = file_page->segment_info;
-  lock_acquire(&file_lock);
-  // off_t size = file_read_at(file_page->file, kva, (off_t)file_page->page_read_bytes, file_page->ofs);
-  off_t size = file_read_at(info->file, kva, (off_t)info->page_read_bytes, info->ofs);
-  lock_release(&file_lock);
+  // read file contents
+  file_seek(info->file, info->ofs);
+	off_t read_bytes = file_read(info->file, kva, info->page_read_bytes);
+	if (read_bytes != info->page_read_bytes)
+    return false;
+  // fill zero to rest space
+	if (read_bytes < PGSIZE)
+		memset(kva + read_bytes, 0, PGSIZE - read_bytes);
+  return true;
 }
 
 /* Swap out the page by writeback contents to the file. */
