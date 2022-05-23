@@ -122,7 +122,7 @@ syscall_handler (struct intr_frame *f) {
 /* addr must be in user space. */
 void validate_addr(const uint64_t *addr) {
 	if ((addr == NULL)
-  || (!is_user_vaddr(addr))
+  || (is_kernel_vaddr(addr))
 	|| (spt_find_page(&thread_current()->spt, addr) == NULL) 
   || (pml4e_walk(thread_current()->pml4, addr, 0) == NULL)) {
 		sys_exit(-1);
@@ -423,12 +423,13 @@ int sys_dup2(int oldfd, int newfd) {
 }
 
 void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
+  validate_addr(addr);
   // check if console input and output
   if (fd < FD_NR_START_INDEX) {
     return NULL;
   }
   // check if addr is page-aligned
-  if ((offset%PGSIZE != 0)||(addr != pg_round_down(addr))||(!is_user_vaddr(addr))||(length <= 0))
+  if ((offset%PGSIZE != 0)||(addr != pg_round_down(addr))||(length <= 0))
     return NULL;
   // get fd and call do_mmap
   struct fd *fd_entry = search_fd(fd);
