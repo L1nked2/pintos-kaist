@@ -309,13 +309,13 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
     void *va = src_page->va;
     bool writable = src_page->writable;
     enum vm_type type = page_get_type(src_page);
-    vm_initializer *init = src_page->uninit.init;
-    void* aux = src_page->uninit.aux;
     
     switch (VM_TYPE(src_page->operations->type)) {
       // if page is UNINIT page
-      case VM_UNINIT:
+      case VM_UNINIT: ;//do not remove semicolon
         // copy auxiliary information(segment_info)
+        vm_initializer *init = src_page->uninit.init;
+        void* aux = src_page->uninit.aux;
         struct segment_info *info = (struct segment_info *)malloc(sizeof(struct segment_info));
         memcpy(info, src_page->uninit.aux, sizeof(struct segment_info));
         info->file = file_duplicate(info->file);
@@ -325,7 +325,7 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
         break;
       // if page is anon or file
       case VM_ANON:
-      case VM_FILE:
+      case VM_FILE: ;//do not remove semicolon
         // allocate page as uninit first
         if(!vm_alloc_page(type, va, writable))
           return false;
