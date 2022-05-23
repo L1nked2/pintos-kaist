@@ -135,8 +135,9 @@ void validate_buffer(const uint64_t *addr, unsigned size, bool to_write) {
     printf("validating buffer: %d, size:%d\n",addr+i,size);///test
     validate_addr(addr+i);
     struct page* page = spt_find_page(&thread_current()->spt, addr+i);
+    printf("current page: %d @ %d\n",page,addr+i);///test
     if(page == NULL) {
-      printf("page not found, %x\n",addr+i);///test
+      printf("page not found, %d\n",addr+i);///test
       sys_exit(-1);
     }
     if(to_write == true && page->writable == false) {
