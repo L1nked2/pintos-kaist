@@ -279,7 +279,7 @@ __do_fork (void *aux) {
     list_push_back(current_fdt, &(dst_fd->fd_elem));
   }
 
-  // shallow-copy parent fdt_dup to current_fdt_dup
+  // deep-copy parent fdt_dup to current_fdt_dup
   for(e=list_begin(parent_fdt_dup); e!=list_end(parent_fdt_dup); e=list_next(e)) {
     struct fd_dup *src_fd_dup = list_entry(e, struct fd_dup, fd_dup_elem);
     //struct fd_dup *dst_fd_dup = (struct fd_dup*)malloc(sizeof(struct fd_dup));
