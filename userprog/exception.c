@@ -142,7 +142,6 @@ page_fault (struct intr_frame *f) {
 
 #ifdef VM
 	/* For project 3 and later. */
-  printf("not_present:%d, write:%d, user:%d\n",not_present,write,user);///test
 	if (user) {
 		thread_current()->stack_ptr = f->rsp;
 	}
@@ -154,7 +153,6 @@ page_fault (struct intr_frame *f) {
 	page_fault_cnt++;
 
   /* For project 2, page faults are handeled with exit(-1) */
-  printf("handling failed\n");///test
   sys_exit(-1);
 
 
