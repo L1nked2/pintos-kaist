@@ -219,7 +219,7 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
     }
     else {
       // page is properly claimed
-      printf("vm_claim success\n");///test
+      //printf("vm_claim success\n");///test
       return true;
     }
   }
