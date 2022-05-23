@@ -122,12 +122,10 @@ syscall_handler (struct intr_frame *f) {
 /* addr must be in user space. */
 void validate_addr(const uint64_t *addr) {
 	if ((addr == NULL)
-  || (is_kernel_vaddr(addr))
-	|| (spt_find_page(&thread_current()->spt, addr) == NULL) 
-  || (pml4e_walk(thread_current()->pml4, addr, 0) == NULL)) {
+  || (is_kernel_vaddr(addr))) {
 		sys_exit(-1);
 	}
-  return NULL;
+  return;
 }
 
 /* addr must be in user space. */
@@ -142,7 +140,7 @@ void validate_buffer(const uint64_t *addr, unsigned size, bool to_write) {
       sys_exit(-1);
     }
   }
-  return NULL;
+  return;
 }
 
 // fd_dup search helper
