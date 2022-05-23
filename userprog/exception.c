@@ -163,6 +163,5 @@ page_fault (struct intr_frame *f) {
 			write ? "writing" : "reading",
 			user ? "user" : "kernel");
 	kill (f);
-/* no properly for project 3 */
 }
 

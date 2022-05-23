@@ -715,7 +715,7 @@ load (const char *file_name, struct intr_frame *if_) {
 
 done:
 	/* We arrive here whether the load is successful or not. */
-	//file_close (file); disabled for pj3
+	file_close (file);
 	return success;
 }
 
@@ -885,27 +885,19 @@ lazy_load_segment (struct page *page, void *aux) {
   size_t page_read_bytes = info->page_read_bytes;
   size_t page_zero_bytes = PGSIZE - page_read_bytes;
   off_t ofs = info->ofs;
-  
+  bool succ = false;
   struct frame *frame = page->frame;
   /* Load this page. */
   file_seek (file, ofs);
   int file_read_count = file_read_at(file, frame->kva, page_read_bytes, ofs);
   // int file_read_count = file_read_at(file, page->va, page_read_bytes, ofs);
   if (file_read_count != (int) page_read_bytes) {
-    // palloc_free_page(page);
-    
-	// vm_dealloc_page(page);
-	spt_remove_page(&thread_current()->spt, page);
-
-    //printf("file_read failed, file: %d, kva: %d, page_read_bytes: %d\n",file, frame->kva, page_read_bytes);///test
-    //printf("actually read: %d\n",file_read_count);///tests
-    //printf("file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);
-    return false;
+	  spt_remove_page(&thread_current()->spt, page);
   } else {
     memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
-    // memset(page->va + page_read_bytes, 0, page_zero_bytes);
+    succ = true;
   }
-  return true;
+  return succ;
 }
 
 /* Loads a segment starting at offset OFS in FILE at address
@@ -940,7 +932,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
     	// segment information for lazy_load_segment
 		struct segment_info *segment_info;
 		segment_info = (struct segment_info *)malloc(sizeof(struct segment_info));
-		segment_info->file = file;
+		segment_info->file = file_reopen(file);
 		segment_info->page_read_bytes = page_read_bytes;
 		segment_info->ofs = ofs;
 		// printf("reserved_file_info: {inode: %d, ofs: %d} @ %d\n",file->inode, ofs, file);///test
