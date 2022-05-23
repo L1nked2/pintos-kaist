@@ -1,6 +1,7 @@
 /* file.c: Implementation of memory backed file object (mmaped object). */
 
 #include "vm/vm.h"
+#include "userprog/syscall.h" // for file lock
 
 static bool file_backed_swap_in (struct page *page, void *kva);
 static bool file_backed_swap_out (struct page *page);
@@ -26,13 +27,17 @@ file_backed_initializer (struct page *page, enum vm_type type, void *kva) {
 	/* Set up the handler */
 	page->operations = &file_ops;
 	struct file_page *file_page = &page->file;
-  file_page->file = ((struct segment_info*)page->uninit.aux)->file;
+  file_page->segment_info = page->uninit.aux;
 }
 
 /* Swap in the page by read contents from the file. */
 static bool
 file_backed_swap_in (struct page *page, void *kva) {
-	struct file_page *file_page UNUSED = &page->file;
+	struct file_page *file_page = &page->file;
+  struct segment_info *info = file_page->segment_info;
+  lock_acquire(&file_lock);
+  off_t size = file_read_at(file_page->file, kva, (off_t)file_page->page_read_bytes, file_page->ofs);
+  lock_release(&file_lock);
 }
 
 /* Swap out the page by writeback contents to the file. */
@@ -44,7 +49,19 @@ file_backed_swap_out (struct page *page) {
 /* Destory the file backed page. PAGE will be freed by the caller. */
 static void
 file_backed_destroy (struct page *page) {
-	struct file_page *file_page UNUSED = &page->file;
+  struct file_page *file_page = &page->file;
+  struct segment_info *info = file_page->segment_info;
+  // if dirty, write back
+  if(pml4_is_dirty(thread_current()->pml4, page->va)) {
+    file_seek(info->file, info->ofs);
+    file_write(info->file, page->va, info->page_read_bytes);
+  }
+  file_close (info->file);
+  // free the physical frame
+  if (page->frame != NULL) {
+    list_remove (&page->frame->frame_elem);
+    free (page->frame);
+  }
 }
 
 /* Do the mmap */

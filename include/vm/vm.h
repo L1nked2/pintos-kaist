@@ -38,6 +38,8 @@ struct segment_info {
   off_t ofs;
 };
 
+struct lock pio_lock;
+
 struct page_operations;
 struct thread;
 

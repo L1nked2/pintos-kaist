@@ -21,7 +21,8 @@ vm_init (void) {
 
   // initialize frame_table
   list_init (&frame_table);
-
+  // init pio_lock(page in & out lock)
+  lock_init (&pio_lock);
   return;
 }
 
