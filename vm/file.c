@@ -85,6 +85,27 @@ do_mmap (void *addr, size_t length, int writable,
 /* Do the munmap */
 void
 do_munmap (void *addr) {
+	struct thread *t = thread_current();
+	struct page *page = spt_find_page(&t->spt, addr);
+	if (page == NULL)
+		return;
+
+	uint32_t page_op_type = page->operations->type;
+	while ((page_op_type == VM_FILE)||
+			((page_op_type == VM_UNINIT)&&(page->uninit.type == VM_FILE))) {
+		struct segment_info *info = page->file.segment_info;
+		struct file *file = info->file;
+		size_t page_read_bytes = info->page_read_bytes;
+		off_t offset = info->ofs;
+		if (pml4_is_dirty(t->pml4, addr)) {
+			file_write_at(file, addr, page_read_bytes, offset);
+		}
+		spt_remove_page(&thread_current()->spt, page);
+		uint8_t *tmp_addr = (uint8_t *)addr; // for void pointer calculating
+		tmp_addr += PGSIZE;
+		addr = (void *)tmp_addr;
+	}
+	
 }
 
 static bool
