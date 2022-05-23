@@ -38,7 +38,8 @@
     "flags.h": "c",
     "random.h": "c",
     "stddef.h": "c",
-    "vm.h": "c"
+    "vm.h": "c",
+    "stdbool.h": "c"
   },
   "C_Cpp.dimInactiveRegions": false,
 }
