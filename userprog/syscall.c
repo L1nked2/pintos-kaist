@@ -106,6 +106,12 @@ syscall_handler (struct intr_frame *f) {
     case SYS_DUP2:
       (f->R).rax = sys_dup2((f->R).rdi, (f->R).rsi);
       break;
+    case SYS_MMAP:
+      (f->R).rax = sys_mmap((f->R).rdi, (f->R).rsi, (f->R).rdx, (f->R).rcx, (f->R).r8);
+      break;
+    case SYS_MUNMAP:
+      sys_munmap((f->R).rdi);
+      break;
     default:
       sys_exit(-1);
       break;
@@ -414,4 +420,22 @@ int sys_dup2(int oldfd, int newfd) {
   }
   // return result
   return newfd;
+}
+
+void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
+  if (fd < 2)
+    sys_exit(-1); // console input and output
+  if ((offset%PGSIZE != 0)||(addr != pg_round_down(addr))||(!is_user_vaddr(addr))||(length <= 0))
+    return NULL;
+  struct fd *fd_entry = search_fd(fd);
+  if (fd_entry == NULL)
+    return NULL;
+  struct file *file = fd_entry->fp;
+  if (file == NULL)
+    return NULL;
+  return do_mmap(addr, length, writable, file, offset);
+}
+
+void sys_munmap(void *addr){
+  do_munmap(addr);
 }
