@@ -132,7 +132,7 @@ void validate_addr(const uint64_t *addr) {
 /* addr must be in user space. */
 void validate_buffer(const uint64_t *addr, unsigned size, bool to_write) {
   for(unsigned i=0; i<size; i++) {
-    printf("validating buffer: %d\n",addr+i);///test
+    printf("validating buffer: %d, size:%d\n",addr+i,size);///test
     validate_addr(addr+i);
     struct page* page = spt_find_page(&thread_current()->spt, addr+i);
     if(page == NULL) {
