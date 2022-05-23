@@ -318,18 +318,23 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
     if(type == VM_UNINIT) {
       vm_initializer *init = src_page->uninit.init;
       void* aux = src_page->uninit.aux;
+      printf("UNINIT copy\n");///test
       if(!vm_alloc_page_with_initializer(type, upage, writable, init, aux))
         return false;
+      printf("Alloc page done\n");///test
     }
     // if page is anon or file
     else {
       // allocate page as uninit first
+      printf("ANON & FILE copy\n");///test
       if(!vm_alloc_page(type, upage, writable))
         return false;
+      printf("Alloc page done\n");///test
       // claim page immediately
       struct page* dst_page = spt_find_page(&thread_current ()->spt, upage);
       if(!vm_claim_page(dst_page))
         return false;
+      printf("claim page done\n");///test
       // copy contents of memory -> CoW will change this
       memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
     }
