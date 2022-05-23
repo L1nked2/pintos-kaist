@@ -3,7 +3,6 @@
 #include "threads/malloc.h"
 #include "vm/vm.h"
 #include "vm/inspect.h"
-#include "userprog/process.h"
 
 static struct list frame_table;
 
@@ -307,34 +306,33 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
   while (hash_next (&i))
   {
     struct page *src_page = hash_entry(hash_cur(&i), struct page, hash_elem);
-    void *upage = src_page->va;
+    void *va = src_page->va;
     bool writable = src_page->writable;
     enum vm_type type = page_get_type(src_page);
 
-    // if page is stack page
-    if (src_page->uninit.type & VM_MARKER_0) {
-      setup_stack(&thread_current()->tf);
-    }
     // if page is UNINIT page
     if(type == VM_UNINIT) {
       vm_initializer *init = src_page->uninit.init;
       void* aux = src_page->uninit.aux;
-      if(!vm_alloc_page_with_initializer(type, upage, writable, init, aux))
+      if(!vm_alloc_page_with_initializer(type, va, writable, init, aux))
         return false;
+      printf("UNINIT page copy done\n");///test
     }
     // if page is anon or file
     else {
       // allocate page as uninit first
-      if(!vm_alloc_page(type, upage, writable))
+      if(!vm_alloc_page(type, va, writable))
         return false;
       // claim page immediately
-      struct page* dst_page = spt_find_page(dst, upage);
-      if(!vm_claim_page(upage))
+      struct page* dst_page = spt_find_page(dst, va);
+      if(!vm_claim_page(va))
         return false;
       // copy contents of memory -> CoW will change this
       memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
+      printf("ANON & FILE page copy done\n");///test
     }
   }
+  printf("spt copy done\n");///test
   return true;
 }
 
