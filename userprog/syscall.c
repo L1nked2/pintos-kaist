@@ -131,13 +131,9 @@ void validate_addr(const uint64_t *addr) {
 
 /* addr must be in user space. */
 void validate_buffer(const uint64_t *addr, unsigned size, bool to_write) {
-  void *start_addr = pg_round_down(addr);
-  void *end_addr = pg_round_down(addr + size);
-  if(addr == NULL)
-    sys_exit(-1);
-  for(void* i=start_addr; i<end_addr; i+=PGSIZE) {
-    validate_addr(addr);
-    struct page* page = spt_find_page(&thread_current()->spt, i);
+  for(unsigned i=0; i<size; i++) {
+    validate_addr(addr+i);
+    struct page* page = spt_find_page(&thread_current()->spt, addr+i);
     if(page == NULL) {
       sys_exit(-1);
     }
