@@ -891,7 +891,7 @@ lazy_load_segment (struct page *page, void *aux) {
   int file_read_count = file_read_at(file, frame->kva, page_read_bytes, ofs);
   // int file_read_count = file_read_at(file, page->va, page_read_bytes, ofs);
   if (file_read_count != (int) page_read_bytes) {
-	  spt_remove_page(&thread_current()->spt, page);
+	  //spt_remove_page(&thread_current()->spt, page);
   } else {
     memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
     succ = true;

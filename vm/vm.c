@@ -110,15 +110,13 @@ spt_insert_page (struct supplemental_page_table *spt,
 	// int succ = false;
 	/* TODO: Fill this function. */
   // find page from spt
-	// struct hash_elem *h_e = hash_find(&spt->pages, &page->hash_elem);
-  // if (h_e != NULL) { // spt has the page already
-	// 	return false;
-	// } else {
-  //   hash_insert(&spt->pages, &page->hash_elem);
-  //   return true;
-  // }
-  hash_insert(&spt->pages, &page->hash_elem);
-  return true;
+	struct hash_elem *h_e = hash_find(&spt->pages, &page->hash_elem);
+  if (h_e != NULL) { // spt has the page already
+		return false;
+	} else {
+    hash_insert(&spt->pages, &page->hash_elem);
+    return true;
+  }
 }
 
 /* Remove PAGE from spt and deallocate it. */
