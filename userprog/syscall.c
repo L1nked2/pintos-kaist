@@ -130,6 +130,18 @@ void validate_addr(const uint64_t *addr) {
   return NULL;
 }
 
+/* addr must be in user space. */
+void validate_buffer(const uint64_t *addr, unsigned size) {
+	validate_addr(addr);
+  for(unsigned i=0; i<size; i++) {
+    struct page* page = spt_find_page(&thread_current()->spt, addr+i);
+    if(page == NULL || page->writable == false) {
+      sys_exit(-1);
+    }
+  }
+  return NULL;
+}
+
 // fd_dup search helper
 struct fd_dup *search_fd_dup(int fd) {
   struct list_elem *e;
@@ -257,7 +269,7 @@ int sys_filesize(int fd) {
 }
 
 int sys_read(int fd, void *buffer, unsigned size) {
-  validate_addr(buffer);
+  validate_buffer(buffer, size);
   int result;
   lock_acquire(&file_lock);
   struct fd* fd_entry = search_fd(fd);
