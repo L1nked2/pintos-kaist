@@ -314,12 +314,14 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
     if(type == VM_UNINIT) {
       vm_initializer *init = src_page->uninit.init;
       void* aux = src_page->uninit.aux;
+      printf("UNINIT page copy start\n");///test
       if(!vm_alloc_page_with_initializer(type, va, writable, init, aux))
         return false;
       printf("UNINIT page copy done\n");///test
     }
     // if page is anon or file
     else {
+      printf("ANON & FILE page copy start\n");///test
       // allocate page as uninit first
       if(!vm_alloc_page(type, va, writable))
         return false;
