@@ -1,7 +1,6 @@
 /* file.c: Implementation of memory backed file object (mmaped object). */
 
 #include "vm/vm.h"
-#include "userprog/process.h"
 
 static bool file_backed_swap_in (struct page *page, void *kva);
 static bool file_backed_swap_out (struct page *page);
@@ -48,7 +47,7 @@ file_backed_destroy (struct page *page) {
 }
 
 /* Do the mmap */
-/* similar with load_segment */
+/* similar with load_segment in process.c */
 void *
 do_mmap (void *addr, size_t length, int writable,
 		struct file *file, off_t offset) {
@@ -68,7 +67,7 @@ do_mmap (void *addr, size_t length, int writable,
 		info->ofs = offset;
 
 		if (!vm_alloc_page_with_initializer(VM_FILE, addr,
-				writable, lazy_load_segment, info)) {
+				writable, file_lazy_load_segment, info)) {
 			free(info);
 			file_close(reopen_file);
 			return NULL;
@@ -86,4 +85,34 @@ do_mmap (void *addr, size_t length, int writable,
 /* Do the munmap */
 void
 do_munmap (void *addr) {
+}
+
+static bool
+file_lazy_load_segment (struct page *page, void *aux) {
+	/* TODO: Load the segment from the file */
+	/* TODO: This called when the first page fault occurs on address VA. */
+	/* TODO: VA is available when calling this function. */
+  struct segment_info *info = (struct segment_info *) aux;
+  struct file *file = info->file;
+  size_t page_read_bytes = info->page_read_bytes;
+  size_t page_zero_bytes = PGSIZE - page_read_bytes;
+  off_t ofs = info->ofs;
+  
+  struct frame *frame = page->frame;
+  /* Load this page. */
+  file_seek (file, ofs);
+  int file_read_count = file_read_at(file, frame->kva, page_read_bytes, ofs);
+  // int file_read_count = file_read_at(file, page->va, page_read_bytes, ofs);
+  if (file_read_count != (int) page_read_bytes) {
+    // palloc_free_page(page);
+    vm_dealloc_page(page);
+    //printf("file_read failed, file: %d, kva: %d, page_read_bytes: %d\n",file, frame->kva, page_read_bytes);///test
+    //printf("actually read: %d\n",file_read_count);///tests
+    //printf("file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);
+    return false;
+  } else {
+    memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
+    // memset(page->va + page_read_bytes, 0, page_zero_bytes);
+  }
+  return true;
 }
