@@ -423,10 +423,9 @@ int sys_dup2(int oldfd, int newfd) {
 }
 
 void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
-  // check if newfdconsole input and output
+  // check if console input and output
   if (fd < FD_NR_START_INDEX) {
-    printf("wrong fd index: %d\n",fd);///test
-    sys_exit(-1);
+    return NULL;
   }
   // check if addr is page-aligned
   if ((offset%PGSIZE != 0)||(addr != pg_round_down(addr))||(!is_user_vaddr(addr))||(length <= 0))
