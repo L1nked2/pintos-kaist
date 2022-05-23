@@ -210,7 +210,7 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
       // vm_claim_page failed,
       // check if stack growth can solve the problem
       if (rsp - 8 <= addr && USER_STACK - 0x100000 <= addr && addr <= USER_STACK) {
-        printf("stack_growth\n");///test
+        //printf("stack_growth\n");///test
         vm_stack_growth(thread_current()->stack_bottom - PGSIZE);
         return true;
       }
@@ -302,7 +302,7 @@ supplemental_page_table_init (struct supplemental_page_table *spt) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct supplemental_page_table *src) {
-  return true;///test
+  //return true;///test
   // Iterate src and copy the contents to dst
   struct hash_iterator i;
   hash_first (&i, src);
