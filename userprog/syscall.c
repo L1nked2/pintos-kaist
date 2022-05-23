@@ -131,12 +131,9 @@ void validate_addr(const uint64_t *addr) {
 /* addr must be in user space. */
 void validate_buffer(const uint8_t *addr, unsigned size, bool to_write) {
   for(int i=0; i<size; i++) {
-    printf("validating buffer: %d, size:%d, rounded: %d\n",addr+i,size,pg_round_down(addr+i));///test
     validate_addr(addr+i);
     struct page* page = spt_find_page(&thread_current()->spt, addr+i);
-    printf("current page: %d @ %d\n",page,addr+i);///test
     if(page == NULL) {
-      printf("page not found, %d\n",addr+i);///test
       sys_exit(-1);
     }
     if(to_write == true && page->writable == false) {
