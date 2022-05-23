@@ -122,13 +122,15 @@ syscall_handler (struct intr_frame *f) {
 /* addr must be in user space. */
 void validate_addr(const uint64_t *addr) {
 	if ((addr == NULL)
-  || (is_kernel_vaddr(addr))) {
+  || (is_kernel_vaddr(addr))
+  || (spt_find_page(&thread_current()->spt, addr) == NULL)) {
 		sys_exit(-1);
 	}
   return;
 }
 
 /* addr must be in user space. */
+//TIP: uint8_t for correct iteration
 void validate_buffer(const uint8_t *addr, unsigned size, bool to_write) {
   for(int i=0; i<size; i++) {
     validate_addr(addr+i);

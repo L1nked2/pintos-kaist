@@ -933,7 +933,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
     	// segment information for lazy_load_segment
 		struct segment_info *segment_info;
 		segment_info = (struct segment_info *)malloc(sizeof(struct segment_info));
-		segment_info->file = file_reopen(file);
+		segment_info->file = file_reopen(file);//TIP: file_reopen for "lazy" usage
 		segment_info->page_read_bytes = page_read_bytes;
 		segment_info->ofs = ofs;
 
