@@ -343,6 +343,10 @@ page_destructor (struct hash_elem *e, void* aux UNUSED) {
   const struct page *page = hash_entry(e, struct page, hash_elem);
   if (page->frame != NULL){
     page->frame->page = NULL;
+    // if file_page, do_munmap
+    if(page->operations->type == VM_FILE) {
+      do_munmap(page->va);
+    }
 	}
   vm_dealloc_page(page);
   return;
@@ -354,17 +358,10 @@ supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
   // iterate through all pages in supplemental_page_table and destroy them
-  struct hash_iterator i;
-  hash_first (&i, &spt->pages);
-  while (hash_next (&i)) { 
-    struct page *page = hash_entry(hash_cur (&i), struct page, hash_elem);
-    // if file_page, do_munmap and destroy
-    if (page->operations->type == VM_FILE) {
-      do_munmap(page->va);
-    } 
-    vm_dealloc_page(page);
+  if(hash_empty(&spt->pages)) {
+    hash_destroy(&spt->pages, NULL);
+  } else {
+    hash_destroy(&spt->pages, page_destructor);
   }
-  // destroy hash table(supplemental_page_table)
-  hash_destroy(&spt->pages, NULL);
   return;
 }
