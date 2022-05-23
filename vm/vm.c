@@ -87,14 +87,14 @@ struct page *
 spt_find_page (struct supplemental_page_table *spt, void *va) {
 	/* TODO: Fill this function. */
   // malloc dummy page for hash_find(), because it takes page as argument.
-	struct page *page = (struct page *)malloc(sizeof(struct page));
+	struct page page;
 	struct hash_elem *h_e;
   // Alignment to get proper page address.
-	page->va = pg_round_down(va);
+	page.va = pg_round_down(va);
   // find page from spt
-	h_e = hash_find(&spt->pages, &page->hash_elem);
+	h_e = hash_find(&spt->pages, &page.hash_elem);
   // free dummy page
-	free(page);
+	//free(page);
   // return result
   if (h_e == NULL) {
     return NULL;
