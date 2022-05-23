@@ -129,7 +129,7 @@ void validate_addr(const uint64_t *addr) {
 }
 
 /* addr must be in user space. */
-void validate_buffer(const uint64_t *addr, unsigned size, bool to_write) {
+void validate_buffer(const uint8_t *addr, unsigned size, bool to_write) {
   for(int i=0; i<size; i++) {
     printf("validating buffer: %d, size:%d, rounded: %d\n",addr+i,size,pg_round_down(addr+i));///test
     validate_addr(addr+i);
