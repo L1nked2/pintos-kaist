@@ -325,14 +325,15 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
       // allocate page as uninit first
       if(!vm_alloc_page(type, va, writable))
         return false;
-      printf("ANON & FILE page copy CK1\n");///test
       // claim page immediately
       if(!vm_claim_page(va))
         return false;
-      printf("ANON & FILE page copy CK2\n");///test
+      printf("ANON & FILE page copy CK1\n");///test
       // copy contents of memory -> CoW will change this
       struct page* dst_page = spt_find_page(dst, va);
+      printf("ANON & FILE page copy CK2\n");///test
       memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
+      printf("ANON & FILE page copy CK3\n");///test
       printf("ANON & FILE page copy done\n");///test
     }
   }
