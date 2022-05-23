@@ -17,6 +17,7 @@ static const struct page_operations file_ops = {
 /* The initializer of file vm */
 void
 vm_file_init (void) {
+
 }
 
 /* Initialize the file backed page */
@@ -51,7 +52,9 @@ file_backed_destroy (struct page *page) {
 void *
 do_mmap (void *addr, size_t length, int writable,
 		struct file *file, off_t offset) {
-	void *ret_addr = addr;
+  // save begin address of pages
+	void *begin_addr = addr;
+  // calculate number of bytes to read and zero-filled.
 	off_t file_len = file_length(file);
 	size_t read_bytes = length < file_len ? length : file_len;
 	size_t zero_bytes = PGSIZE - read_bytes%PGSIZE;
@@ -59,54 +62,55 @@ do_mmap (void *addr, size_t length, int writable,
 	while ((read_bytes > 0)||(zero_bytes >0)) {
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
-		struct file *reopen_file = file_reopen(file);
+		struct file *file = file_reopen(file);
 
 		struct segment_info *info = (struct segment_info *)malloc(sizeof(struct segment_info));
-		info->file = reopen_file;
-		info->page_read_bytes;
+		info->file = file;
+		info->page_read_bytes = page_read_bytes;
 		info->ofs = offset;
 
 		if (!vm_alloc_page_with_initializer(VM_FILE, addr,
 				writable, file_lazy_load_segment, info)) {
 			free(info);
-			file_close(reopen_file);
+			file_close(file);
 			return NULL;
 		}
 		read_bytes -= page_read_bytes;
 		zero_bytes -= page_zero_bytes;
 		offset += page_read_bytes;
-		uint8_t *tmp_addr = (uint8_t *)addr; // for void pointer calculating
-		tmp_addr += PGSIZE;
-		addr = (void *)tmp_addr;
+		addr = (void *)((uint8_t *)addr + PGSIZE);
 	}
-	return ret_addr;
+	return begin_addr;
 }
 
 /* Do the munmap */
 void
 do_munmap (void *addr) {
 	struct thread *t = thread_current();
-	struct page *page = spt_find_page(&t->spt, addr);
-	if (page == NULL)
-		return;
-
-	uint32_t page_op_type = page->operations->type;
-	while ((page_op_type == VM_FILE)||
-			((page_op_type == VM_UNINIT)&&(page->uninit.type == VM_FILE))) {
+	while (true) {
+    // get target page from spt
+    struct page *page = spt_find_page(&t->spt, addr);
+    if (page == NULL)
+		  return;
+    // get segment_info
 		struct segment_info *info = page->file.segment_info;
 		struct file *file = info->file;
 		size_t page_read_bytes = info->page_read_bytes;
-		off_t offset = info->ofs;
-		if (pml4_is_dirty(t->pml4, addr)) {
-			file_write_at(file, addr, page_read_bytes, offset);
-		}
+		off_t ofs = info->ofs;
+    // check dirty bit and writeback if dirty
+		if (pml4_is_dirty(thread_current()->pml4, page->va)) {
+      file_write_at(file, addr, page_read_bytes, ofs);
+      pml4_set_dirty (thread_current()->pml4, page->va, 0);
+    }
+    // remove page from table
+    pml4_clear_page(thread_current()->pml4, page->va);
 		spt_remove_page(&thread_current()->spt, page);
-		uint8_t *tmp_addr = (uint8_t *)addr; // for void pointer calculating
-		tmp_addr += PGSIZE;
-		addr = (void *)tmp_addr;
+    // preoceed the addr
+		addr = (void *)((uint8_t *)addr + PGSIZE);
 	}
-	
+  return;
 }
+
 
 static bool
 file_lazy_load_segment (struct page *page, void *aux) {
@@ -118,22 +122,18 @@ file_lazy_load_segment (struct page *page, void *aux) {
   size_t page_read_bytes = info->page_read_bytes;
   size_t page_zero_bytes = PGSIZE - page_read_bytes;
   off_t ofs = info->ofs;
-  
+  bool succ = false;
   struct frame *frame = page->frame;
   /* Load this page. */
   file_seek (file, ofs);
   int file_read_count = file_read_at(file, frame->kva, page_read_bytes, ofs);
-  // int file_read_count = file_read_at(file, page->va, page_read_bytes, ofs);
   if (file_read_count != (int) page_read_bytes) {
-    // palloc_free_page(page);
-    vm_dealloc_page(page);
-    //printf("file_read failed, file: %d, kva: %d, page_read_bytes: %d\n",file, frame->kva, page_read_bytes);///test
-    //printf("actually read: %d\n",file_read_count);///tests
-    //printf("file_info: {inode: %d, pos: %d} @ %d\n",file->inode, file->pos, file);
-    return false;
+	  spt_remove_page(&thread_current()->spt, page);
   } else {
     memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
-    // memset(page->va + page_read_bytes, 0, page_zero_bytes);
+    succ = true;
   }
-  return true;
+  file_close(file);
+  free(info);
+  return succ;
 }

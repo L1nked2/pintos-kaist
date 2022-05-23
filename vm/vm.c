@@ -246,7 +246,6 @@ vm_claim_page (void *va UNUSED) {
   page = spt_find_page(&thread_current()->spt, va);
   // If page is not found on supplemental_page_table, return false.
 	if (page == NULL) {
-    // printf("page not found on supplemental table\n");///test
 		return false;
 	}
   // call do_claim_page to do rest job.
@@ -268,7 +267,6 @@ vm_do_claim_page (struct page *page) {
     return false;
   }
   // swap_in page and return result
-  // printf("going to swap_in on page %d, frame %d\n", page->va, frame->kva);/// test
 	return swap_in (page, frame->kva);
 }
 
@@ -302,7 +300,6 @@ supplemental_page_table_init (struct supplemental_page_table *spt) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct supplemental_page_table *src) {
-  //return true;///test
   // Iterate src and copy the contents to dst
   struct hash_iterator i;
   hash_first (&i, src);
@@ -356,11 +353,18 @@ void
 supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 	/* TODO: Destroy all the supplemental_page_table hold by thread and
 	 * TODO: writeback all the modified contents to the storage. */
-  // writeback will be implemented in each page type
-  if(hash_empty(&spt->pages)) {
-    hash_destroy(&spt->pages, NULL);
-  } else {
-    hash_destroy(&spt->pages, page_destructor);
+  // iterate through all pages in supplemental_page_table and destroy them
+  struct hash_iterator i;
+  hash_first (&i, &spt->pages);
+  while (hash_next (&i)) { 
+    struct page *page = hash_entry(hash_cur (&i), struct page, hash_elem);
+    // if file_page, do_munmap and destroy
+    if (page->operations->type == VM_FILE) {
+      do_munmap(page->va);
+    } 
+    vm_dealloc_page(page);
   }
+  // destroy hash table(supplemental_page_table)
+  hash_destroy(&spt->pages, NULL);
   return;
 }

@@ -897,6 +897,8 @@ lazy_load_segment (struct page *page, void *aux) {
     memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
     succ = true;
   }
+  file_close(file);
+  free(info);
   return succ;
 }
 
@@ -935,7 +937,6 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		segment_info->file = file_reopen(file);
 		segment_info->page_read_bytes = page_read_bytes;
 		segment_info->ofs = ofs;
-		// printf("reserved_file_info: {inode: %d, ofs: %d} @ %d\n",file->inode, ofs, file);///test
 
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
       			writable, lazy_load_segment, segment_info)) {

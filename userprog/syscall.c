@@ -423,10 +423,13 @@ int sys_dup2(int oldfd, int newfd) {
 }
 
 void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
-  if (fd < 2)
-    sys_exit(-1); // console input and output
+  // check if newfdconsole input and output
+  if (fd < FD_NR_START_INDEX)
+    sys_exit(-1);
+  // check if addr is page-aligned
   if ((offset%PGSIZE != 0)||(addr != pg_round_down(addr))||(!is_user_vaddr(addr))||(length <= 0))
     return NULL;
+  // get fd and call do_mmap
   struct fd *fd_entry = search_fd(fd);
   if (fd_entry == NULL)
     return NULL;
@@ -438,4 +441,5 @@ void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
 
 void sys_munmap(void *addr){
   do_munmap(addr);
+  return;
 }
