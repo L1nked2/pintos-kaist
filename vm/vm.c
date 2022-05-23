@@ -315,7 +315,6 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
     switch (VM_TYPE(src_page->operations->type)) {
       // if page is UNINIT page
       case VM_UNINIT:
-        printf("UNINIT page copy start\n");///test
         // copy auxiliary information(segment_info)
         struct segment_info *info = (struct segment_info *)malloc(sizeof(struct segment_info));
         memcpy(info, src_page->uninit.aux, sizeof(struct segment_info));
@@ -323,25 +322,19 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
         // allocate page as uninit
         if(!vm_alloc_page_with_initializer(type, va, writable, init, info))
           return false;
-        printf("UNINIT page copy done\n");///test
         break;
       // if page is anon or file
       case VM_ANON:
       case VM_FILE:
-        printf("ANON & FILE page copy start\n");///test
         // allocate page as uninit first
         if(!vm_alloc_page(type, va, writable))
           return false;
         // claim page immediately
         if(!vm_claim_page(va))
           return false;
-        printf("ANON & FILE page copy CK1\n");///test
         // copy contents of memory -> CoW will change this
         struct page* dst_page = spt_find_page(dst, va);
-        printf("ANON & FILE page copy CK2\n");///test
         memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
-        printf("ANON & FILE page copy CK3\n");///test
-        printf("ANON & FILE page copy done\n");///test
         break;
       default:
         break;
