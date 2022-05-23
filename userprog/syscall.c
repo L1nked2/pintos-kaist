@@ -122,9 +122,8 @@ syscall_handler (struct intr_frame *f) {
 /* addr must be in user space. */
 void validate_addr(const uint64_t *addr) {
 	if ((addr == NULL)
-  || (is_kernel_vaddr(addr))
-	|| (spt_find_page(&thread_current()->spt, addr) == NULL)) {
-    printf("invalid addr, %x\n",addr);
+  || (is_kernel_vaddr(addr))) {
+    printf("invalid addr, %x\n",addr);///test
 		sys_exit(-1);
 	}
   return;
@@ -136,7 +135,7 @@ void validate_buffer(const uint64_t *addr, unsigned size, bool to_write) {
     validate_addr(addr+i);
     struct page* page = spt_find_page(&thread_current()->spt, addr+i);
     if(page == NULL) {
-      printf("page not found, %x\n",addr+i);
+      printf("page not found, %x\n",addr+i);///test
       sys_exit(-1);
     }
     if(to_write == true && page->writable == false) {
