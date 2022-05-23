@@ -142,6 +142,7 @@ page_fault (struct intr_frame *f) {
 
 #ifdef VM
 	/* For project 3 and later. */
+  printf("not_present:%d, write:%d, user:%d\n");///test
 	if (user) {
 		thread_current()->stack_ptr = f->rsp;
 	}

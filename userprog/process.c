@@ -518,7 +518,6 @@ static void
 process_cleanup (void) {
 	struct thread *curr = thread_current ();
 #ifdef VM
-  printf("spt_kill in precess_cleanup\n");///test
 	supplemental_page_table_kill (&curr->spt);
 #endif
 	uint64_t *pml4;
@@ -537,7 +536,6 @@ process_cleanup (void) {
 		pml4_activate (NULL);
 		pml4_destroy (pml4);
 	}
-  printf("pml4 cleanup in precess_cleanup\n");///test
 }
 
 /* Sets up the CPU for running user code in the nest thread.
