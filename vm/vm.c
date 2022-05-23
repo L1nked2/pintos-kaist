@@ -306,31 +306,31 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
   while (hash_next (&i))
   {
     struct page *src_page = hash_entry(hash_cur(&i), struct page, hash_elem);
-    enum vm_type type = page_get_type(src_page);
     void *upage = src_page->va;
     bool writable = src_page->writable;
-    vm_initializer *init = src_page->uninit.init;
-    void* aux = src_page->uninit.aux;
-    // TODO: need to allocate uninit page and claim them immediately.
+    enum vm_type type = page_get_type(src_page);
 
     // if page is stack page
     // if (src_page->uninit.type & VM_MARKER_0) {
     //   setup_stack(&thread_current()->tf);
     // }
     // if page is UNINIT page
-    if(src_page->operations->type == VM_UNINIT) {
+    if(type == VM_UNINIT) {
+      vm_initializer *init = src_page->uninit.init;
+      void* aux = src_page->uninit.aux;
       if(!vm_alloc_page_with_initializer(type, upage, writable, init, aux))
         return false;
     }
     // if page is anon or file
     else {
+      // allocate page as uninit first
       if(!vm_alloc_page(type, upage, writable))
         return false;
-      if(!vm_claim_page(upage))
+      // claim page immediately
+      struct page* dst_page = spt_find_page(&thread_current ()->spt, upage);
+      if(!vm_claim_page(dst_page))
         return false;
-    }
-    if (src_page->operations->type != VM_UNINIT) {
-      struct page* dst_page = spt_find_page(dst, upage);
+      // copy contents of memory -> CoW will change this
       memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
     }
   }
