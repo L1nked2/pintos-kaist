@@ -137,8 +137,29 @@ static struct frame *
 vm_get_victim (void) {
 	struct frame *victim = NULL;
 	/* TODO: The policy for eviction is up to you. */
-	// clock algorithm is recommended, but FIFO temporarily
-  victim = list_entry(list_pop_front(&frame_table), struct frame, frame_elem);
+  lock_acquire(&pio_lock);
+  struct list_elem *iter;
+  struct list_elem *temp;
+  struct frame *frame_item;
+  for (iter=list_begin(&frame_table); iter!=list_end(&frame_table); ) {
+    frame_item = list_entry(iter, struct frame, frame_elem);
+    // do clock until not accessed frame appears
+    if (pml4_is_accessed(thread_current()->pml4, frame_item->page->va)) {
+        pml4_set_accessed(thread_current()->pml4, frame_item->page->va, false);
+        temp = list_remove(iter);
+        list_push_back(&frame_table, iter);
+        iter = temp;
+        continue;
+    }
+    if (victim == NULL) {
+        victim = iter;
+        break;
+    }
+    iter = list_next(iter);
+  }
+  // clock algorithm is recommended, but FIFO temporarily
+  //victim = list_entry(list_pop_front(&frame_table), struct frame, frame_elem);
+  lock_release(&pio_lock);
 	return victim;
 }
 
@@ -147,10 +168,13 @@ vm_get_victim (void) {
 static struct frame *
 vm_evict_frame (void) {
 	struct frame *victim = vm_get_victim();
+  bool succ = false;
 	/* TODO: swap out the victim and return the evicted frame. */
   if (victim->page != NULL) {
-	  swap_out(victim->page);
+	  succ = swap_out(victim->page);
   }
+  victim->page = NULL;
+	memset (victim->kva, 0, PGSIZE);
 	return victim;
 }
 
