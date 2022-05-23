@@ -36,7 +36,8 @@ file_backed_swap_in (struct page *page, void *kva) {
 	struct file_page *file_page = &page->file;
   struct segment_info *info = file_page->segment_info;
   lock_acquire(&file_lock);
-  off_t size = file_read_at(file_page->file, kva, (off_t)file_page->page_read_bytes, file_page->ofs);
+  // off_t size = file_read_at(file_page->file, kva, (off_t)file_page->page_read_bytes, file_page->ofs);
+  off_t size = file_read_at(info->file, kva, (off_t)info->page_read_bytes, info->ofs);
   lock_release(&file_lock);
 }
 
