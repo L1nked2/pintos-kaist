@@ -8,6 +8,7 @@ enum vm_type;
 
 struct file_page {
 	struct segment_info *segment_info;
+  struct file* file;
 };
 
 void vm_file_init (void);
