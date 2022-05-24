@@ -178,7 +178,7 @@ file_lazy_load_segment (struct page *page, void *aux) {
   file_seek (file, ofs);
   int file_read_count = file_read_at(file, frame->kva, page_read_bytes, ofs);
   if (file_read_count != (int) page_read_bytes) {
-    printf("spt_remove_page\n");///test
+    printf("spt_remove_page, actually read %d bytes\n", file_read_count);///test
 	  spt_remove_page(&thread_current()->spt, page);
   } else {
     memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
