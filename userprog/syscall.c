@@ -438,11 +438,11 @@ int sys_dup2(int oldfd, int newfd) {
 }
 
 void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
-  // validate_addr(addr);
+  validate_addr(addr);
   // check if console input and output
-  if (addr == 0) {
-    return NULL;
-  }
+  // if (addr == 0) {
+  //   return NULL;
+  // }
   if (fd < 2) {
     return NULL;
   }
