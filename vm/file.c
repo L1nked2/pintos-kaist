@@ -33,12 +33,13 @@ file_backed_initializer (struct page *page, enum vm_type type, void *kva) {
 /* Swap in the page by read contents from the file. */
 static bool
 file_backed_swap_in (struct page *page, void *kva) {
-	lock_acquire(&file_lock);
 	struct file_page *file_page = &page->file;
   struct segment_info *info = file_page->segment_info;
   // read file contents
+  lock_acquire(&file_lock);
   file_seek(info->file, info->ofs);
   off_t read_bytes = file_read(info->file, kva, info->page_read_bytes);
+  lock_release(&file_lock);
   if (read_bytes != info->page_read_bytes) {
     lock_release(&file_lock);
     return false;
@@ -46,7 +47,6 @@ file_backed_swap_in (struct page *page, void *kva) {
   // fill zero to rest space
   if (read_bytes < PGSIZE)
 	memset(kva + read_bytes, 0, PGSIZE - read_bytes);
-  lock_release(&file_lock);
   return true;
 }
 
@@ -59,8 +59,10 @@ file_backed_swap_out (struct page *page) {
   lock_acquire(&file_lock);
   // check if page is dirty
 	if (pml4_is_dirty (cur->pml4, page->va)) {
+    lock_acquire(&file_lock);
 		file_seek (info->file, info->ofs);
 		file_write(info->file, page->va, info->page_read_bytes);
+    lock_release(&file_lock);
 		pml4_set_dirty (cur->pml4, page->va, false);
 	}
 	// make "not present" for given page
@@ -75,11 +77,13 @@ static void
 file_backed_destroy (struct page *page) {
   struct file_page *file_page = &page->file;
   struct segment_info *info = file_page->segment_info;
-  lock_acquire(&file_lock);
+
   // if dirty, write back
   if(pml4_is_dirty(thread_current()->pml4, page->va)) {
     file_seek(info->file, info->ofs);
+    lock_acquire(&file_lock);
     file_write(info->file, page->va, info->page_read_bytes);
+    lock_release(&file_lock);
   }
   file_close (info->file);
   // free the physical frame
@@ -88,7 +92,6 @@ file_backed_destroy (struct page *page) {
     free (page->frame);
   }
   free(info);
-  lock_release(&file_lock);
 }
 
 /* Do the mmap */
@@ -98,7 +101,7 @@ do_mmap (void *addr, size_t length, int writable,
 		struct file *file, off_t offset) {
   // save begin address of pages
 	void *begin_addr = addr;
-	lock_acquire(&file_lock);
+	
   //printf("mmap started, %d\n",begin_addr);///test
   // calculate number of bytes to read and zero-filled.
 	off_t file_len = file_length(file);
@@ -141,7 +144,6 @@ do_mmap (void *addr, size_t length, int writable,
 		addr = (void *)((uint8_t *)addr + PGSIZE);
 	}
   //printf("mmap finished, %d\n",begin_addr);///test
-    lock_release(&file_lock);
 	return begin_addr;
 }
 
@@ -149,7 +151,7 @@ do_mmap (void *addr, size_t length, int writable,
 void
 do_munmap (void *addr) {
 	struct thread *t = thread_current();
-	lock_acquire(&file_lock);
+	
 	while (true) {
 		// get target page from spt
 		struct page *page = spt_find_page(&t->spt, addr);
@@ -164,7 +166,9 @@ do_munmap (void *addr) {
 		off_t ofs = info->ofs;
 		// check dirty bit and writeback if dirty
 		if (pml4_is_dirty(thread_current()->pml4, page->va)) {
+      lock_acquire(&file_lock);
 			file_write_at(file, addr, page_read_bytes, ofs);
+      lock_release(&file_lock);
 			pml4_set_dirty (thread_current()->pml4, page->va, 0);
 		}
 		// remove page from table
@@ -173,8 +177,7 @@ do_munmap (void *addr) {
 		// preoceed the addr
 		addr = (void *)((uint8_t *)addr + PGSIZE);
 	}
-	lock_release(&file_lock);
-    return;
+  return;
 }
 
 
@@ -183,7 +186,7 @@ file_lazy_load_segment (struct page *page, void *aux) {
 	/* TODO: Load the segment from the file */
 	/* TODO: This called when the first page fault occurs on address VA. */
 	/* TODO: VA is available when calling this function. */
-  lock_acquire(&file_lock);
+  
   struct segment_info *info = (struct segment_info *) aux;
   struct file *file = info->file;
   size_t page_read_bytes = info->page_read_bytes;
@@ -193,7 +196,9 @@ file_lazy_load_segment (struct page *page, void *aux) {
   struct frame *frame = page->frame;
   /* Load this page. */
   file_seek (file, ofs);
+  lock_acquire(&file_lock);
   int file_read_count = file_read_at(file, frame->kva, page_read_bytes, ofs);
+  lock_release(&file_lock);
   if (file_read_count != (int) page_read_bytes) {
     printf("spt_remove_page, actually read %d bytes\n", file_read_count);///test
 	  spt_remove_page(&thread_current()->spt, page);
@@ -201,7 +206,6 @@ file_lazy_load_segment (struct page *page, void *aux) {
     memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
     succ = true;
   }
-  lock_release(&file_lock);
   //file_close(file);
   return succ;
 }
