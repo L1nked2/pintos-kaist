@@ -124,8 +124,7 @@ void validate_addr(const uint64_t *addr) {
 	if ((addr == NULL)
   || (is_kernel_vaddr(addr))
   || (spt_find_page(&thread_current()->spt, addr) == NULL)) {
-		// sys_exit(-1);
-    return NULL;
+		sys_exit(-1);
 	}
   return;
 }

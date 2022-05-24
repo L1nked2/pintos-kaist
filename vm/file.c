@@ -38,7 +38,7 @@ file_backed_swap_in (struct page *page, void *kva) {
   file_seek(info->file, info->ofs);
 	off_t read_bytes = file_read(info->file, kva, info->page_read_bytes);
 	if (read_bytes != info->page_read_bytes)
-    return false;
+      return false;
   // fill zero to rest space
 	if (read_bytes < PGSIZE)
 		memset(kva + read_bytes, 0, PGSIZE - read_bytes);

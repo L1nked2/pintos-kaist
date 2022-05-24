@@ -371,12 +371,20 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
 /* Helper function for supplemental_page_table_kill */
 void
 page_destructor (struct hash_elem *e, void* aux UNUSED) {
+  struct thread *cur = thread_current();
   const struct page *page = hash_entry(e, struct page, hash_elem);
   if (page->frame != NULL){
     page->frame->page = NULL;
     // if file_page, do_munmap
     if(page->operations->type == VM_FILE) {
-      do_munmap(page->va);
+      // do_munmap(page->va);
+      struct file_page *file_page = &page->file;
+      struct segment_info *info = file_page->segment_info;
+      struct file *file = info->file;
+      size_t page_read_bytes = info->page_read_bytes;
+      off_t offset = info->ofs;
+      void *kva = page->frame->kva;
+      file_write_at(file, kva, page_read_bytes, offset)
     }
 	}
   vm_dealloc_page(page);
