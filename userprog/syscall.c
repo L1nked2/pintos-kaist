@@ -439,7 +439,7 @@ int sys_dup2(int oldfd, int newfd) {
 
 void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
   // validate address, start and end address
-  if (addr == 0 || is_kernel_vaddr(addr) || is_kernel_vaddr((size_t)addr + length)) {
+  if (addr == 0 || is_kernel_vaddr(addr) || is_kernel_vaddr((void *)addr + length)) {
     return NULL;
   }
   // check if console input and output
