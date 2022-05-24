@@ -40,7 +40,6 @@ struct segment_info {
   off_t ofs;
 };
 
-extern struct lock file_lock;
 struct lock pio_lock;
 
 struct page_operations;

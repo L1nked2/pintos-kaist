@@ -18,9 +18,9 @@ struct fd_dup *search_fd_dup(int fd);
 struct fd *search_fd(int fd);
 void sys_halt();
 void sys_exit(int status);
-int sys_fork(const char *thread_name, struct intr_frame *if_);
+tid_t sys_fork(const char *thread_name, struct intr_frame *if_);
 int sys_exec (const char *cmd_line);
-int sys_wait (int tid);
+int sys_wait (tid_t tid);
 bool sys_create (const char *file, unsigned initial_size);
 bool sys_remove (const char *file);
 int sys_open (const char *file);
@@ -32,6 +32,6 @@ unsigned sys_tell (int fd);
 void sys_close (int fd);
 int sys_dup2(int oldfd, int newfd);
 
-void *sys_mmap(void *addr, size_t length, int writable, int fd, int32_t offset);
+void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset);
 void sys_munmap(void *addr);
 #endif /* userprog/syscall.h */
