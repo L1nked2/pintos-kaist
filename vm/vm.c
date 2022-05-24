@@ -4,6 +4,8 @@
 #include "vm/vm.h"
 #include "vm/inspect.h"
 
+#include "userprog/syscall.h" // for file lock
+
 static struct list frame_table;
 
 /* Initializes the virtual memory subsystem by invoking each subsystem's

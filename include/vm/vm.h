@@ -2,7 +2,6 @@
 #define VM_VM_H
 #include <stdbool.h>
 #include "threads/palloc.h"
-#include "userprog/syscall.h"
 #include "hash.h"
 #include "bitmap.h"
 
