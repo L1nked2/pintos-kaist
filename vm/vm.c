@@ -386,8 +386,8 @@ page_destructor (struct hash_elem *e, void* aux UNUSED) {
       file_write_at(file, kva, page_read_bytes, offset);
     }
 	}
-  // vm_dealloc_page(page);
-  pml4_clear_page(thread_current()->pml4, page->va);
+  vm_dealloc_page(page);
+  // pml4_clear_page(thread_current()->pml4, page->va);
   return;
 }
 
