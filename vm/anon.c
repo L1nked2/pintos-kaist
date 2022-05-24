@@ -46,14 +46,14 @@ static bool
 anon_swap_in (struct page *page, void *kva) {
 	struct anon_page *anon_page = &page->anon;
 	disk_sector_t swap_disk_sector = anon_page->swap_disk_sector;
-	size_t idx = swap_disk_sector/SECTORS_PER_PAGE;
+
   // validate disk sector
 	if (anon_page->swap_disk_sector == SIZE_MAX)
 		return false;
-	if (!bitmap_test(swap_table, idx))
+	if (!bitmap_test(swap_table, swap_disk_sector))
 		return false;
 	
-	disk_rw_repeatedly(swap_disk_sector, page->frame->kva, 'r');
+	disk_rw_repeatedly(swap_disk_sector, kva, 'r');
 	//bitmap_set_multiple(swap_table, anon_page->swap_disk_sector, SECTORS_PER_PAGE, false);
 	bitmap_set(swap_table, anon_page->swap_disk_sector, false);
 
