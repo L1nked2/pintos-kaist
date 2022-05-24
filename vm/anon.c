@@ -17,24 +17,15 @@ static const struct page_operations anon_ops = {
 	.type = VM_ANON,
 };
 
-<<<<<<< HEAD
 static struct bitmap *swap_table;
 const size_t page_sector = PGSIZE/DISK_SECTOR_SIZE; // 4096/512 = 8
-=======
-#define SECTORS_PER_PAGE PGSIZE/DISK_SECTOR_SIZE
-struct bitmap *swap_table;
->>>>>>> e177703bbdba738c2a4645089cf171dc8f7cf1ed
 
 /* Initialize the data for anonymous pages */
 void
 vm_anon_init (void) {
 	/* TODO: Set up the swap_disk. */
 	swap_disk = disk_get(1, 1);
-<<<<<<< HEAD
 	swap_table = bitmap_create((size_t)disk_size(swap_disk)/page_sector);
-=======
-	swap_table = bitmap_create(disk_size(swap_disk) / SECTORS_PER_PAGE);
->>>>>>> e177703bbdba738c2a4645089cf171dc8f7cf1ed
 }
 
 /* Initialize the file mapping */
@@ -53,7 +44,7 @@ anon_swap_in (struct page *page, void *kva) {
 	struct anon_page *anon_page = &page->anon;
 	uint32_t swap_disk_sector = anon_page->swap_disk_sector;
 	size_t idx = swap_disk_sector/page_sector;
-	page->frame->kva = kva;
+	
 	if (anon_page->swap_disk_sector == SIZE_MAX)
 		return false;
 	if (!bitmap_test(swap_table, idx))
@@ -69,6 +60,16 @@ anon_swap_in (struct page *page, void *kva) {
 static bool
 anon_swap_out (struct page *page) {
 	struct anon_page *anon_page = &page->anon;
+	disk_sector_t swap_disk_sector = bitmap_scan_and_flip(swap_table, 0, 8, 1);
+	
+	if (swap_disk_sector == BITMAP_ERROR) // bitmap_scan can return BITMAP_ERROR
+		return false;
+	
+	anon_page->swap_disk_sector = swap_disk_sector;
+	disk_rw_repeatedly(swap_disk_sector, page->frame->kva, 'w');
+	pml4_clear_page(thread_current()->pml4, page->va);
+	
+	return true;
 }
 
 /* Destroy the anonymous page. PAGE will be freed by the caller. */
