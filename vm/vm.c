@@ -384,7 +384,7 @@ page_destructor (struct hash_elem *e, void* aux UNUSED) {
       size_t page_read_bytes = info->page_read_bytes;
       off_t offset = info->ofs;
       void *kva = page->frame->kva;
-      file_write_at(file, kva, page_read_bytes, offset)
+      file_write_at(file, kva, page_read_bytes, offset);
     }
 	}
   vm_dealloc_page(page);
