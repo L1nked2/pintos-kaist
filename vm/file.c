@@ -79,6 +79,7 @@ file_backed_destroy (struct page *page) {
     list_remove (&page->frame->frame_elem);
     free (page->frame);
   }
+  free(info);
 }
 
 /* Do the mmap */
@@ -88,7 +89,7 @@ do_mmap (void *addr, size_t length, int writable,
 		struct file *file, off_t offset) {
   // save begin address of pages
 	void *begin_addr = addr;
-  printf("mmap started, %d\n",begin_addr);///test
+  //printf("mmap started, %d\n",begin_addr);///test
   // calculate number of bytes to read and zero-filled.
 	off_t file_len = file_length(file);
 	size_t read_bytes = length < file_len ? length : file_len;
@@ -108,7 +109,7 @@ do_mmap (void *addr, size_t length, int writable,
 		
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
-		struct file *file = file_duplicate(file);
+		struct file *file = file_reopen(file);
 
 		struct segment_info *info = (struct segment_info *)malloc(sizeof(struct segment_info));
 		info->file = file;
@@ -126,7 +127,7 @@ do_mmap (void *addr, size_t length, int writable,
 		offset += page_read_bytes;
 		addr = (void *)((uint8_t *)addr + PGSIZE);
 	}
-  printf("mmap finished, %d\n",begin_addr);///test
+  //printf("mmap finished, %d\n",begin_addr);///test
 	return begin_addr;
 }
 
@@ -181,6 +182,5 @@ file_lazy_load_segment (struct page *page, void *aux) {
     succ = true;
   }
   file_close(file);
-  free(info);
   return succ;
 }
