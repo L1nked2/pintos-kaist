@@ -119,7 +119,7 @@ do_mmap (void *addr, size_t length, int writable,
 
 		if (!vm_alloc_page_with_initializer(VM_FILE, addr,
 				writable, file_lazy_load_segment, info)) {
-      printf("file page allocation failed\n");
+      printf("file page allocation failed\n");///test
 			free(info);
 			file_close(file);
 			return NULL;
@@ -178,6 +178,7 @@ file_lazy_load_segment (struct page *page, void *aux) {
   file_seek (file, ofs);
   int file_read_count = file_read_at(file, frame->kva, page_read_bytes, ofs);
   if (file_read_count != (int) page_read_bytes) {
+    printf("spt_remove_page"\n);///test
 	  spt_remove_page(&thread_current()->spt, page);
   } else {
     memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
