@@ -329,7 +329,6 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
 		struct supplemental_page_table *src) {
   // Iterate src and copy the contents to dst
   struct hash_iterator i;
-  lock_acquire(&file_lock);
   hash_first (&i, &src->pages);
   while (hash_next (&i))
   {
@@ -348,24 +347,18 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
         memcpy(info, src_page->uninit.aux, sizeof(struct segment_info));
         info->file = file_duplicate(info->file);
         // allocate page as uninit
-        if(!vm_alloc_page_with_initializer(type, va, writable, init, info)) {
-          lock_release(&file_lock);
+        if(!vm_alloc_page_with_initializer(type, va, writable, init, info))
           return false;
-        }
         break;
       // if page is anon or file
       case VM_ANON:
       case VM_FILE: ;//do not remove semicolon
         // allocate page as uninit first
-        if(!vm_alloc_page(type, va, writable)) {
-          lock_release(&file_lock);
+        if(!vm_alloc_page(type, va, writable))
           return false;
-        }
         // claim page immediately
-        if(!vm_claim_page(va)) {
-          lock_release(&file_lock);
+        if(!vm_claim_page(va))
           return false;
-        }
         // copy contents of memory -> CoW will change this
         struct page* dst_page = spt_find_page(dst, va);
         memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
@@ -374,7 +367,6 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
         break;
     }
   }
-  lock_release(&file_lock);
   return true;
 }
 
@@ -411,14 +403,11 @@ supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
 /* test function */
 void do_munmap_without_remove (void *addr) {
 	struct thread *t = thread_current();
-  lock_acquire(&file_lock);
 	while (true) {
     // get target page from spt
     struct page *page = spt_find_page(&t->spt, addr);
-    if (page == NULL) {
-      lock_release(&file_lock);
+    if (page == NULL)
 		  return;
-    }
     // get segment_info
 		struct segment_info *info = page->file.segment_info;
 		struct file *file = info->file;
@@ -435,6 +424,5 @@ void do_munmap_without_remove (void *addr) {
     // preoceed the addr
 		addr = (void *)((uint8_t *)addr + PGSIZE);
 	}
-  lock_release(&file_lock);
   return;
 }
