@@ -98,7 +98,7 @@ do_mmap (void *addr, size_t length, int writable,
 		if ((!is_user_vaddr(addr))||(spt_find_page(&thread_current()->spt, addr))) {
 			void *tmp_addr = addr;
 			while (addr > tmp_addr) {
-				struct supplemental_page_table *spt = thread_current()->spt;
+				struct supplemental_page_table *spt = &thread_current()->spt;
 				spt_remove_page(spt, spt_find_page(spt, tmp_addr));
 				tmp_addr = (void *)((uint8_t *)addr + PGSIZE);
 			}
