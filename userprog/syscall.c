@@ -106,12 +106,12 @@ syscall_handler (struct intr_frame *f) {
     case SYS_DUP2:
       (f->R).rax = sys_dup2((f->R).rdi, (f->R).rsi);
       break;
-    case SYS_MMAP:
-      (f->R).rax = sys_mmap((f->R).rdi, (f->R).rsi, (f->R).rdx, (f->R).r10, (f->R).r8);
-      break;
-    case SYS_MUNMAP:
-      sys_munmap((f->R).rdi);
-      break;
+    // case SYS_MMAP:
+    //   (f->R).rax = sys_mmap((f->R).rdi, (f->R).rsi, (f->R).rdx, (f->R).r10, (f->R).r8);
+    //   break;
+    // case SYS_MUNMAP:
+    //   sys_munmap((f->R).rdi);
+    //   break;
     default:
       sys_exit(-1);
       break;
