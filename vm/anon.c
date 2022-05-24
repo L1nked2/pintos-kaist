@@ -72,7 +72,7 @@ anon_swap_out (struct page *page) {
 		return false;
 	
 	anon_page->swap_disk_sector = swap_disk_sector;
-	disk_rw_repeatedly(swap_disk_sector, kva, 'w');
+	disk_rw_repeatedly(swap_disk_sector, page->frame->kva, 'w');
 	pml4_clear_page(thread_current()->pml4, page->va);
 	page->frame = NULL;
 	return true;
