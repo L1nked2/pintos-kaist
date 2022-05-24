@@ -443,12 +443,15 @@ void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
   if (addr == 0 || is_kernel_vaddr(addr) || is_kernel_vaddr((void *)addr + length)) {
     return NULL;
   }
+  if (length <= 0) {
+    return NULL;
+  }
   // check if console input and output
   if (fd < 2) {
     return NULL;
   }
   // check if addr is page-aligned
-  if ((offset%PGSIZE != 0)||(addr != pg_round_down(addr))||(length <= 0))
+  if ((offset%PGSIZE != 0)||(addr != pg_round_down(addr)))
     return NULL;
   // get fd and call do_mmap
   struct fd *fd_entry = search_fd(fd);
