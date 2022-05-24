@@ -376,7 +376,7 @@ page_destructor (struct hash_elem *e, void* aux UNUSED) {
     page->frame->page = NULL;
     // if file_page, do_munmap
     if(page->operations->type == VM_FILE) {
-      do_munmap(page->va);
+      do_munmap_without_remove(page->va);
     }
 	}
   vm_dealloc_page(page);
@@ -394,5 +394,32 @@ supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
   } else {
     hash_destroy(&spt->pages, page_destructor);
   }
+  return;
+}
+
+/* test function */
+void do_munmap_without_remove (void *addr) {
+	struct thread *t = thread_current();
+	while (true) {
+    // get target page from spt
+    struct page *page = spt_find_page(&t->spt, addr);
+    if (page == NULL)
+		  return;
+    // get segment_info
+		struct segment_info *info = page->file.segment_info;
+		struct file *file = info->file;
+		size_t page_read_bytes = info->page_read_bytes;
+		off_t ofs = info->ofs;
+    // check dirty bit and writeback if dirty
+		if (pml4_is_dirty(thread_current()->pml4, page->va)) {
+      file_write_at(file, addr, page_read_bytes, ofs);
+      pml4_set_dirty (thread_current()->pml4, page->va, 0);
+    }
+    // remove page from table
+    pml4_clear_page(thread_current()->pml4, page->va);
+		// spt_remove_page(&thread_current()->spt, page);
+    // preoceed the addr
+		addr = (void *)((uint8_t *)addr + PGSIZE);
+	}
   return;
 }
