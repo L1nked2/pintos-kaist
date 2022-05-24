@@ -440,7 +440,7 @@ int sys_dup2(int oldfd, int newfd) {
 void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
   validate_addr(addr);
   // check if console input and output
-  if (fd < FD_NR_START_INDEX) {
+  if (fd < 2) {
     return NULL;
   }
   // check if addr is page-aligned
@@ -451,7 +451,7 @@ void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
   if (fd_entry == NULL)
     return NULL;
   struct file *file = fd_entry->fp;
-  if (file == NULL)
+  if (file_length(file) == 0 || file == NULL)
     return NULL;
   return do_mmap(addr, length, writable, file, offset);
 }
