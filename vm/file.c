@@ -92,8 +92,19 @@ do_mmap (void *addr, size_t length, int writable,
 	off_t file_len = file_length(file);
 	size_t read_bytes = length < file_len ? length : file_len;
 	size_t zero_bytes = PGSIZE - read_bytes%PGSIZE;
-
+	
 	while ((read_bytes > 0)||(zero_bytes > 0)) {
+		// pages mapped overlaps other existing pages or kernel memory
+		if ((!is_user_vaddr(addr))||(spt_find_page(&thread_current()->spt, addr))) {
+			void *tmp_addr = addr;
+			while (addr > tmp_addr) {
+				struct supplemental_page_table *spt = thread_current()->spt;
+				spt_remove_page(spt, spt_find_page(spt, tmp_addr));
+				tmp_addr = (void *)((uint8_t *)addr + PGSIZE);
+			}
+			return NULL;
+		}
+		
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 		struct file *file = file_reopen(file);
