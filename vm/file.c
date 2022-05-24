@@ -56,7 +56,6 @@ file_backed_swap_out (struct page *page) {
 	struct file_page *file_page UNUSED = &page->file;
   struct segment_info *info = file_page->segment_info;
   struct thread* cur = thread_current ();
-  lock_acquire(&file_lock);
   // check if page is dirty
 	if (pml4_is_dirty (cur->pml4, page->va)) {
     lock_acquire(&file_lock);
@@ -68,7 +67,6 @@ file_backed_swap_out (struct page *page) {
 	// make "not present" for given page
 	pml4_clear_page (cur->pml4, page->va);
 	page->frame = NULL;
-	lock_release(&file_lock);
 	return true;
 }
 
@@ -117,7 +115,6 @@ do_mmap (void *addr, size_t length, int writable,
 				spt_remove_page(spt, spt_find_page(spt, tmp_addr));
 				tmp_addr = (void *)((uint8_t *)addr + PGSIZE);
 			}
-			lock_release(&file_lock);
 			return NULL;
 		}
 		
@@ -135,7 +132,6 @@ do_mmap (void *addr, size_t length, int writable,
       printf("file page allocation failed\n");///test
 			free(info);
 			file_close(file);
-			lock_release(&file_lock);
 			return NULL;
 		}
 		read_bytes -= page_read_bytes;
@@ -156,7 +152,6 @@ do_munmap (void *addr) {
 		// get target page from spt
 		struct page *page = spt_find_page(&t->spt, addr);
 		if (page == NULL) {
-			lock_release(&file_lock);
 			return;
 		}
 		// get segment_info
