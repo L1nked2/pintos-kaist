@@ -94,7 +94,7 @@ do_mmap (void *addr, size_t length, int writable,
 	size_t zero_bytes = PGSIZE - read_bytes%PGSIZE;
 	
 	while ((read_bytes > 0)||(zero_bytes > 0)) {
-		// pages mapped overlaps other existing pages or kernel memory
+		// manage overlapping
 		if ((!is_user_vaddr(addr))||(spt_find_page(&thread_current()->spt, addr))) {
 			void *tmp_addr = addr;
 			while (addr > tmp_addr) {
