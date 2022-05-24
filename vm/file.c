@@ -182,6 +182,6 @@ file_lazy_load_segment (struct page *page, void *aux) {
     memset(frame->kva + page_read_bytes, 0, page_zero_bytes);
     succ = true;
   }
-  file_close(file);
+  //file_close(file);
   return succ;
 }
