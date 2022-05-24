@@ -439,20 +439,26 @@ int sys_dup2(int oldfd, int newfd) {
 
 void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
   validate_addr(addr);
+  lock_acquire(&file_lock);
   // check if console input and output
   if (fd < 2) {
+    lock_release(&file_lock);
     return NULL;
   }
   // check if addr is page-aligned
   if ((offset%PGSIZE != 0)||(addr != pg_round_down(addr))||(length <= 0))
+    lock_release(&file_lock);
     return NULL;
   // get fd and call do_mmap
   struct fd *fd_entry = search_fd(fd);
   if (fd_entry == NULL)
+    lock_release(&file_lock);
     return NULL;
   struct file *file = fd_entry->fp;
   if (file_length(file) == 0 || file == NULL)
+    lock_release(&file_lock);
     return NULL;
+  lock_release(&file_lock);
   return do_mmap(addr, length, writable, file, offset);
 }
 
