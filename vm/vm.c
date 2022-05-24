@@ -371,7 +371,6 @@ supplemental_page_table_copy (struct supplemental_page_table *dst,
 /* Helper function for supplemental_page_table_kill */
 void
 page_destructor (struct hash_elem *e, void* aux UNUSED) {
-  struct thread *cur = thread_current();
   const struct page *page = hash_entry(e, struct page, hash_elem);
   if (page->frame != NULL){
     page->frame->page = NULL;
@@ -387,7 +386,8 @@ page_destructor (struct hash_elem *e, void* aux UNUSED) {
       file_write_at(file, kva, page_read_bytes, offset);
     }
 	}
-  vm_dealloc_page(page);
+  // vm_dealloc_page(page);
+  pml4_clear_page(thread_current()->pml4, page->va);
   return;
 }
 
