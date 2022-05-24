@@ -93,7 +93,7 @@ do_mmap (void *addr, size_t length, int writable,
 	size_t read_bytes = length < file_len ? length : file_len;
 	size_t zero_bytes = PGSIZE - read_bytes%PGSIZE;
 
-	while ((read_bytes > 0)||(zero_bytes >0)) {
+	while ((read_bytes > 0)||(zero_bytes > 0)) {
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 		struct file *file = file_reopen(file);
@@ -106,7 +106,7 @@ do_mmap (void *addr, size_t length, int writable,
 		if (!vm_alloc_page_with_initializer(VM_FILE, addr,
 				writable, file_lazy_load_segment, info)) {
 			free(info);
-			file_close(file);
+			// file_close(file);
 			return NULL;
 		}
 		read_bytes -= page_read_bytes;
