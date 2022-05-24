@@ -132,7 +132,6 @@ do_mmap (void *addr, size_t length, int writable,
 void
 do_munmap (void *addr) {
 	struct thread *t = thread_current();
-  printf("do_munmap initiated, %d\n",addr);///test
 	while (true) {
     // get target page from spt
     struct page *page = spt_find_page(&t->spt, addr);
