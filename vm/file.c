@@ -110,10 +110,10 @@ do_mmap (void *addr, size_t length, int writable,
 		
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
-		struct file *file = file_reopen(file);
+		struct file *reopen_file = file_reopen(file);
 
 		struct segment_info *info = (struct segment_info *)malloc(sizeof(struct segment_info));
-		info->file = file;
+		info->file = reopen_file;
 		info->page_read_bytes = page_read_bytes;
 		info->ofs = offset;
 
