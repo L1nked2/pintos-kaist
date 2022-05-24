@@ -445,7 +445,7 @@ void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
   }
   //printf("test length: %d\n",(int)length<=0);///test
   if ((int)length <= 0) {
-    printf("mmap: negative length\n");///test
+    //printf("mmap: negative length\n");///test
     return NULL;
   }
   // check if console input and output
