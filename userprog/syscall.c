@@ -272,7 +272,7 @@ int sys_filesize(int fd) {
 }
 
 int sys_read(int fd, void *buffer, unsigned size) {
-  validate_buffer(buffer, size, false);
+  validate_buffer(buffer, size, true);
   int result;
   lock_acquire(&file_lock);
   struct fd* fd_entry = search_fd(fd);
@@ -305,7 +305,7 @@ int sys_read(int fd, void *buffer, unsigned size) {
 }
 
 int sys_write(int fd, const void *buffer, unsigned size) {
-  validate_buffer(buffer, size, true);
+  validate_buffer(buffer, size, false);
   int result;
 	lock_acquire(&file_lock);
 	struct fd* fd_entry = search_fd(fd);
@@ -453,7 +453,7 @@ void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
   if (fd_entry == NULL)
     return NULL;
   struct file *file = fd_entry->fp;
-  if (file_length(file) == 0 || file == NULL)
+  if (file == NULL || file_length(file) == 0)
     return NULL;
   return do_mmap(addr, length, writable, file, offset);
 }
