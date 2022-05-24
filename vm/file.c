@@ -88,6 +88,7 @@ do_mmap (void *addr, size_t length, int writable,
 		struct file *file, off_t offset) {
   // save begin address of pages
 	void *begin_addr = addr;
+  printf("mmap started, %d\n",begin_addr);///test
   // calculate number of bytes to read and zero-filled.
 	off_t file_len = file_length(file);
 	size_t read_bytes = length < file_len ? length : file_len;
@@ -125,6 +126,7 @@ do_mmap (void *addr, size_t length, int writable,
 		offset += page_read_bytes;
 		addr = (void *)((uint8_t *)addr + PGSIZE);
 	}
+  printf("mmap finished, %d\n",begin_addr);///test
 	return begin_addr;
 }
 
