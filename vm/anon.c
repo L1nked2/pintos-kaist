@@ -36,6 +36,8 @@ anon_initializer (struct page *page, enum vm_type type, void *kva) {
   /* Set up the handler */
 	page->operations = &anon_ops;
 	struct anon_page *anon_page = &page->anon;
+  // allocate SIZE_MAX for swap sector as sentinel
+  anon_page->swap_disk_sector = SIZE_MAX;
   return true;
 }
 
@@ -43,17 +45,20 @@ anon_initializer (struct page *page, enum vm_type type, void *kva) {
 static bool
 anon_swap_in (struct page *page, void *kva) {
 	struct anon_page *anon_page = &page->anon;
-	uint32_t swap_disk_sector = anon_page->swap_disk_sector;
+	disk_sector_t swap_disk_sector = anon_page->swap_disk_sector;
 	size_t idx = swap_disk_sector/SECTORS_PER_PAGE;
-	
+  // validate disk sector
 	if (anon_page->swap_disk_sector == SIZE_MAX)
 		return false;
 	if (!bitmap_test(swap_table, idx))
 		return false;
 	
 	disk_rw_repeatedly(swap_disk_sector, page->frame->kva, 'r');
-	bitmap_set_multiple(swap_table, anon_page->swap_disk_sector, SECTORS_PER_PAGE, false);
-	
+	//bitmap_set_multiple(swap_table, anon_page->swap_disk_sector, SECTORS_PER_PAGE, false);
+	bitmap_set(swap_table, anon_page->swap_disk_sector, false);
+
+  // mark swap disk sector as default
+	anon_page->swap_disk_sector = SIZE_MAX;
 	return true;
 }
 
@@ -61,7 +66,7 @@ anon_swap_in (struct page *page, void *kva) {
 static bool
 anon_swap_out (struct page *page) {
 	struct anon_page *anon_page = &page->anon;
-	disk_sector_t swap_disk_sector = bitmap_scan_and_flip(swap_table, 0, 8, 1);
+	disk_sector_t swap_disk_sector = bitmap_scan_and_flip(swap_table, 0, 1, false);
 	
 	if (swap_disk_sector == BITMAP_ERROR) // bitmap_scan can return BITMAP_ERROR
 		return false;
@@ -69,7 +74,7 @@ anon_swap_out (struct page *page) {
 	anon_page->swap_disk_sector = swap_disk_sector;
 	disk_rw_repeatedly(swap_disk_sector, page->frame->kva, 'w');
 	pml4_clear_page(thread_current()->pml4, page->va);
-	
+	page->frame = NULL;
 	return true;
 }
 
@@ -82,7 +87,7 @@ anon_destroy (struct page *page) {
 /* Helper function for anon swap IO */
 void disk_rw_repeatedly(uint32_t swap_disk_sector, void *kva, char cond) {
 	for(int sector = 0; sector < SECTORS_PER_PAGE; sector++) {
-		disk_sector_t sec_no = swap_disk_sector + sector;
+		disk_sector_t sec_no = (disk_sector_t)(swap_disk_sector * SECTORS_PER_PAGE) + sector;
 		void *buffer = (void *)((uint8_t *)kva + DISK_SECTOR_SIZE*sector);
 		if (cond == 'r') {
 			disk_read(swap_disk, sec_no, buffer);
