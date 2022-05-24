@@ -249,7 +249,7 @@ vm_try_handle_fault (struct intr_frame *f, void *addr,
     }
   }
   // cannot handle page_fault (writing to r/o, etc,.)
-  printf("page_fault handling failed (not claim case)\n");///test
+  //printf("page_fault handling failed (not claim case)\n");///test
   return false;
 }
 
