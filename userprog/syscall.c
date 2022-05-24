@@ -439,11 +439,11 @@ int sys_dup2(int oldfd, int newfd) {
 
 void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
   // validate address, start and end address
-  printf("given addr %p, length %lld, end addr %p\n", addr, length, addr + length);///test
+  //printf("given addr %p, length %lld, end addr %p\n", addr, length, addr + length);///test
   if (addr == 0 || is_kernel_vaddr(addr) || is_kernel_vaddr((void *)addr + length)) {
     return NULL;
   }
-  printf("test length: %d\n",(int)length<=0);///test
+  //printf("test length: %d\n",(int)length<=0);///test
   if ((int)length <= 0) {
     printf("mmap: negative length\n");///test
     return NULL;
