@@ -153,6 +153,11 @@ fat_boot_create (void) {
 void
 fat_fs_init (void) {
 	/* TODO: Your code goes here. */
+	// initailize fat_length and data_start field of fat_fs.
+
+	fat_fs->data_start = fat_fs->bs.fat_start + fat_fs->bs.fat_sectors;
+	lock_init(&fat_fs->write_lock);
+	return;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -165,6 +170,9 @@ fat_fs_init (void) {
 cluster_t
 fat_create_chain (cluster_t clst) {
 	/* TODO: Your code goes here. */
+	// extend a chain by appending a cluster after the cluster specified in clst.
+	// if clst is equal to zero, create a new chain.
+	// return the cluster number of newly allocated cluster.
 }
 
 /* Remove the chain of clusters starting from CLST.
@@ -172,22 +180,42 @@ fat_create_chain (cluster_t clst) {
 void
 fat_remove_chain (cluster_t clst, cluster_t pclst) {
 	/* TODO: Your code goes here. */
+	// starting from clst, remove clusters from a chain.
+	if (pclst == 0) {
+		for (cluster_t c = clst; c != EOChain; c = fat_get(c)) {
+			if (c == 0)
+				return;
+			fat_put(c, 0);
+		}
+	}
+	else {
+		fat_put(pclst, EOChain);
+	}
+	return;
 }
 
 /* Update a value in the FAT table. */
 void
 fat_put (cluster_t clst, cluster_t val) {
 	/* TODO: Your code goes here. */
+	// update FAT entry pointed by cluster number clst to val.
+	fat_fs->fat[clst] = val;
+	return;
 }
 
 /* Fetch a value in the FAT table. */
 cluster_t
 fat_get (cluster_t clst) {
 	/* TODO: Your code goes here. */
+	// return in which cluster number the given cluster clst points.
+	return fat_fs->fat[clst];
 }
 
 /* Covert a cluster # to a sector number. */
 disk_sector_t
 cluster_to_sector (cluster_t clst) {
 	/* TODO: Your code goes here. */
+	// translates a cluster number clst into the corresponding sector number.
+	// return the sector number.
+	return fat_fs->data_start + clst;
 }
