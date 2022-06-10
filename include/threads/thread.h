@@ -10,7 +10,9 @@
 #ifdef VM
 #include "vm/vm.h"
 #endif
-
+#ifdef EFILESYS
+#include "filesys/directory.h"
+#endif
 
 /* States in a thread's life cycle. */
 enum thread_status {
