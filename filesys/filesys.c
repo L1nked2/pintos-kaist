@@ -131,12 +131,13 @@ filesys_remove (const char *name) {
   bool success = dir != NULL && dir_remove(dir, name);
 
   return success;
-#endif
+#else
 	struct dir *dir = dir_open_root ();
 	bool success = dir != NULL && dir_remove (dir, name);
 	dir_close (dir);
 
 	return success;
+#endif
 }
 
 /* Formats the file system. */
