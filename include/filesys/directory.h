@@ -45,6 +45,6 @@ bool dir_make(const char *dir);
 bool dir_read(int fd, char *name);
 bool isdir(int fd);
 bool inumber(int fd);
-bool parse_path(char *src, char *dst)
+bool parse_path(char *src, char *dst);
 
 #endif /* filesys/directory.h */
