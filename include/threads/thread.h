@@ -153,7 +153,7 @@ struct thread {
   uint64_t *stack_ptr;
 #endif
 #ifdef EFILESYS
-  struct dir cur_dir;
+  struct dir *cur_dir;
 #endif
 	/* Owned by thread.c. */
 	struct intr_frame tf;               /* Information for switching */
