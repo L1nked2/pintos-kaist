@@ -154,10 +154,9 @@ void
 fat_fs_init (void) {
 	/* TODO: Your code goes here. */
 	// initailize fat_length and data_start field of fat_fs.
-  // fat_length is the number of clusters, sector->cluster
-  fat_fs->fat_length = fat_fs->bs.fat_sectors / SECTORS_PER_CLUSTER;
+	fat_fs->fat_length = fat_fs->bs.fat_sectors / SECTORS_PER_CLUSTER;
 	fat_fs->data_start = fat_fs->bs.fat_start + fat_fs->bs.fat_sectors;
-  fat_fs->last_clst = 1;
+	fat_fs->last_clst = 1;
 	lock_init(&fat_fs->write_lock);
 	return;
 }
@@ -175,6 +174,27 @@ fat_create_chain (cluster_t clst) {
 	// extend a chain by appending a cluster after the cluster specified in clst.
 	// if clst is equal to zero, create a new chain.
 	// return the cluster number of newly allocated cluster.
+	cluster_t new_clst = NULL;
+	for (cluster_t i = 1; i < fat_fs->fat_length; i++) {
+		if (!fat_get(i)) {
+			new_clst = i;
+		}
+	}
+	if (new_clst == NULL) {
+		return 0;
+	} else {
+		if (clst) {
+			fat_put(clst, new_clst);
+			fat_put(new_clst, EOChain);
+			fat_fs->last_clst = new_clst;
+			return new_clst;
+		} else{
+			fat_put(new_clst, EOChain);
+			fat_fs->last_clst = new_clst;
+			return new_clst;
+		}
+	}
+
 }
 
 /* Remove the chain of clusters starting from CLST.

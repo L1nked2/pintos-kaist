@@ -6,18 +6,6 @@
 #include "filesys/inode.h"
 #include "threads/malloc.h"
 
-/* A directory. */
-struct dir {
-	struct inode *inode;                /* Backing store. */
-	off_t pos;                          /* Current position. */
-};
-
-/* A single directory entry. */
-struct dir_entry {
-	disk_sector_t inode_sector;         /* Sector number of header. */
-	char name[NAME_MAX + 1];            /* Null terminated file name. */
-	bool in_use;                        /* In use or free? */
-};
 
 /* Creates a directory with space for ENTRY_CNT entries in the
  * given SECTOR.  Returns true if successful, false on failure. */
@@ -47,6 +35,30 @@ dir_open (struct inode *inode) {
 struct dir *
 dir_open_root (void) {
 	return dir_open (inode_open (ROOT_DIR_SECTOR));
+}
+
+struct dir *dir_open_from_path(char *path) {
+	struct dir *ret_dir;
+	int path_len = strlen(path);
+	char *tmp_path = (char *)calloc(path_len + 1, sizeof(char *));
+	memcpy(tmp_path, path, path_len + 1);
+	if ((*tmp_path == '/') && (path_len == 1)) {
+		// case of root
+		free(tmp_path);
+		return dir_open_root();
+	}
+	if (*tmp_path == '/') {
+		// case of absolute path
+		ret_dir = dir_open_root();
+		tmp_path += 1;
+	} else {
+		// case of relative path
+		ret_dir = dir_reopen(thread_current()->dir);
+	}
+	char *token, *save_ptr;
+	token = strtok_r(tmp_path, '/', &save_ptr);
+	// not finished yet
+	return;
 }
 
 /* Opens and returns a new directory for the same inode as DIR.
@@ -213,4 +225,65 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1]) {
 		}
 	}
 	return false;
+}
+
+bool dir_change(const char *dir) {
+	// changes the current working directory of the process to dir.
+	// returns true if successful, false on failure.
+	if (strlen(dir) > NAME_MAX)
+		return false;
+	
+	return;
+}
+
+bool dir_make(const char *dir) {
+	// creates the directory named dir.
+	// returns true if successful, false on failure.
+	// fails if dir already exists or if any directory name in dir,
+	// besides the last, does not already exist.
+	return;
+}
+
+bool dir_read(int fd, char *name) {
+	// reads a directory entry from file descriptor fd.
+	// if successful, stores the null-terminated file name in name,
+	// which must have room for READDIR_MAX_LEN + 1 bytes, and returns true.
+	// if no entries are left in the directory, returns false.
+	return;
+}
+
+bool isdir(int fd) {
+	// returns true if fd represents a directory.
+	// false if it represents an ordinary file.
+	return;
+}
+
+bool inumber(int fd) {
+	// returns the inode number of the inode associated with fd,
+	// which may represent an ordinary file or a directory.
+	return;
+}
+
+bool parse_path(char *src, char *dst) {
+	bool success = true;
+	int src_len = strlen(src);
+	char *tmp_src = (char *)calloc(src_len + 1, sizeof(char));
+	memcpy(tmp_src, src, src_len + 1);
+	char *token, *save_ptr;
+	token = strtok_r(tmp_src, '/', &save_ptr);
+	if (token == NULL) {
+		memcpy(dst, src, src_len + 1);
+		free(tmp_src);
+		return !success;
+	} else {
+		token = strtok_r(NULL, '/', &save_ptr);
+		char *cur;
+		while (token != NULL) {
+			cur = token;
+			token = strtok_r(NULL, '/', &save_ptr);
+		}
+		memcpy(dst, cur, src_len + 1);
+		free(tmp_src);
+		return success;
+	}
 }
