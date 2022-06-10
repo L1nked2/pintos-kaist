@@ -32,6 +32,15 @@ unsigned sys_tell (int fd);
 void sys_close (int fd);
 int sys_dup2(int oldfd, int newfd);
 
+// syscall for pj3
 void *sys_mmap(void *addr, size_t length, int writable, int fd, int32_t offset);
 void sys_munmap(void *addr);
+
+// syscall for pj4
+bool sys_chdir(const char *dir);
+bool sys_mkdir(const char *dir);
+bool sys_readdir(int fd, char *name);
+bool sys_isdir(int fd);
+int sys_inumber(int fd);
+int sys_symlink(const char *target, const char *linkpath);
 #endif /* userprog/syscall.h */
