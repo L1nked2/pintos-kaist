@@ -154,7 +154,8 @@ void
 fat_fs_init (void) {
 	/* TODO: Your code goes here. */
 	// initailize fat_length and data_start field of fat_fs.
-
+  // fat_length is the number of clusters, sector->cluster
+  fat_fs->fat_length = fat_fs->bs.fat_sectors / SECTORS_PER_CLUSTER;
 	fat_fs->data_start = fat_fs->bs.fat_start + fat_fs->bs.fat_sectors;
 	lock_init(&fat_fs->write_lock);
 	return;
