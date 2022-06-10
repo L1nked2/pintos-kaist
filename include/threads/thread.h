@@ -150,7 +150,9 @@ struct thread {
   void *stack_bottom;
   uint64_t *stack_ptr;
 #endif
-
+#ifdef EFILESYS
+  struct dir cur_dir;
+#endif
 	/* Owned by thread.c. */
 	struct intr_frame tf;               /* Information for switching */
 	unsigned magic;                     /* Detects stack overflow. */

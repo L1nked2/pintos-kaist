@@ -209,6 +209,11 @@ thread_create (const char *name, int priority,
   sema_init(&(t->wait_sema), 0);
   sema_init(&(t->exit_sema), 0);
 
+  // project4 directory inherit
+#ifdef EFILESYS
+  t->cur_dir = thread_current()->cur_dir;
+#endif
+
 	/* Add to run queue. */
 	thread_unblock (t);
  	if(thread_mlfqs) {
@@ -450,6 +455,10 @@ init_thread (struct thread *t, const char *name, int priority) {
   // init part of project 3
   t->stack_ptr = USER_STACK;
   t->stack_bottom = USER_STACK;
+#ifdef EFILESYS
+  // init part of project 4
+  t->cur_dir = NULL;
+#endif
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should

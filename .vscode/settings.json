@@ -40,7 +40,8 @@
     "stddef.h": "c",
     "vm.h": "c",
     "stdbool.h": "c",
-    "main.h": "c"
+    "main.h": "c",
+    "directory.h": "c"
   },
   "C_Cpp.dimInactiveRegions": false,
 }
