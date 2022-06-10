@@ -12,12 +12,7 @@
 #define NAME_MAX 14
 
 struct inode;
-
-/* A directory. */
-struct dir {
-	struct inode *inode;                /* Backing store. */
-	off_t pos;                          /* Current position. */
-};
+struct dir;
 
 /* Opening and closing directories. */
 bool dir_create (disk_sector_t sector, size_t entry_cnt);
