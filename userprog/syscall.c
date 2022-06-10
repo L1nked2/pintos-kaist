@@ -112,6 +112,24 @@ syscall_handler (struct intr_frame *f) {
     case SYS_MUNMAP:
       sys_munmap((f->R).rdi);
       break;
+    case SYS_CHDIR:
+      (f->R).rax = sys_chdir((f->R).rdi);
+      break;
+    case SYS_MKDIR:
+      (f->R).rax = sys_mkdir((f->R).rdi);
+      break;
+    case SYS_READDIR:
+      (f->R).rax = sys_readdir((f->R).rdi, (f->R).rsi);
+      break;
+    case SYS_ISDIR:
+      (f->R).rax = sys_isdir((f->R).rdi);
+      break;
+    case SYS_INUMBER:
+      (f->R).rax = sys_inumber((f->R).rdi);
+      break;
+    case SYS_SYMLINK:
+      (f->R).rax = sys_symlink((f->R).rdi, (f->R).rsi);
+      break;
     default:
       sys_exit(-1);
       break;
@@ -468,4 +486,29 @@ void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
 void sys_munmap(void *addr){
   do_munmap(addr);
   return;
+}
+
+bool sys_chdir(const char *dir) {
+  //TODO
+  return false;
+}
+bool sys_mkdir(const char *dir) {
+  //TODO
+  return false;
+}
+bool sys_readdir(int fd, char *name) {
+  //TODO
+  return false;
+}
+bool sys_isdir(int fd) {
+  //TODO
+  return false;
+}
+int sys_inumber(int fd) {
+  //TODO
+  return 0;
+}
+int sys_symlink(const char *target, const char *linkpath) {
+  //TODO
+  return 0;
 }
