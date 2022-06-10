@@ -53,7 +53,7 @@ struct dir *dir_open_from_path(char *path) {
 		tmp_path += 1;
 	} else {
 		// case of relative path
-		ret_dir = dir_reopen(thread_current()->dir);
+		ret_dir = dir_reopen(thread_current()->cur_dir);
 	}
 	char *token, *save_ptr;
 	token = strtok_r(tmp_path, '/', &save_ptr);
