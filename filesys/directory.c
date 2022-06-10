@@ -6,12 +6,6 @@
 #include "filesys/inode.h"
 #include "threads/malloc.h"
 
-/* A directory. */
-struct dir {
-	struct inode *inode;                /* Backing store. */
-	off_t pos;                          /* Current position. */
-};
-
 /* A single directory entry. */
 struct dir_entry {
 	disk_sector_t inode_sector;         /* Sector number of header. */
