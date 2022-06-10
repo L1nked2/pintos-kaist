@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "devices/disk.h"
+#include "filesys/off_t.h"
+#include "threads/thread.h"
 
 /* Maximum length of a file name component.
  * This is the traditional UNIX maximum length.
