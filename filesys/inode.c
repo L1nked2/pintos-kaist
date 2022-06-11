@@ -90,9 +90,9 @@ inode_create (disk_sector_t sector, off_t length) {
       cluster_t new_sector = fat_create_chain(0);
 			static char zeros[DISK_SECTOR_SIZE];
 			disk_inode->start = new_sector;
-      printf("inode_create, sectors = %d\n", sectors);///test
+      //printf("inode_create, sectors = %d\n", sectors);///test
 			for (size_t i=0; i<sectors; i++) {
-        printf("inode_create, new_sector = %p\n",new_sector);///test
+        //printf("inode_create, new_sector = %p\n",new_sector);///test
 				if (new_sector == 0) {
 					free(disk_inode);
           return success;
