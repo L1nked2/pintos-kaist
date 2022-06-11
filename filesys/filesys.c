@@ -111,11 +111,10 @@ filesys_open (const char *name) {
   else {
     dir = dir_open_root ();
   }
-  printf("filesys_open, name: %s\n", name);///test
+  printf("filesys_open, name: %s, dir_is_null:\n", name, dir == NULL);///test
 
 	if (dir != NULL)
 		dir_lookup (dir, name, &inode);
-  print("inode: %p\n", inode);///test
 	dir_close (dir);
 
 	return file_open (inode);
