@@ -61,7 +61,7 @@ filesys_done (void) {
 bool
 filesys_create (const char *name, off_t initial_size) {
 #ifdef EFILESYS
-  disk_sector_t inode_sector = fat_create_chain(0);
+  disk_sector_t inode_sector = 0;
   struct thread *cur = thread_current();
   struct dir *dir;
   if(cur->cur_dir == NULL) {
@@ -79,6 +79,9 @@ filesys_create (const char *name, off_t initial_size) {
   if (!success && inode_sector != 0)
     fat_remove_chain(inode_sector, 0);
   dir_close(dir);
+
+  struct inode file_inode = inode_open(inode_sector);
+  disk_write(filesys_disk, file_inode->sector, &file_inode->data);
   printf("filesys_created finished, success: %d\n",success);///test
   return success;
 
