@@ -242,14 +242,8 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 	uint8_t *bounce = NULL;
 
 	while (size > 0) {
-#ifdef EFILESYS
-		//cluster_t clst = fat_cluster_read_at(inode->data.start, offset);
-		//disk_sector_t sector_idx = cluster_to_sector(clst);
-    disk_sector_t sector_idx = byte_to_sector (inode, offset);
-#else
 		/* Disk sector to read, starting byte offset within sector. */
 		disk_sector_t sector_idx = byte_to_sector (inode, offset);
-#endif
 		int sector_ofs = offset % DISK_SECTOR_SIZE;
 
 		/* Bytes left in inode, bytes left in sector, lesser of the two. */
