@@ -78,7 +78,7 @@ filesys_create (const char *name, off_t initial_size) {
 	
   if (!success && inode_sector != 0)
     fat_remove_chain(inode_sector, 0);
-
+  
   dir_close(dir);
   return success;
 #else
@@ -111,10 +111,12 @@ filesys_open (const char *name) {
   else {
     dir = dir_open_root ();
   }
-  printf("filesys_open, name: %s, dir_is_null:%d\n", name, dir == NULL);///test
+  printf("filesys_open, name: %s\n", name);///test
 
-	if (dir != NULL)
+	if (dir != NULL) {
+    printf("filesys_open, dir_lookup: %p\n", dir);
 		dir_lookup (dir, name, &inode);
+  }
 	dir_close (dir);
 
 	return file_open (inode);
