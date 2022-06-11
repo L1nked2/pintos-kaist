@@ -277,7 +277,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 		bytes_read += chunk_size;
 	}
 	free (bounce);
-
+  printf("inode finished with bytes read: %d\n", bytes_read);///test
 	return bytes_read;
 }
 
