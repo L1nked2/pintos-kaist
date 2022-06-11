@@ -459,5 +459,5 @@ void extend_chain(struct inode *inode, off_t pos) {
 #endif
 
 void inode_write_file(struct inode *inode) {
-  disk_write(filesys_disk, inode->sector, inode->data);
+  disk_write(filesys_disk, inode->sector, &inode->data);
 }
