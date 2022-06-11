@@ -105,6 +105,7 @@ struct file *
 filesys_open (const char *name) {
 	struct dir *dir = dir_open_root ();
 	struct inode *inode = NULL;
+  printf("filesys_open, name: %s\n", name);///test
 
 	if (dir != NULL)
 		dir_lookup (dir, name, &inode);
