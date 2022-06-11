@@ -75,7 +75,7 @@ filesys_create (const char *name, off_t initial_size) {
 			&& (inode_sector != 0)
 			&& inode_create (inode_sector, initial_size)
 			&& dir_add (dir, name, inode_sector));//name should be changed(parsing?)
-	printf("filesys_create, inode_sector = %p, success = %d\n", inode_sector, success);///test
+	printf("filesys_create, inode_sector = %p, dir = %p, success = %d\n", inode_sector, dir, success);///test
   if (!success && inode_sector != 0)
     fat_remove_chain(inode_sector, 0);
   
