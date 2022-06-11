@@ -463,7 +463,6 @@ void extend_chain(struct inode *inode, off_t pos) {
   }
   inode->data.length = pos;
   disk_write(filesys_disk, inode->sector, &inode->data);
-  PANIC("extend_chain, inode->data.length: %d\n",inode->data.length);
 }
 
 #endif
