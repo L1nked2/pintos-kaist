@@ -253,7 +253,6 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 
 		/* Number of bytes to actually copy out of this sector. */
 		int chunk_size = size < min_left ? size : min_left;
-    printf("inode_read_at, inode_left: %d\n", inode_left);///test
 		if (chunk_size <= 0)
 			break;
 
@@ -419,17 +418,17 @@ inode_length (const struct inode *inode) {
 #ifdef EFILESYS
 /* extend cluster chain */
 void extend_chain(struct inode *inode, off_t pos) {
-    off_t extend_size = (pos + DISK_SECTOR_SIZE - 1) / DISK_SECTOR_SIZE - (inode->data.length + DISK_SECTOR_SIZE - 1) / DISK_SECTOR_SIZE;
-    cluster_t clst = inode->data.start;
-    if (inode->data.start == 0)
-      clst = 0;
+  off_t extend_size = (pos + DISK_SECTOR_SIZE - 1) / DISK_SECTOR_SIZE - (inode->data.length + DISK_SECTOR_SIZE - 1) / DISK_SECTOR_SIZE;
+  cluster_t clst = sector_to_cluster(inode->data.start);
+  if (inode->data.start == 0)
+    clst = 0;
 
-    for (off_t i=0; i<extend_size; i++) {
-        clst = fat_create_chain(clst);
-        if (inode->data.start == 0)
-          inode->data.start = cluster_to_sector(clst);
-    }
-    inode->data.length = pos;
-    disk_write(filesys_disk, inode->sector, &inode->data);
+  for (off_t i=0; i<extend_size; i++) {
+      clst = fat_create_chain(clst);
+      if (inode->data.start == 0)
+        inode->data.start = cluster_to_sector(clst);
+  }
+  inode->data.length = pos;
+  disk_write(filesys_disk, inode->sector, &inode->data);
 }
 #endif

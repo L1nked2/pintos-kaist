@@ -243,6 +243,12 @@ cluster_to_sector (cluster_t clst) {
 	return fat_fs->data_start + clst;
 }
 
+/* Covert a sector # to cluster number. */
+cluster_t
+sector_to_cluster(disk_sector_t sect) {
+    return sect - fat_fs->data_start + 1;
+}
+
 /* Convert cluster and offset to actual sector
  * extend chain if offset is bigger than current size
  */
