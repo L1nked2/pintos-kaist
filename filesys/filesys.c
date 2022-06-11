@@ -74,8 +74,8 @@ filesys_create (const char *name, off_t initial_size) {
   bool success = (dir != NULL
 			&& (inode_sector != 0)
 			&& inode_create (inode_sector, initial_size)
-			&& dir_add (dir, name, inode_sector));//name should be changed(parsing?)
-	printf("filesys_create, inode_sector = %p, inode_create = %p, dir_add = %p\n", inode_sector, inode_create (inode_sector, initial_size),dir_add (dir, name, inode_sector));///test
+			&& dir_add (dir, name, inode_sector));
+	//printf("filesys_create, inode_sector = %p, inode_create = %p, dir_add = %p\n", inode_sector, inode_create (inode_sector, initial_size),dir_add (dir, name, inode_sector));///test
   if (!success && inode_sector != 0)
     fat_remove_chain(inode_sector, 0);
   
@@ -119,7 +119,7 @@ filesys_open (const char *name) {
 		dir_lookup (dir, name, &inode);
   }
 	dir_close (dir);
-  printf("filesys_open, file_open for dir_inode: %p\n", dir->inode);///test
+  printf("filesys_open, file_open for dir_inode: %p, inode: %p\n", dir->inode,inode);///test
 	return file_open (inode);
 }
 
