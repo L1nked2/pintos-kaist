@@ -157,7 +157,7 @@ fat_fs_init (void) {
 	fat_fs->fat_length = fat_fs->bs.fat_sectors / SECTORS_PER_CLUSTER;
 	fat_fs->data_start = fat_fs->bs.fat_start + fat_fs->bs.fat_sectors;
 	fat_fs->last_clst = 1;
-  printf("fat_fs_init, fat_length = %d\n", fat_fs->fat_length);
+  //printf("fat_fs_init, fat_length = %d\n", fat_fs->fat_length);
 	lock_init(&fat_fs->write_lock);
 	return;
 }

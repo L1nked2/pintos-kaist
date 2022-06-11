@@ -103,10 +103,11 @@ filesys_create (const char *name, off_t initial_size) {
  * or if an internal memory allocation fails. */
 struct file *
 filesys_open (const char *name) {
-	struct dir *dir;
+	struct dir *dir;\
+  struct thread *cur = thread_current ();
   struct inode *inode = NULL;
-  if(thread_current()->cur_dir != NULL) {
-    dir = thread_current()->cur_dir;
+  if(cur->cur_dir != NULL) {
+    dir = cur->cur_dir;
   }
   else {
     dir = dir_open_root ();
@@ -114,11 +115,11 @@ filesys_open (const char *name) {
   printf("filesys_open, name: %s\n", name);///test
 
 	if (dir != NULL) {
-    printf("filesys_open, dir_lookup for dir_inode: %p\n", dir->inode);
+    printf("filesys_open, dir_lookup for dir_inode: %p\n", dir->inode);///test
 		dir_lookup (dir, name, &inode);
   }
 	dir_close (dir);
-
+  printf("filesys_open, file_open for dir_inode: %p\n", dir->inode);///test
 	return file_open (inode);
 }
 
