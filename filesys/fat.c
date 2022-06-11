@@ -249,23 +249,6 @@ sector_to_cluster(disk_sector_t sect) {
     return sect - fat_fs->data_start;
 }
 
-/* Convert cluster and offset to actual sector
- * extend chain if offset is bigger than current size
- */
-cluster_t fat_cluster_read_at(cluster_t clst, off_t offset) {
-  size_t pos = offset / DISK_SECTOR_SIZE;
-  cluster_t cursor = clst;
-  for (size_t i=0; i<pos; i++) {
-    if(fat_get(cursor) == EOChain) {
-      if(!fat_create_chain(cursor)) {
-        return 0;
-      }
-    }
-    cursor = fat_get(cursor);
-  }
-  return cursor;
-}
-
 /* Allocate size clusters and return head sector at sect
  */
 bool fat_allocate(size_t size, disk_sector_t *sect) {
