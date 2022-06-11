@@ -425,7 +425,7 @@ inode_length (const struct inode *inode) {
 /* extend cluster chain */
 void extend_chain(struct inode *inode, off_t pos) {
     off_t extend_size = (pos + DISK_SECTOR_SIZE - 1) / DISK_SECTOR_SIZE - (inode->data.length + DISK_SECTOR_SIZE - 1) / DISK_SECTOR_SIZE;
-    cluster_t clst = inode->data.start - fat_fs->data_start + 1;
+    cluster_t clst = inode->data.start;
     if (inode->data.start == 0)
       clst = 0;
 
