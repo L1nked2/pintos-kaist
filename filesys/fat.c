@@ -265,3 +265,25 @@ cluster_t fat_cluster_read_at(cluster_t clst, off_t offset) {
   }
   return cursor;
 }
+
+/* Allocate size clusters and return head sector at sect
+ */
+bool fat_allocate(size_t size, disk_sector_t *sect) {
+  if (size <= 0)
+      return true;
+  cluster_t head = fat_create_chain(0);
+  if (head == NULL) {
+      fat_remove_chain(head, 0);
+      return false;
+  }
+  cluster_t clst = head;
+  for (size_t i = 0; i < size - 1; i++) {
+      clst = fat_create_chain(clst);
+      if (clst == 0) {
+          fat_remove_chain(head, 0);
+          return false;
+      }
+  }
+  *sect = cluster_to_sector(head);
+  return true;
+}

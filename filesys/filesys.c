@@ -72,15 +72,16 @@ filesys_create (const char *name, off_t initial_size) {
   }
   
   bool success = (dir != NULL
-			&& (inode_sector != 0)
+			&& fat_allocate (1, &inode_sector)
 			&& inode_create (inode_sector, initial_size)
 			&& dir_add (dir, name, inode_sector));
-	//printf("filesys_create, inode_sector = %p, inode_create = %p, dir_add = %p\n", inode_sector, inode_create (inode_sector, initial_size),dir_add (dir, name, inode_sector));///test
+
   if (!success && inode_sector != 0)
     fat_remove_chain(inode_sector, 0);
-  
   dir_close(dir);
+  printf("filesys_created finished, success: %d\n",success);///test
   return success;
+
 #else
 	disk_sector_t inode_sector = 0;
 	struct dir *dir = dir_open_root ();

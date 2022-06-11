@@ -87,22 +87,20 @@ inode_create (disk_sector_t sector, off_t length) {
     size_t sectors = bytes_to_sectors (length);
     disk_inode->length = length;
     disk_inode->magic = INODE_MAGIC;
-    if (sectors > 0) {
-      cluster_t new_sector = fat_create_chain(0);
-			static char zeros[DISK_SECTOR_SIZE];
-			disk_inode->start = new_sector;
-      //printf("inode_create, sectors = %d\n", sectors);///test
-			for (size_t i=0; i<sectors; i++) {
-        //printf("inode_create, new_sector = %p\n",new_sector);///test
-				if (new_sector == 0) {
-					free(disk_inode);
-          return success;
-				}
-				disk_write(filesys_disk, cluster_to_sector(new_sector), zeros);
-				new_sector = fat_create_chain(new_sector);
-			}
-		}
-		disk_write (filesys_disk, cluster_to_sector(sector), disk_inode);
+    if(fat_allocate(sectors, &disk_inode->start)) {
+      disk_write(filesys_disk, sector, disk_inode);
+      if (sectors > 0) {
+        cluster_t new_clst = sector_to_cluster(disk_inode->start);
+        static char zeros[DISK_SECTOR_SIZE];
+        for (size_t i=0; i<sectors; i++) {
+          if (new_clst == EOChain) {
+            return false;
+          }
+          disk_write(filesys_disk, cluster_to_sector(new_clst), zeros);
+          new_clst = fat_get(new_clst);
+        }
+      }
+    }
 		success = true;
 		free(disk_inode);
 	}
