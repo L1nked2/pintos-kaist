@@ -250,7 +250,7 @@ cluster_t fat_cluster_read_at(cluster_t clst, off_t offset) {
   cluster_t cursor = clst;
   for (size_t i=0; i<pos; i++) {
     if(fat_get(cursor) == EOChain) {
-      if(!fat_create_chain(cursor)){
+      if(!fat_create_chain(cursor)) {
         return 0;
       }
     }
