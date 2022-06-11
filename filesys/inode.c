@@ -94,14 +94,15 @@ inode_create (disk_sector_t sector, off_t length) {
         static char zeros[DISK_SECTOR_SIZE];
         for (size_t i=0; i<sectors; i++) {
           if (new_clst == EOChain) {
+            printf("inode_create, cluster chain is ended before create done\n");///test
             return false;
           }
           disk_write(filesys_disk, cluster_to_sector(new_clst), zeros);
           new_clst = fat_get(new_clst);
         }
       }
+      success = true;
     }
-		success = true;
 		free(disk_inode);
 	}
 	return success;
