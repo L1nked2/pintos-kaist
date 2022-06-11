@@ -276,7 +276,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 		bytes_read += chunk_size;
 	}
 	free (bounce);
-  printf("inode finished with bytes read: %d\n", bytes_read);///test
+  printf("inode_read_at finished with bytes read: %d\n", bytes_read);///test
 	return bytes_read;
 }
 
@@ -418,6 +418,7 @@ inode_length (const struct inode *inode) {
 /* extend cluster chain */
 void extend_chain(struct inode *inode, off_t pos) {
   off_t extend_size = (pos + DISK_SECTOR_SIZE - 1) / DISK_SECTOR_SIZE - (inode->data.length + DISK_SECTOR_SIZE - 1) / DISK_SECTOR_SIZE;
+  printf("extend_chain, extend_size: %d\n", extend_size);///test
   cluster_t clst = sector_to_cluster(inode->data.start);
   if (inode->data.start == 0)
     clst = 0;
