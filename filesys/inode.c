@@ -226,14 +226,20 @@ inode_close (struct inode *inode) {
 	if (--inode->open_cnt == 0) {
 		/* Remove from inode list and release lock. */
 		list_remove (&inode->elem);
-
+#ifdef EFILESYS
+  /* Deallocate blocks if removed. */
+		if (inode->removed) {
+			fat_remove_chain(inode->sector, 0);
+      fat_remove_chain(inode->data.start, 0);
+		}
+#else
 		/* Deallocate blocks if removed. */
 		if (inode->removed) {
 			free_map_release (inode->sector, 1);
 			free_map_release (inode->data.start,
 					bytes_to_sectors (inode->data.length)); 
 		}
-
+#endif
 		free (inode); 
 	}
 }
