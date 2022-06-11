@@ -80,8 +80,7 @@ filesys_create (const char *name, off_t initial_size) {
     fat_remove_chain(inode_sector, 0);
   dir_close(dir);
 
-  struct inode *file_inode = inode_open(inode_sector);
-  disk_write(filesys_disk, file_inode->sector, &file_inode->data);
+  inode_write_file(inode_open(inode_sector));
   printf("filesys_created finished, success: %d\n",success);///test
   return success;
 

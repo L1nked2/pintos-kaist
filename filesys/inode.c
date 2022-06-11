@@ -435,6 +435,8 @@ off_t
 inode_length (const struct inode *inode) {
 	return inode->data.length;
 }
+
+/* Helper functions for pj4 */
 #ifdef EFILESYS
 /* extend cluster chain */
 void extend_chain(struct inode *inode, off_t pos) {
@@ -453,4 +455,9 @@ void extend_chain(struct inode *inode, off_t pos) {
   disk_write(filesys_disk, inode->sector, &inode->data);
   PANIC("extend_chain, inode->data.length: %d\n",inode->data.length);
 }
+
 #endif
+
+void inode_write_file(struct inode *inode) {
+  disk_write(filesys_disk, inode->sector, inode->data);
+}
