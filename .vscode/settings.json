@@ -41,7 +41,8 @@
     "vm.h": "c",
     "stdbool.h": "c",
     "main.h": "c",
-    "directory.h": "c"
+    "directory.h": "c",
+    "fat.h": "c"
   },
   "C_Cpp.dimInactiveRegions": false,
 }

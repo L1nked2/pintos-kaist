@@ -241,3 +241,20 @@ cluster_to_sector (cluster_t clst) {
 	// return the sector number.
 	return fat_fs->data_start + clst;
 }
+
+/* Convert cluster and offset to actual sector
+ * extend chain if offset is bigger than current size
+ */
+cluster_t fat_cluster_read_at(cluster_t clst, off_t offset) {
+  size_t pos = offset / DISK_SECTOR_SIZE;
+  cluster_t cursor = clst;
+  for (size_t i=0; i<pos; i++) {
+    if(fat_get(cursor) == EOChain) {
+      if(!fat_create_chain(cursor)){
+        return 0;
+      }
+    }
+    cursor = fat_get(cursor);
+  }
+  return cursor;
+}
