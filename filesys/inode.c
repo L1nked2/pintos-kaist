@@ -88,18 +88,17 @@ inode_create (disk_sector_t sector, off_t length) {
     disk_inode->magic = INODE_MAGIC;
     if (sectors > 0) {
       cluster_t new_sector = fat_create_chain(0);
-			char *zero_space = (char *)calloc(DISK_SECTOR_SIZE, sizeof(char));
+			static char zeros[DISK_SECTOR_SIZE];
 			disk_inode->start = new_sector;
 			for (size_t i=0; i<sectors; i++) {
+        printf("inode_create, new_sector = %p\n",new_sector);///test
 				if (new_sector == 0) {
 					free(disk_inode);
-          free(zero_space);
           return success;
 				}
-				disk_write(filesys_disk, cluster_to_sector(new_sector), zero_space);
+				disk_write(filesys_disk, cluster_to_sector(new_sector), zeros);
 				new_sector = fat_create_chain(new_sector);
 			}
-			free(zero_space);
 		}
 		disk_write (filesys_disk, cluster_to_sector(sector), disk_inode);
 		success = true;
