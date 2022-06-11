@@ -76,8 +76,8 @@ filesys_create (const char *name, off_t initial_size) {
 			&& inode_create (inode_sector, initial_size)
 			&& dir_add (dir, name, inode_sector));//name should be changed(parsing?)
 	
-  if (!success && inode_sector != 0)
-    fat_remove_chain(inode_sector, 0);
+  //if (!success && inode_sector != 0)
+  //  fat_remove_chain(inode_sector, 0);
   
   dir_close(dir);
   return success;
