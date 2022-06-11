@@ -114,7 +114,7 @@ filesys_open (const char *name) {
   printf("filesys_open, name: %s\n", name);///test
 
 	if (dir != NULL) {
-    printf("filesys_open, dir_lookup: %p\n", dir);
+    printf("filesys_open, dir_lookup for dir_inode: %p\n", dir->inode);
 		dir_lookup (dir, name, &inode);
   }
 	dir_close (dir);
