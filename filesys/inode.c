@@ -45,6 +45,24 @@ struct inode {
  * INODE.
  * Returns -1 if INODE does not contain data for a byte at offset
  * POS. */
+#ifdef EFILESYS
+static disk_sector_t
+byte_to_sector (const struct inode *inode, off_t pos) {
+	ASSERT(inode != NULL);
+  if (pos < inode->data.length) {
+		cluster_t clst = sector_to_cluster(inode->data.start);
+    for (off_t i=0; i < pos / DISK_SECTOR_SIZE; i++) {
+      clst = fat_get(clst);
+    }
+    if (clst == EOChain)
+      return -1;
+    return cluster_to_sector(clst);
+  }
+	else {
+		return -1;
+  }
+}
+#else
 static disk_sector_t
 byte_to_sector (const struct inode *inode, off_t pos) {
 	ASSERT (inode != NULL);
@@ -53,6 +71,7 @@ byte_to_sector (const struct inode *inode, off_t pos) {
 	else
 		return -1;
 }
+#endif
 
 /* List of open inodes, so that opening a single inode twice
  * returns the same `struct inode'. */
@@ -432,5 +451,6 @@ void extend_chain(struct inode *inode, off_t pos) {
   }
   inode->data.length = pos;
   disk_write(filesys_disk, inode->sector, &inode->data);
+  PANIC("extend_chain, inode->data.length: %d\n",inode->data.length);
 }
 #endif
