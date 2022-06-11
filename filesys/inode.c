@@ -64,6 +64,51 @@ inode_init (void) {
  * disk.
  * Returns true if successful.
  * Returns false if memory or disk allocation fails. */
+#ifdef EFILESYS
+bool
+inode_create (disk_sector_t sector, off_t length) {
+
+  struct inode_disk *disk_inode = NULL;
+	bool success = false;
+
+	ASSERT (length >= 0);
+
+	/* If this assertion fails, the inode structure is not exactly
+	 * one sector in size, and you should fix that. */
+	ASSERT (sizeof *disk_inode == DISK_SECTOR_SIZE);
+
+	disk_inode = calloc (1, sizeof *disk_inode);
+  if (disk_inode != NULL) {
+    size_t sectors = bytes_to_sectors (length);
+    disk_inode->length = length;
+    disk_inode->magic = INODE_MAGIC;
+    if (sectors > 0) {
+      cluster_t new_sector = fat_create_chain(0);
+			char *zero_space = (char *)calloc(DISK_SECTOR_SIZE, sizeof(char));
+			disk_inode->start = new_sector;
+			for (size_t i=0; i<sectors; i++) {
+				if (new_sector == 0) {
+					free(disk_inode);
+          free(zero_space);
+          return success;
+				}
+				disk_write(filesys_disk, cluster_to_sector(new_sector), zero_space);
+				new_sector = fat_create_chain(new_sector);
+			}
+			free(zero_space);
+		}
+		disk_write (filesys_disk, cluster_to_sector(sector), disk_inode);
+		success = true;
+		free(disk_inode);
+	}
+	return success;
+}
+#else
+/* Initializes an inode with LENGTH bytes of data and
+ * writes the new inode to sector SECTOR on the file system
+ * disk.
+ * Returns true if successful.
+ * Returns false if memory or disk allocation fails. */
 bool
 inode_create (disk_sector_t sector, off_t length) {
 	struct inode_disk *disk_inode = NULL;
@@ -95,6 +140,8 @@ inode_create (disk_sector_t sector, off_t length) {
 	}
 	return success;
 }
+#endif
+
 
 /* Reads an inode from SECTOR
  * and returns a `struct inode' that contains it.
