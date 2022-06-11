@@ -73,14 +73,13 @@ filesys_create (const char *name, off_t initial_size) {
   
   bool success = (dir != NULL
 			&& fat_allocate (1, &inode_sector)
-			//&& inode_create (inode_sector, initial_size)
+			&& inode_create (inode_sector, initial_size)
 			&& dir_add (dir, name, inode_sector));
-  bool success_test = inode_create (inode_sector, initial_size);
 
   if (!success && inode_sector != 0)
     fat_remove_chain(inode_sector, 0);
   dir_close(dir);
-  printf("filesys_created finished, success: %d, success_test: %d\n",success,success_test);///test
+  printf("filesys_created finished, success: %d\n",success);///test
   return success;
 
 #else
