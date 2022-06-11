@@ -176,26 +176,26 @@ fat_create_chain (cluster_t clst) {
 	// if clst is equal to zero, create a new chain.
 	// return the cluster number of newly allocated cluster.
 	cluster_t new_clst = NULL;
-	for (cluster_t i = 1; i < fat_fs->fat_length; i++) {
-		if (!fat_get(i)) {
+	for (cluster_t i = ROOT_DIR_CLUSTER + 1; i < fat_fs->fat_length; i++) {
+		if (fat_get(i) == 0) {
 			new_clst = i;
+      break;
 		}
 	}
 	if (new_clst == NULL) {
 		return 0;
 	} else {
-		if (clst) {
+		if (clst == 0) {
+      fat_put(new_clst, EOChain);
+			fat_fs->last_clst = new_clst;
+		} else {
+      for (;fat_get(clst) != EOChain; clst = fat_get(clst));
 			fat_put(clst, new_clst);
 			fat_put(new_clst, EOChain);
 			fat_fs->last_clst = new_clst;
-			return new_clst;
-		} else{
-			fat_put(new_clst, EOChain);
-			fat_fs->last_clst = new_clst;
-			return new_clst;
 		}
 	}
-
+  return new_clst;
 }
 
 /* Remove the chain of clusters starting from CLST.
