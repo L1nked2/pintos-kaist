@@ -426,9 +426,9 @@ void extend_chain(struct inode *inode, off_t pos) {
     clst = 0;
 
   for (off_t i=0; i<extend_size; i++) {
-      clst = fat_create_chain(clst);
-      if (inode->data.start == 0)
-        inode->data.start = cluster_to_sector(clst);
+    clst = fat_create_chain(clst);
+    if (inode->data.start == 0)
+      inode->data.start = cluster_to_sector(clst);
   }
   inode->data.length = pos;
   disk_write(filesys_disk, inode->sector, &inode->data);
