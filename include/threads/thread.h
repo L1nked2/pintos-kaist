@@ -10,9 +10,7 @@
 #ifdef VM
 #include "vm/vm.h"
 #endif
-#ifdef EFILESYS
-#include "filesys/directory.h"
-#endif
+
 
 /* States in a thread's life cycle. */
 enum thread_status {
@@ -151,6 +149,9 @@ struct thread {
   /* Stack bottom for project 3 */
   void *stack_bottom;
   uint64_t *stack_ptr;
+#endif
+#ifdef EFILESYS
+#include "filesys/directory.h"
 #endif
 #ifdef EFILESYS
   struct dir *cur_dir;
