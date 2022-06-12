@@ -159,3 +159,22 @@ file_tell (struct file *file) {
 	ASSERT (file != NULL);
 	return file->pos;
 }
+
+int file_inumber(struct file *file) {
+	return inode_get_inumber(file->inode);
+}
+
+bool file_isdir(struct file *file) {
+	return inode_isdir(file->inode);
+}
+
+bool file_readdir(struct file *file, char *name) {
+	struct dir *dir = dir_open(file->inode);
+	dir->pos = file->pos;
+	if (dir_readdir(dir, name)) {
+		file->pos = dir->pos;
+		return true;
+	} else {
+		return false;
+	}
+}

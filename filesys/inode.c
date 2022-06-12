@@ -21,6 +21,8 @@ struct inode_disk {
 	disk_sector_t start;                /* First data sector. */
 	off_t length;                       /* File size in bytes. */
 	unsigned magic;                     /* Magic number. */
+	bool is_dir;
+	bool is_sym;
 	uint32_t unused[125];               /* Not used. */
 };
 
@@ -90,7 +92,7 @@ inode_init (void) {
  * Returns false if memory or disk allocation fails. */
 #ifdef EFILESYS
 bool
-inode_create (disk_sector_t sector, off_t length) {
+inode_create (disk_sector_t sector, off_t length, bool is_dir, bool is_sym) {
 
   struct inode_disk *disk_inode = NULL;
 	bool success = false;
@@ -106,6 +108,8 @@ inode_create (disk_sector_t sector, off_t length) {
     size_t sectors = bytes_to_sectors (length);
     disk_inode->length = length;
     disk_inode->magic = INODE_MAGIC;
+	disk_inode->is_dir = is_dir;
+	disk_inode->is_sym = is_sym;
     if(fat_allocate(sectors, &disk_inode->start)) {
       disk_write(filesys_disk, sector, disk_inode);
       if (sectors > 0) {
@@ -215,6 +219,13 @@ inode_reopen (struct inode *inode) {
 disk_sector_t
 inode_get_inumber (const struct inode *inode) {
 	return inode->sector;
+}
+
+bool inode_isdir(struct inode *inode) {
+	return inode->data.is_dir;
+}
+bool inode_issym(struct inode *inode) {
+	return inode->data.is_sym;
 }
 
 /* Closes INODE and writes it to disk.

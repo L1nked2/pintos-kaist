@@ -22,4 +22,7 @@ off_t inode_length (const struct inode *);
 
 void inode_write_file(struct inode *inode);
 
+bool inode_isdir(struct inode *inode);
+bool inode_issym(struct inode *inode);
+
 #endif /* filesys/inode.h */

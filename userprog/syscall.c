@@ -498,15 +498,27 @@ bool sys_mkdir(const char *dir) {
 }
 bool sys_readdir(int fd, char *name) {
   //TODO
+  if (sys_isdir(fd)) {
+    struct file *f = search_fd(fd)->fp;
+    if (f == NULL) return false;
+    if (file_readdir(f, name)) return true;
+  }
   return false;
 }
 bool sys_isdir(int fd) {
   //TODO
-  return false;
+  struct file *f = search_fd(fd)->fp;
+  if (f == NULL) return false;
+  return file_isdir(f);
 }
 int sys_inumber(int fd) {
   //TODO
-  return 0;
+  struct file *f = search_fd(fd)->fp;
+  if (f == NULL) {
+    return -1;
+  } else{
+    return file_inumber(f);
+  }
 }
 int sys_symlink(const char *target, const char *linkpath) {
   //TODO
