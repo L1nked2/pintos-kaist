@@ -9,7 +9,7 @@ struct bitmap;
 
 void inode_init (void);
 #ifdef EFILESYS
-inode_create (disk_sector_t, off_t, bool, bool);
+bool inode_create (disk_sector_t, off_t, bool, bool);
 #else
 bool inode_create (disk_sector_t, off_t);
 #endif
