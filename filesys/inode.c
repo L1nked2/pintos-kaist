@@ -196,7 +196,7 @@ inode_open (disk_sector_t sector) {
 	inode->deny_write_cnt = 0;
 	inode->removed = false;
 #ifdef EFILESYS
-  disk_read (filesys_disk, inode->sector, &inode->data);
+  disk_read (filesys_disk, cluster_to_sector(inode->sector), &inode->data);
 #else
   disk_read (filesys_disk, inode->sector, &inode->data);
 #endif
