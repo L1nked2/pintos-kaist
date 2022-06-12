@@ -30,7 +30,7 @@ enum vm_type {
 #include "vm/anon.h"
 #include "vm/file.h"
 #ifdef EFILESYS
-#include "filesys/page_cache.h"
+//#include "filesys/page_cache.h"
 #endif
 
 struct segment_info {
