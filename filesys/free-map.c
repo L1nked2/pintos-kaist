@@ -65,9 +65,13 @@ free_map_close (void) {
 void
 free_map_create (void) {
 	/* Create inode. */
+	#ifdef EFILESYS
+	if (!inode_create (FREE_MAP_SECTOR, bitmap_file_size (free_map), false, false))
+		PANIC ("free map creation failed");
+	#else
 	if (!inode_create (FREE_MAP_SECTOR, bitmap_file_size (free_map)))
 		PANIC ("free map creation failed");
-
+	#endif
 	/* Write bitmap to file. */
 	free_map_file = file_open (inode_open (FREE_MAP_SECTOR));
 	if (free_map_file == NULL)
