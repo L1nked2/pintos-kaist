@@ -113,7 +113,7 @@ inode_create (disk_sector_t sector, off_t length) {
         static char zeros[DISK_SECTOR_SIZE];
         for (size_t i=0; i<sectors; i++) {
           if (new_clst == EOChain) {
-            printf("inode_create, cluster chain is ended before create done\n");///test
+            //printf("inode_create, cluster chain is ended before create done\n");///test
             return false;
           }
           disk_write(filesys_disk, cluster_to_sector(new_clst), zeros);
@@ -264,12 +264,12 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 	uint8_t *buffer = buffer_;
 	off_t bytes_read = 0;
 	uint8_t *bounce = NULL;
-  printf("inode_read_at started with inode: %p, size: %d, offset: %d\n", inode, size, offset);///test
-  printf("inode_read_at, inode length: %d, start: %d\n", inode->data.length,inode->data.start);///test
+  //printf("inode_read_at started with inode: %p, size: %d, offset: %d\n", inode, size, offset);///test
+  //printf("inode_read_at, inode length: %d, start: %d\n", inode->data.length,inode->data.start);///test
 	while (size > 0) {
 		/* Disk sector to read, starting byte offset within sector. */
 		disk_sector_t sector_idx = byte_to_sector (inode, offset);
-    printf("inode_read_at, sector_idx: %d\n", sector_idx);///test
+    //printf("inode_read_at, sector_idx: %d\n", sector_idx);///test
     if (sector_idx == -1) {
       return bytes_read;
     }
@@ -306,7 +306,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 		bytes_read += chunk_size;
 	}
 	free (bounce);
-  printf("inode_read_at finished with bytes read: %d\n", bytes_read);///test
+  //printf("inode_read_at finished with bytes read: %d\n", bytes_read);///test
 	return bytes_read;
 }
 
@@ -328,7 +328,7 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
 	while (size > 0) {
     /* Sector to write, starting byte offset within sector. */
     disk_sector_t sector_idx = byte_to_sector(inode, offset + size);
-    printf("inode_write_at, sector_idx: %d\n", sector_idx);///test
+    //printf("inode_write_at, sector_idx: %d\n", sector_idx);///test
     if (sector_idx == -1) {
       extend_chain(inode, offset + size);
     }
@@ -451,7 +451,7 @@ inode_length (const struct inode *inode) {
 /* extend cluster chain */
 void extend_chain(struct inode *inode, off_t pos) {
   off_t extend_size = (pos + DISK_SECTOR_SIZE - 1) / DISK_SECTOR_SIZE - (inode->data.length + DISK_SECTOR_SIZE - 1) / DISK_SECTOR_SIZE;
-  printf("extend_chain, extend_size: %d\n", extend_size);///test
+  //printf("extend_chain, extend_size: %d\n", extend_size);///test
   cluster_t clst = sector_to_cluster(inode->data.start);
   if (inode->data.start == 0)
     clst = 0;
