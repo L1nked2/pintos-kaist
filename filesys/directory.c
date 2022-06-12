@@ -11,7 +11,11 @@
  * given SECTOR.  Returns true if successful, false on failure. */
 bool
 dir_create (disk_sector_t sector, size_t entry_cnt) {
+	#ifdef EFILESYS
+	return inode_create (sector, entry_cnt * sizeof (struct dir_entry), true, false);
+	#else
 	return inode_create (sector, entry_cnt * sizeof (struct dir_entry));
+	#endif
 }
 
 /* Opens and returns the directory for the given INODE, of which
