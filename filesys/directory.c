@@ -61,6 +61,7 @@ struct dir *dir_open_from_path(char *path) {
 	}
 	char *token, *save_ptr;
 	token = strtok_r(tmp_path, '/', &save_ptr);
+	
 	// not finished yet
 	return;
 }
