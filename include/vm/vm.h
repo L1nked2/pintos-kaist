@@ -104,7 +104,7 @@ struct supplemental_page_table {
 /* Implementation of supplemental_page_table,
  * based on hash table */
 #include "threads/mmu.h"
-#include "threads/thread.h"
+//#include "threads/thread.h"
 #include "threads/vaddr.h"
 
 // Helper function for hash table
