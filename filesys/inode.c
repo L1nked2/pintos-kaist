@@ -107,7 +107,7 @@ inode_create (disk_sector_t sector, off_t length) {
     disk_inode->length = length;
     disk_inode->magic = INODE_MAGIC;
     if(fat_allocate(sectors, &disk_inode->start)) {
-      disk_write(filesys_disk, cluster_to_sector(sector), disk_inode);
+      disk_write(filesys_disk, sector, disk_inode);
       if (sectors > 0) {
         cluster_t new_clst = sector_to_cluster(disk_inode->start);
         static char zeros[DISK_SECTOR_SIZE];
@@ -196,7 +196,7 @@ inode_open (disk_sector_t sector) {
 	inode->deny_write_cnt = 0;
 	inode->removed = false;
 #ifdef EFILESYS
-  disk_read (filesys_disk, cluster_to_sector(inode->sector), &inode->data);
+  disk_read (filesys_disk, inode->sector, &inode->data);
 #else
   disk_read (filesys_disk, inode->sector, &inode->data);
 #endif
