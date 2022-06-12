@@ -23,7 +23,7 @@ struct inode_disk {
 	unsigned magic;                     /* Magic number. */
 	bool is_dir;
 	bool is_sym;
-	uint32_t unused[125];               /* Not used. */
+	uint32_t unused[124];               /* Not used. */
 };
 
 /* Returns the number of sectors to allocate for an inode SIZE
@@ -108,8 +108,8 @@ inode_create (disk_sector_t sector, off_t length, bool is_dir, bool is_sym) {
     size_t sectors = bytes_to_sectors (length);
     disk_inode->length = length;
     disk_inode->magic = INODE_MAGIC;
-	disk_inode->is_dir = is_dir;
-	disk_inode->is_sym = is_sym;
+    disk_inode->is_dir = is_dir;
+    disk_inode->is_sym = is_sym;
     if(fat_allocate(sectors, &disk_inode->start)) {
       disk_write(filesys_disk, sector, disk_inode);
       if (sectors > 0) {
