@@ -30,7 +30,7 @@ enum vm_type {
 #include "vm/anon.h"
 #include "vm/file.h"
 #ifdef EFILESYS
-//#include "filesys/page_cache.h"
+#include "filesys/page_cache.h"
 #endif
 
 struct segment_info {
@@ -104,7 +104,7 @@ struct supplemental_page_table {
 /* Implementation of supplemental_page_table,
  * based on hash table */
 #include "threads/mmu.h"
-//#include "threads/thread.h"
+#include "threads/thread.h"
 #include "threads/vaddr.h"
 
 // Helper function for hash table
